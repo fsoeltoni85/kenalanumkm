@@ -29,7 +29,6 @@ const MAP_LEFT = 29;
 const MAP_TOP = 54;
 const ORANGE = "#ff5b27";
 const LAND = "#f4d7c6";
-const HOVER = "#ffc09f";
 
 function project([longitude, latitude]: Position): [number, number] {
   return [MAP_LEFT + (longitude - 94) * MAP_SCALE, MAP_TOP + (7 - latitude) * MAP_SCALE];
@@ -66,13 +65,6 @@ function provinceAt(data: ProvinceCollection, point: UserCoordinates) {
   return feature?.properties.PROVINSI;
 }
 
-function userPointFeature(location: UserCoordinates) {
-  return {
-    type: "Feature" as const,
-    properties: {},
-    geometry: { type: "Point" as const, coordinates: [location.longitude, location.latitude] },
-  };
-}
 
 function ProvinceSvgFallback({ data, activeProvince, userLocation, onProvinceSelect }: {
   data: ProvinceCollection;
