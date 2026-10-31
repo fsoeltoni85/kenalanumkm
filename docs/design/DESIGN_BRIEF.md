@@ -1,24 +1,46 @@
-# Design Brief
+# Design Brief — KenalanUMKM
 
-## Visual direction
-Use the approved concept mockup as visual north star: bright, clean, modern, friendly Indonesian local-business product. Map dominates home. Light interface, white surfaces, subtle borders/shadows, green primary actions and restrained warm category accents.
+## Product experience
+KenalanUMKM is a map-first public competition for real, fixed-location Indonesian UMKM. The map is the main way visitors explore Indonesia; the leaderboard is the competitive mechanic. Do not turn the experience into a generic business directory, CRM, review site or a decorative dashboard.
 
-## Approved concept coverage
-The approved composite mockup depicts: (1) Indonesia map home, (2) city/category selection, (3) mobile map, (4) city/category leaderboard, (5) UMKM detail, (6) stake top-up concept, (7) transfer instruction concept, (8) owner dashboard concept. The latter three are future concepts, not MVP commitments.
+## Primary visual hierarchy
+1. A real Indonesia map occupies the main canvas and remains the dominant element on desktop and mobile.
+2. Province selection is the map's navigation/grouping interaction.
+3. The selected Kabupaten/Kota and category define the leaderboard shown beside or below the map.
+4. Each leaderboard row, when real listing data exists, presents the business identity, rank, cumulative confirmed stake and click statistics.
+5. Business detail is a separate drill-down showing the fixed physical location and business identity.
 
-The binary reference image still needs to be added at `docs/design/references/kenalanumkm-ui-concept.png`; the GitHub text-file interface used for this bootstrap cannot upload the binary image. Do not replace it with an unrelated asset. This written brief is binding until the exact approved image is committed.
+## Geography and competition
+Information hierarchy: Indonesia → Province → Kabupaten/Kota → Category → Leaderboard.
+- Province is a navigation/grouping layer, not a competition unit.
+- The competition unit is Kabupaten/Kota + category.
+- Kecamatan, Kelurahan and Desa must not appear as competition levels or filters.
+- A listing represents a real fixed physical UMKM location. Exact address and coordinates are for pin placement/geocoding only.
+- Businesses in different subdistricts but in the same Kabupaten/Kota and category compete on the same board.
 
-## Layout
-Desktop: compact top navigation, search/category chips and large map canvas with supporting leaderboard/detail panel. Mobile: map-first, compact search, touch-friendly controls and bottom sheet/navigation. Leaderboard rows show rank, identity, cumulative stake and clicks. Detail page shows business identity, physical location, stake/rank and contact links.
+## Ranking communication
+- Ranking is determined only by cumulative confirmed stake.
+- Clicks are visible statistics and never affect rank.
+- Do not imply voting, reviews, stars, editorial scoring, popularity or a winner prize.
+- Do not invent minimums, outbid increments, tie-breaks, expiry, refunds or payment terms; those rules remain pending approval.
+
+## Homepage layout
+- Compact navigation and clear product statement: “Peta kompetisi UMKM Indonesia”.
+- Large interactive Indonesia map as the primary surface.
+- Province selection/search and selected province context.
+- A focused panel showing Kabupaten/Kota, category and the matching leaderboard.
+- An honest empty state when there is no real participant data.
+- Short explanation of how rank works and a clearly secondary owner-registration entry point.
+
+## Map implementation
+The current preview uses a GeoJSON outline/fill of Indonesia's 38 provinces with MapLibre GL JS, without third-party raster tiles. Province polygons are selectable. It intentionally does not show fabricated business pins or fabricated ranking amounts.
+Dataset: denyherianto/indonesia-geojson-topojson-maps-with-38-provinces, GeoJSON file under CC BY 4.0. Attribution and license must remain visible. Upstream provenance/terms must be reviewed before production use. This geographic dataset does not provide Kabupaten/Kota competition polygons or business locations.
+
+## Demo integrity
+The preview must be clearly labelled as a prototype. City selector options are illustrative only. Do not display invented live UMKM counts, active listings, stake totals, clicks, verified badges, addresses, or payment details. Empty ranking states are preferred to fake financial data.
+
+## Responsive design
+Desktop: map dominates with the selected city/category leaderboard in a right-side panel. Mobile: map remains first and full-width; filters and leaderboard follow in a scrollable panel. Provide accessible controls and keyboard-operable selects.
 
 ## Visual system
-Primary deep/medium green; very light neutral background; white surface; charcoal text; category accents may use orange/blue/purple/teal. Typography clean sans-serif. Avoid color-only status cues.
-
-## Components
-Responsive header; search/suggestions; category chips; map and cluster/pin states; province/city selector and breadcrumb; leaderboard rows; business summary/detail; gallery placeholder; future stake card; future owner dashboard shell.
-
-## Accessibility
-Keyboard-operable controls, visible focus, adequate contrast, accessible map controls, reduced motion and list alternative to map.
-
-## Data integrity
-Sample content must say sample/demo. Never display invented live UMKM counts, live clicks, verified badges, payment account details or active stake totals.
+Bright, clean, local, confident. Deep green accents, light neutral canvas, soft sea background, white surfaces, strong charcoal type, restrained shadows and thin borders. Avoid generic SaaS gradients, generic map-illustration blobs and oversized marketing panels.
