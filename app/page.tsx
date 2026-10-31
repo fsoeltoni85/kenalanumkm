@@ -127,7 +127,8 @@ export default function HomePage() {
   }
 
   const topThree = scope === "city" || search.trim() ? [] : rows.slice(0, 3);
-  const listRows = topThree.length > 0 ? rows.slice(3) : rows;
+  const showCityChampion = scope === "city" && !search.trim() && rows.length > 0;
+  const listRows = topThree.length > 0 ? rows.slice(3) : showCityChampion ? [] : rows;
   const totalStake = rows.reduce((sum, row) => sum + row.stake, 0);
   const totalClicks = rows.reduce((sum, row) => sum + row.periodClicks, 0);
 
@@ -283,6 +284,7 @@ export default function HomePage() {
                 <span>PEMEGANG POSISI #1 DI KOTA INI</span>
                 <strong>{rows[0].name}</strong>
                 <small><MapPin size={12} /> {rows[0].city} · {rows[0].province}</small>
+                <small className="city-champion-clicks"><Eye size={11} /> {compactNumber(rows[0].periodClicks)} klik</small>
               </div>
               <div className="city-champion-value">
                 <span>STAKE</span>
@@ -292,45 +294,49 @@ export default function HomePage() {
             </section>
           )}
 
-          <div className="list-tools">
-            <div className="list-heading">
-              <strong>{search.trim() ? "Hasil pencarian" : topThree.length > 0 ? "Peringkat berikutnya" : scope === "city" ? "Juara kota" : "Peringkat juara kota"}</strong>
-              <span>{rows.length} hasil · {periodLabel(period, dailyDate)}</span>
-            </div>
-            <label className="search-box">
-              <Search size={15} />
-              <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari UMKM atau kota…" aria-label="Cari UMKM atau kota" />
-            </label>
-          </div>
-
-          <div className="column-head">
-            <span>POSISI</span><span>JUARA KOTA</span><span>STAKE</span><span><Eye size={12} /> KLIK</span>
-          </div>
-          <div className="ranking-list" aria-live="polite">
-            {listRows.length > 0 ? listRows.map((row) => (
-              <article key={row.id} className="ranking-row">
-                <div className="rank-cell"><span className="rank-number">{String(row.rank).padStart(2, "0")}</span></div>
-                <div className="business-cell">
-                  <span className="business-avatar">{row.initial}</span>
-                  <div className="business-main">
-                    <strong>{row.name}</strong>
-                    <div className="business-meta">
-                      <span className="city-pill"><MapPin size={11} /> {row.city}</span>
-                      <span className="national-rank-chip">#{row.nationalRank} Indonesia</span>
-                    </div>
-                  </div>
+          {!showCityChampion && (
+            <>
+              <div className="list-tools">
+                <div className="list-heading">
+                  <strong>{search.trim() ? "Hasil pencarian" : topThree.length > 0 ? "Peringkat berikutnya" : "Peringkat juara kota"}</strong>
+                  <span>{rows.length} hasil · {periodLabel(period, dailyDate)}</span>
                 </div>
-                <strong className="stake-value">{shortRupiah(row.stake)}</strong>
-                <span className="click-value">{compactNumber(row.periodClicks)}</span>
-              </article>
-            )) : (
-              <div className="empty-state">
-                <span className="empty-icon"><Sparkles size={21} /></span>
-                <strong>{search.trim() ? "UMKM atau kota tidak ditemukan." : "Belum ada juara simulasi di wilayah ini."}</strong>
-                <span>{search.trim() ? "Coba kata kunci lain untuk menemukan juara kota." : "Data contoh saat ini hanya mencakup beberapa kabupaten/kota. Wilayah lain akan menampilkan papan kosong sampai data tersedia."}</span>
+                <label className="search-box">
+                  <Search size={15} />
+                  <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari UMKM atau kota…" aria-label="Cari UMKM atau kota" />
+                </label>
               </div>
-            )}
-          </div>
+
+              <div className="column-head">
+                <span>POSISI</span><span>JUARA KOTA</span><span>STAKE</span><span><Eye size={12} /> KLIK</span>
+              </div>
+              <div className="ranking-list" aria-live="polite">
+                {listRows.length > 0 ? listRows.map((row) => (
+                  <article key={row.id} className="ranking-row">
+                    <div className="rank-cell"><span className="rank-number">{String(row.rank).padStart(2, "0")}</span></div>
+                    <div className="business-cell">
+                      <span className="business-avatar">{row.initial}</span>
+                      <div className="business-main">
+                        <strong>{row.name}</strong>
+                        <div className="business-meta">
+                          <span className="city-pill"><MapPin size={11} /> {row.city}</span>
+                          <span className="national-rank-chip">#{row.nationalRank} Indonesia</span>
+                        </div>
+                      </div>
+                    </div>
+                    <strong className="stake-value">{shortRupiah(row.stake)}</strong>
+                    <span className="click-value">{compactNumber(row.periodClicks)}</span>
+                  </article>
+                )) : (
+                  <div className="empty-state">
+                    <span className="empty-icon"><Sparkles size={21} /></span>
+                    <strong>{search.trim() ? "UMKM atau kota tidak ditemukan." : "Belum ada juara simulasi di wilayah ini."}</strong>
+                    <span>{search.trim() ? "Coba kata kunci lain untuk menemukan juara kota." : "Data contoh saat ini hanya mencakup beberapa kabupaten/kota. Wilayah lain akan menampilkan papan kosong sampai data tersedia."}</span>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
 
           <div className="board-bottom">
             <span>Menampilkan {rows.length} <span className="muted">juara kota</span></span>
