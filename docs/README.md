@@ -14,6 +14,9 @@ This directory contains the project reference documents. Read them before implem
 ## Delivery
 - [Implementation plan and acceptance gates](delivery/IMPLEMENTATION_PLAN.md)
 
+## Operations
+- [Cloudflare PR preview runbook](operations/CLOUDFLARE_PREVIEW.md)
+
 ## Repository rules
 - [Agent instructions](../AGENTS.md) are kept at the repository root so coding tools discover them automatically.
 - [Design reference assets](design/references/README.md) describes the approved mockup and asset location.
