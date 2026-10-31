@@ -1,24 +1,81 @@
-name: CI
+name: CI and Cloudflare Preview
+
 on:
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main, "bootstrap/**", "feature/**", "feat/**"]
+
 permissions:
   contents: read
+
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   checks:
+    name: Lint, typecheck, test and build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm install
-      - run: npm run typecheck
-      - run: npm run test
-      - run: npm run build
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm run test
+      - name: Production build
+        run: npm run build
+
+  preview:
+    name: Deploy Cloudflare PR preview
+    needs: checks
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      vars.CLOUDFLARE_PREVIEW_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: preview
+    concurrency:
+      group: cloudflare-preview-pr-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Deploy isolated preview Worker
+        run: npx @vinext/cloudflare deploy --env preview --name "kenalanumkm-pr-${{ github.event.pull_request.number }}"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Verify preview health
+        id: health
+        shell: bash
+        run: |
+          preview_url="https://kenalanumkm-pr-${{ github.event.pull_request.number }}.${{ vars.CLOUDFLARE_WORKERS_SUBDOMAIN }}.workers.dev"
+          echo "preview_url=$preview_url" >> "$GITHUB_OUTPUT"
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent --show-error "$preview_url/api/health"; then
+              echo
+              echo "Preview is healthy: $preview_url"
+              echo "### Cloudflare Preview" >> "$GITHUB_STEP_SUMMARY"
+              echo "$preview_url" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "Preview did not return a healthy response: $preview_url" >&2
+          exit 1
