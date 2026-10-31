@@ -108,10 +108,6 @@ function rupiah(value: number) {
   }).format(value);
 }
 
-function compactNumber(value: number) {
-  return new Intl.NumberFormat("id-ID").format(value);
-}
-
 export default function HomePage() {
   const [province, setProvince] = useState("Jawa Barat");
   const [city, setCity] = useState("Kota Bekasi");
@@ -133,10 +129,6 @@ export default function HomePage() {
 
   function entryStake(entry: Entry) {
     return period === "all-time" ? entry.allTime : period === "today" ? entry.today : (entry.daily[dailyDate] ?? 0);
-  }
-
-  function entryClicks(entry: Entry) {
-    return period === "all-time" ? entry.clicks : period === "today" ? entry.todayClicks : (entry.dailyClicks[dailyDate] ?? 0);
   }
 
   return (
