@@ -46,7 +46,7 @@ Copy .env.example to .env.local only when ready to connect a Supabase environmen
 
 The current application is a leaderboard-first UI prototype. Demo business names, stakes and click counts are synthetic and clearly labelled as DATA SIMULASI. They are not real registered UMKM, transactions, traffic or verified rankings. There is no map or browser location collection in the public experience.
 
-The standalone Worker preview is separate from the compiled vinext application. The repository and its pull request branch are the source of truth for code changes.
+The isolated Cloudflare preview Worker `kenalanumkm-pr-1` is deployed from the pull request branch by GitHub Actions after all CI checks pass. GitHub and the PR branch remain the source of truth; the preview is not production.
 
 ## Delivery
 
