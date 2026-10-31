@@ -108,8 +108,8 @@ function shortRupiah(value: number) {
 type LocationStatus = "checking" | "located" | "denied" | "unavailable" | "error";
 
 export default function HomePage() {
-  const [province, setProvince] = useState("Jawa Barat");
-  const [city, setCity] = useState("Kota Bekasi");
+  const [province, setProvince] = useState("");
+  const [city, setCity] = useState("");
   const [scope, setScope] = useState<Scope>("indonesia");
   const [category, setCategory] = useState("Makanan & Minuman");
   const [period, setPeriod] = useState<Period>("all-time");
@@ -168,6 +168,7 @@ export default function HomePage() {
   const handleProvinceDetected = useCallback((detectedProvince: string) => {
     if (province !== detectedProvince) setCity("");
     setProvince(detectedProvince);
+    setScope("province");
     setLocationMessage("Kamu terdeteksi di " + detectedProvince);
   }, [province]);
 
@@ -243,7 +244,7 @@ export default function HomePage() {
                 <div>
                   <div className="eyebrow"><Trophy size={13} /> LEADERBOARD UMKM</div>
                   <h2>{listTitle}</h2>
-                  <div className="board-subtitle">{selectedCategory?.icon} {category} <span>·</span> {scopeSubtitle}</div>
+                  <div className="board-subtitle">{selectedCategory?.icon} {category} <span>·</span> {scopeSubtitle || "Pilih wilayah"}</div>
                 </div>
                 <span className="demo-sticker">TOP 20</span>
               </div>
@@ -261,7 +262,7 @@ export default function HomePage() {
 
             <div className="scope-strip" role="tablist" aria-label="Lingkup leaderboard">
               <button type="button" role="tab" aria-selected={scope === "indonesia"} onClick={() => setScope("indonesia")} className={scope === "indonesia" ? "scope-tab active" : "scope-tab"}>🇮🇩 Indonesia</button>
-              <button type="button" role="tab" aria-selected={scope === "province"} onClick={() => setScope("province")} className={scope === "province" ? "scope-tab active" : "scope-tab"}>📍 Provinsi</button>
+              <button type="button" role="tab" aria-selected={scope === "province"} disabled={!province} onClick={() => setScope("province")} className={scope === "province" ? "scope-tab active" : "scope-tab"}>📍 Provinsi</button>
               <button type="button" role="tab" aria-selected={scope === "city"} disabled={!city} onClick={() => setScope("city")} className={scope === "city" ? "scope-tab active" : "scope-tab"}>🏙️ Kota/Kab</button>
             </div>
 
