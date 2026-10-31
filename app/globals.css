@@ -218,6 +218,7 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
 .city-champion-copy > span, .city-champion-value > span { color: #a48c51; font-size: 7px; font-weight: 800; letter-spacing: .75px; }
 .city-champion-copy > strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #355849; font-size: 13px; font-weight: 800; }
 .city-champion-copy small { display: inline-flex; align-items: center; gap: 4px; color: #8d9c8e; font-size: 8px; }
+.city-champion-copy .city-champion-clicks { color: #a9b8ad; }
 .city-champion-value { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
 .city-champion-value > strong { color: #a97b20; font-size: 18px; font-weight: 800; white-space: nowrap; }
 .city-champion-value small { color: #978c71; font-size: 8px; }
