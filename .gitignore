@@ -2,8 +2,9 @@ node_modules/
 dist/
 .vite/
 .vinext/
-.wrangler/
 .cloudflare/
+.wrangler/
+.dev.vars
 .env
 .env.*
 !.env.example
