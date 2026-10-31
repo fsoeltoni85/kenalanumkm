@@ -129,7 +129,6 @@ export default function HomePage() {
   const entryClicks = (entry: Entry) => period === "all-time" ? entry.clicks : period === "today" ? entry.todayClicks : (entry.dailyClicks[dailyDate] ?? 0);
   const totalStake = rows.reduce((sum, entry) => sum + entryStake(entry), 0);
   const totalClicks = rows.reduce((sum, entry) => sum + entryClicks(entry), 0);
-  const scopeTitle = scope === "indonesia" ? "Indonesia" : scope === "province" ? province : city;
   const scopeSubtitle = scope === "indonesia" ? "Seluruh Indonesia" : scope === "province" ? "Provinsi" : province;
   const selectedCategory = categories.find((item) => item.name === category);
 
