@@ -21,7 +21,13 @@ The account ID is configured in `cloudflare.config.ts` and the workflow; it is a
 The token is used only by the PR preview deployment and cleanup jobs. When it is absent, CI still runs, but the preview step writes a skip notice and does not deploy.
 
 ## Start a preview manually
-After adding the secret, open the repository Actions tab → **CI and Cloudflare Preview** → **Run workflow**. Select branch `bootstrap/kenalanumkm-foundation`, keep PR number `1`, and run. This manual trigger is included because connector-created commits may not automatically start new Actions runs. The same checks still run before deployment.
+After adding the secret, the workflow can be dispatched against the feature branch from a local GitHub CLI session. The workflow has already been registered by its initial PR run:
+
+```bash
+gh workflow run ci.yml --repo fsoeltoni85/kenalanumkm --ref bootstrap/kenalanumkm-foundation -f pr_number=1
+```
+
+The same lint, typecheck, tests and build run before deployment. The GitHub web UI's Run workflow button normally appears only when the workflow file is present on the default branch; do not merge this PR just to expose that button.
 
 ## Workflow behavior
 1. GitHub Actions installs dependencies and runs lint, typecheck, tests and production build.
