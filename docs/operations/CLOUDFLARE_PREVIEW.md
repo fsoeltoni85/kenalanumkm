@@ -1,16 +1,36 @@
 # Cloudflare Preview Deployment
 
 ## Purpose
+This runbook describes the isolated Cloudflare Workers preview used to review KenalanUMKM's map-first product UI. It is not the production deployment procedure.
+
 ## Current preview status
 
-An initial visual-shell preview has already been deployed directly through the authenticated Cloudflare connection (no Cloudflare API token was stored in GitHub):
+The current preview has been deployed directly through the authenticated Cloudflare connection:
 
 - Worker: `kenalanumkm-pr-1`
 - URL: https://kenalanumkm-pr-1.kenalanumkm-preview.workers.dev
-- `/api/health` returned HTTP 200 with `{"status":"ok","app":"kenalanumkm","preview":true}`.
-- This is a lightweight static visual shell for UI review. It is not the compiled vinext/Next.js bundle. CI has independently passed the vinext production build.
+- Root page: HTTP 200; map-first KenalanUMKM interface.
+- `/api/health`: HTTP 200 with `{"status":"ok","app":"kenalanumkm","preview":true,"kind":"map-competition-preview"}`.
+- `/data/indonesia-38-provinces.geojson`: HTTP 200, served from the upstream province GeoJSON dataset.
+- This standalone Worker preview is **not** the compiled vinext/Next.js bundle. The source implementation is in the PR branch and CI checks the application build separately.
 
-PR previews run as isolated Cloudflare Workers and never replace the production Worker. The account workers.dev subdomain configured for this project is:
+The revised interface makes the Indonesia map the main surface, supports province selection, and frames the leaderboard around Kabupaten/Kota + category. It displays an honest empty state rather than invented UMKM pins, stake amounts, clicks, or participant counts.
+
+## Geography data
+
+The preview uses the 38-province GeoJSON from:
+
+- Repository: https://github.com/denyherianto/indonesia-geojson-topojson-maps-with-38-provinces
+- Dataset license declared by the repository: CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/
+- Attribution is shown in the interface and recorded in `public/data/README.md`.
+
+The preview Worker proxies this dataset from the upstream GitHub raw URL. The dataset provides provincial shapes only; it does not include Kabupaten/Kota competition polygons or UMKM locations. The upstream provenance/source terms could not be verified from the repository's referenced source file during implementation. Review those terms and validate the boundary dataset before production/commercial use. Do not treat these polygons as authoritative cadastral or legal boundaries.
+
+No third-party raster basemap tiles are used. A production tile/style provider has not been selected.
+
+## Worker hostname
+
+The account workers.dev subdomain configured for this project is:
 
 `kenalanumkm-preview.workers.dev`
 
@@ -18,40 +38,42 @@ For PR number N, the expected preview URL is:
 
 `https://kenalanumkm-pr-N.kenalanumkm-preview.workers.dev`
 
-The workflow only posts this link after `/api/health` returns HTTP success.
+## Direct Cloudflare deployment
 
-## GitHub environment setup
-Create a GitHub Actions environment named `preview` in repository Settings → Environments. Add one secret:
+The current preview was uploaded directly through the authenticated Cloudflare connection. This path does not require storing a Cloudflare API token in GitHub Actions.
+
+The direct upload is suitable for this standalone visual prototype. It does not turn the standalone Worker into a vinext/Next.js deployment and does not establish continuous deployment for later commits.
+
+## GitHub environment setup for automated PR previews
+
+The repository workflow's automated preview deployment and cleanup jobs use a GitHub Actions environment named `preview`. Add one secret there:
 
 - `CLOUDFLARE_API_TOKEN`: create a scoped Cloudflare API token using the official **Edit Cloudflare Workers** template, limited to the KenalanUMKM account. Do not paste it into this repository, a workflow file, or a chat message.
 
 The account ID is configured in `cloudflare.config.ts` and the workflow; it is an identifier, not a secret.
 
-The token is used only by the PR preview deployment and cleanup jobs. When it is absent, CI still runs, but the preview step writes a skip notice and does not deploy.
-
-## Start a preview manually
-After adding the secret, the workflow can be dispatched against the feature branch from a local GitHub CLI session. The workflow has already been registered by its initial PR run:
-
-```bash
-gh workflow run ci.yml --repo fsoeltoni85/kenalanumkm --ref bootstrap/kenalanumkm-foundation -f pr_number=1
-```
-
-The same lint, typecheck, tests and build run before deployment. The GitHub web UI's Run workflow button normally appears only when the workflow file is present on the default branch; do not merge this PR just to expose that button.
+When the secret is absent, lint/typecheck/tests/build still run, but the workflow's automated preview deployment step is skipped. This secret is only needed by GitHub Actions automation, not by the direct Cloudflare deployment described above.
 
 ## Workflow behavior
+
 1. GitHub Actions installs dependencies and runs lint, typecheck, tests and production build.
-2. Only after all checks pass, a same-repository PR deploys to a dedicated Worker named `kenalanumkm-pr-N`.
+2. Only after all checks pass, a same-repository PR can deploy to a dedicated Worker named `kenalanumkm-pr-N`, subject to the GitHub environment secret.
 3. The workflow polls `/api/health`. It posts/updates a PR comment only after the health check succeeds.
 4. Closing the PR deletes that dedicated preview Worker.
 5. Production Worker name `kenalanumkm` is not used by this PR preview job.
 
 ## Data and cost safeguards
-- No production Supabase credentials are configured by this workflow.
-- No payment provider or real payment flow is enabled in preview.
-- No paid Cloudflare product add-on is provisioned by this workflow. Worker requests and resource quotas remain subject to the account's current plan limits.
+
+- No production Supabase credentials are configured by this preview.
+- No payment provider or real payment flow is enabled.
+- No paid Cloudflare product add-on is provisioned by this preview. Worker requests and resource quotas remain subject to the account's current plan limits.
 - Do not add a custom domain or deploy to production as part of PR preview.
+- Never display sample values as real-time listings, clicks, verified businesses, addresses, or stake totals.
 
 ## Troubleshooting
-- If preview is skipped, check that `CLOUDFLARE_API_TOKEN` exists in the GitHub `preview` environment.
+
+- If automated preview deployment is skipped, check that `CLOUDFLARE_API_TOKEN` exists in the GitHub `preview` environment.
+- If the map geometry endpoint fails, check upstream GeoJSON availability and Worker logs.
+- If the map itself fails to initialize, inspect browser console/network requests for the MapLibre CDN and GeoJSON endpoint.
 - If deployment succeeds but health polling fails, inspect the GitHub Actions deploy and health-check logs before sharing the URL.
 - If the account workers.dev domain changes, update the expected hostname in this workflow and this runbook.
