@@ -233,7 +233,7 @@ export default function IndonesiaMap({ activeProvince, onProvinceSelect }: Indon
       map?.remove();
       mapRef.current = null;
     };
-  }, [activeProvince]);
+  }, []);
 
   useEffect(() => {
     const map = mapRef.current;
