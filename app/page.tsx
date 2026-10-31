@@ -56,7 +56,7 @@ function periodLabel(period: Period, dailyDate: string) {
 type GeoDropdownProps = {
   label: string;
   value: string;
-  options: string[];
+  options: readonly string[];
   placeholder: string;
   disabled?: boolean;
   onChange: (value: string) => void;
