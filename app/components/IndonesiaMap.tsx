@@ -96,16 +96,16 @@ export default function IndonesiaMap({ activeProvince, onProvinceSelect }: Indon
           padding: { top: 45, right: 48, bottom: 45, left: 48 },
           duration: 0,
         });
-      });
-      map.on("click", "province-fill", (event) => {
-        const province = event.features?.[0]?.properties?.PROVINSI;
-        if (typeof province === "string") onSelectRef.current(province);
-      });
-      map.on("mouseenter", "province-fill", () => {
-        if (map) map.getCanvas().style.cursor = "pointer";
-      });
-      map.on("mouseleave", "province-fill", () => {
-        if (map) map.getCanvas().style.cursor = "";
+        map?.on("click", "province-fill", (event) => {
+          const province = event.features?.[0]?.properties?.PROVINSI;
+          if (typeof province === "string") onSelectRef.current(province);
+        });
+        map?.on("mouseenter", "province-fill", () => {
+          if (map) map.getCanvas().style.cursor = "pointer";
+        });
+        map?.on("mouseleave", "province-fill", () => {
+          if (map) map.getCanvas().style.cursor = "";
+        });
       });
     };
 
@@ -116,8 +116,6 @@ export default function IndonesiaMap({ activeProvince, onProvinceSelect }: Indon
       map?.remove();
       mapRef.current = null;
     };
-  // Initialize the map once; selection changes are handled below.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
