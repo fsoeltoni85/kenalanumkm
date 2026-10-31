@@ -12,6 +12,22 @@ describe("city champion leaderboard", () => {
     expect(champions.every((item) => item.isDemo)).toBe(true);
   });
 
+  it("selects only the highest-stake champion when a city has multiple candidates", () => {
+    const champions = createDemoCityChampions("Makanan & Minuman");
+    const secondBekasiCandidate = {
+      ...champions[0],
+      id: "kota-bekasi-second-candidate",
+      name: "Martabak Cadangan Simulasi",
+      allTimeStake: 60_000_000,
+    };
+    const rows = buildLeaderboard([...champions, secondBekasiCandidate], filter);
+    const bekasiRows = rows.filter((row) => row.city === "Kota Bekasi");
+
+    expect(bekasiRows).toHaveLength(1);
+    expect(bekasiRows[0].name).toBe("Martabak Cadangan Simulasi");
+    expect(bekasiRows[0].nationalRank).toBe(1);
+  });
+
   it("shows one champion per city on the Indonesia board, ordered by stake", () => {
     const rows = buildLeaderboard(createDemoCityChampions("Makanan & Minuman"), filter);
     expect(rows).toHaveLength(20);
