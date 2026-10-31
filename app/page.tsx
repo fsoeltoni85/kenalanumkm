@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowUpRight, CalendarDays, ChevronDown, MapPin } from "lucide-react";
+import { ArrowUpRight, CalendarDays, ChevronDown, Eye, Flame, MapPin, Trophy } from "lucide-react";
 import IndonesiaMap from "./components/IndonesiaMap";
 
 const provinces = [
@@ -100,6 +100,12 @@ function makeEntries(category: string): Entry[] {
   }));
 }
 
+function shortRupiah(value: number) {
+  if (value >= 1000000) return "Rp" + (value / 1000000).toLocaleString("id-ID", { maximumFractionDigits: 1 }) + " jt";
+  if (value >= 1000) return "Rp" + (value / 1000).toLocaleString("id-ID", { maximumFractionDigits: 0 }) + " rb";
+  return rupiah(value);
+}
+
 function rupiah(value: number) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -122,141 +128,185 @@ export default function HomePage() {
     return valueB - valueA;
   }), [category, period, dailyDate]);
 
+  const entryStake = (entry: Entry) => period === "all-time" ? entry.allTime : period === "today" ? entry.today : (entry.daily[dailyDate] ?? 0);
+  const entryClicks = (entry: Entry) => period === "all-time" ? entry.clicks : period === "today" ? entry.todayClicks : (entry.dailyClicks[dailyDate] ?? 0);
+  const totalStake = rows.reduce((sum, entry) => sum + entryStake(entry), 0);
+  const totalClicks = rows.reduce((sum, entry) => sum + entryClicks(entry), 0);
+  const mostClicked = [...rows].sort((a, b) => entryClicks(b) - entryClicks(a))[0];
+  const categoryEmoji: Record<string, string> = {
+    "Makanan & Minuman": "🍜", Fashion: "👕", Retail: "🛍️", Jasa: "🧰",
+    Kecantikan: "💅", Kesehatan: "💊", Otomotif: "🛵", Pendidikan: "📚", Lainnya: "✨",
+  };
+
   function chooseProvince(nextProvince: string) {
     setProvince(nextProvince);
     setCity(citiesByProvince[nextProvince]?.[0] ?? "");
   }
 
-  function entryStake(entry: Entry) {
-    return period === "all-time" ? entry.allTime : period === "today" ? entry.today : (entry.daily[dailyDate] ?? 0);
-  }
-
   return (
-    <main className="min-h-screen bg-[#f7f8f6] text-[#202a24]">
-      <header className="sticky top-0 z-20 border-b border-[#e8ece8] bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-          <a href="/" className="flex shrink-0 items-center gap-2.5" aria-label="KenalanUMKM beranda">
-            <span className="grid h-8 w-8 place-items-center rounded-[10px] bg-[#147b51] text-sm font-black text-white">K</span>
-            <span className="text-[17px] font-extrabold tracking-[-0.05em]">Kenalan<span className="text-[#16845a]">UMKM</span></span>
+    <main className="site-shell">
+      <header className="site-header">
+        <div className="header-inner">
+          <a href="/" className="brand" aria-label="KenalanUMKM beranda">
+            <span className="brand-mark">K</span>
+            <span className="brand-name">Kenalan<span>UMKM</span></span>
           </a>
-          <div className="flex items-center gap-2">
-            <span className="hidden rounded-full bg-[#fff5df] px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[.1em] text-[#94681b] sm:inline-flex">Data simulasi</span>
-            <a href="#daftarkan" className="inline-flex items-center gap-1.5 rounded-full bg-[#147b51] px-3.5 py-2 text-xs font-bold text-white transition hover:bg-[#0d6843]">
-              Daftarkan UMKM <ArrowUpRight size={14} />
-            </a>
+          <div className="header-right">
+            <span className="demo-pill"><i /> DATA SIMULASI</span>
+            <a href="#daftarkan" className="join-button">Ikut bersaing <ArrowUpRight size={15} /></a>
           </div>
         </div>
       </header>
 
-      <section className="mx-auto max-w-[1600px] px-3 py-4 sm:px-5 lg:px-7">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-[11px] font-semibold text-[#758078]">
-            <span>Indonesia</span><span className="text-[#bbc4bd]">/</span>
-            <span>{province}</span><span className="text-[#bbc4bd]">/</span>
-            <strong className="text-[#29372e]">{city || "Pilih Kabupaten/Kota"}</strong>
+      <section className="page-content">
+        <div className="location-line">
+          <div className="crumbs">
+            <span>INDONESIA</span><span className="crumb-slash">/</span>
+            <strong>{province}</strong><span className="crumb-slash">/</span>
+            <strong className="current-city">{city || "Pilih Kabupaten/Kota"}</strong>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <select aria-label="Provinsi" value={province} onChange={(event) => chooseProvince(event.target.value)} className="max-w-[145px] appearance-none rounded-full border border-[#e1e7e2] bg-white py-2 pl-3 pr-8 text-[11px] font-semibold outline-none focus:border-[#16845a]">
+          <div className="location-selects">
+            <label className="select-wrap">
+              <span className="sr-only">Provinsi</span>
+              <select value={province} onChange={(event) => chooseProvince(event.target.value)}>
                 {provinces.map((item) => <option key={item} value={item}>{item}</option>)}
               </select>
-              <ChevronDown size={12} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#748179]" />
-            </div>
-            <div className="relative">
-              <select aria-label="Kabupaten/Kota" value={city} disabled={!cityOptions.length} onChange={(event) => setCity(event.target.value)} className="max-w-[165px] appearance-none rounded-full border border-[#e1e7e2] bg-white py-2 pl-3 pr-8 text-[11px] font-semibold outline-none focus:border-[#16845a] disabled:opacity-50">
-                {cityOptions.length ? cityOptions.map((item) => <option key={item} value={item}>{item}</option>) : <option value="">Pilih area demo</option>}
+              <ChevronDown size={13} />
+            </label>
+            <label className="select-wrap">
+              <span className="sr-only">Kabupaten/Kota</span>
+              <select value={city} disabled={!cityOptions.length} onChange={(event) => setCity(event.target.value)}>
+                {cityOptions.length ? cityOptions.map((item) => <option key={item} value={item}>{item}</option>) : <option value="">Area demo belum tersedia</option>}
               </select>
-              <ChevronDown size={12} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#748179]" />
-            </div>
+              <ChevronDown size={13} />
+            </label>
           </div>
         </div>
 
-        <div className="grid items-stretch gap-3 xl:grid-cols-[minmax(0,1fr)_430px]">
-          <section className="relative min-h-[400px] overflow-hidden rounded-[1.35rem] border border-[#dce7df] bg-[#e8f2f3] shadow-sm lg:min-h-[640px]" aria-label="Peta Indonesia">
-            <IndonesiaMap activeProvince={province} onProvinceSelect={chooseProvince} />
-            <div className="absolute bottom-4 right-4 z-[2] rounded-full border border-white/80 bg-white/90 px-3 py-1.5 text-[10px] text-[#66766d] shadow-sm">
-              <MapPin size={11} className="mr-1 inline-block" />38 provinsi
-            </div>
-          </section>
-
-          <aside className="flex min-h-[580px] flex-col overflow-hidden rounded-[1.35rem] border border-[#e3e9e4] bg-white shadow-sm">
-            <div className="border-b border-[#edf0ed] px-4 pb-3 pt-4 sm:px-5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-[9px] font-extrabold uppercase tracking-[.15em] text-[#87938b]">{city ? "Leaderboard kota" : "Leaderboard"}</div>
-                  <h1 className="mt-1 truncate text-[22px] font-black leading-tight tracking-[-.045em]">{city || "Pilih Kota"}</h1>
+        <div className="main-grid">
+          <section className="leaderboard-card" aria-label="Leaderboard UMKM">
+            <div className="board-heading">
+              <div className="board-heading-top">
+                <div>
+                  <div className="eyebrow"><Trophy size={13} /> PAPAN PERINGKAT</div>
+                  <h1>{city || "Pilih Kota"}</h1>
+                  <div className="board-subtitle">{category} <span>·</span> {province}</div>
                 </div>
+                <span className="demo-sticker">CONTOH UI</span>
+              </div>
+              <div className="stake-summary">
+                <div className="stake-total">
+                  <span className="summary-label">TOTAL STAKE DI PAPAN</span>
+                  <strong>{rupiah(totalStake)}</strong>
                 </div>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {categories.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => setCategory(item)}
-                    className={category === item
-                      ? "rounded-full bg-[#187a51] px-3 py-1.5 text-[10px] font-bold text-white"
-                      : "rounded-full bg-[#f3f5f3] px-3 py-1.5 text-[10px] font-semibold text-[#65736a] transition hover:bg-[#e9efeb]"}
-                  >
-                    {item}
-                  </button>
-                ))}
+                <div className="summary-stats">
+                  <div><strong>{rows.length}</strong><span>UMKM</span></div>
+                  <div><strong>{new Intl.NumberFormat("id-ID").format(totalClicks)}</strong><span><Eye size={11} /> KLIK</span></div>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-2 border-b border-[#edf0ed] px-4 py-2.5 sm:px-5">
-              <div className="flex items-center gap-1 rounded-full bg-[#f3f5f3] p-1" role="tablist" aria-label="Periode leaderboard">
-                <button type="button" role="tab" aria-selected={period === "all-time"} onClick={() => setPeriod("all-time")} className={period === "all-time" ? "rounded-full bg-white px-3 py-1.5 text-[10px] font-extrabold text-[#202a24] shadow-sm" : "rounded-full px-3 py-1.5 text-[10px] font-semibold text-[#77837b]"}>All Time</button>
-                <button type="button" role="tab" aria-selected={period === "today"} onClick={() => setPeriod("today")} className={period === "today" ? "rounded-full bg-white px-3 py-1.5 text-[10px] font-extrabold text-[#202a24] shadow-sm" : "rounded-full px-3 py-1.5 text-[10px] font-semibold text-[#77837b]"}>Hari Ini</button>
-                <button type="button" role="tab" aria-selected={period === "daily"} onClick={() => setPeriod("daily")} className={period === "daily" ? "rounded-full bg-white px-3 py-1.5 text-[10px] font-extrabold text-[#202a24] shadow-sm" : "rounded-full px-3 py-1.5 text-[10px] font-semibold text-[#77837b]"}>Harian</button>
-              </div>
-              {period === "today" && <span className="inline-flex items-center gap-1.5 text-[9px] font-bold text-[#238455]"><i className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#20a15c]" />LIVE</span>}
-              {period === "daily" && (
-                <div className="relative">
-                  <CalendarDays size={12} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[#758078]" />
-                  <select aria-label="Tanggal leaderboard harian" value={dailyDate} onChange={(event) => setDailyDate(event.target.value)} className="max-w-[115px] appearance-none rounded-full border border-[#e3e9e4] bg-white py-1.5 pl-7 pr-2 text-[9px] font-semibold text-[#4f5b53] outline-none">
-                    {dates.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-                  </select>
-                </div>
-              )}
-            </div>
-
-            <div className="grid grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-2 bg-[#fafbfa] px-4 py-2 text-[9px] font-extrabold uppercase tracking-[.1em] text-[#929c95] sm:px-5">
-              <span>#</span><span>UMKM</span><span className="text-right">Stake</span>
-            </div>
-
-            <div className="flex-1">
-              {rows.map((entry, index) => (
-                <article key={entry.id} className={index < 3 ? "grid grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-2 border-b border-[#edf0ed] bg-[#f8fbf8] px-4 py-3 sm:px-5" : "grid grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-2 border-b border-[#edf0ed] px-4 py-3 sm:px-5"}>
-                  <span className={index === 0 ? "text-[16px] font-black tabular-nums text-[#187a51]" : "text-[13px] font-bold tabular-nums text-[#8c9790]"}>{String(index + 1).padStart(2, "0")}</span>
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <span className={index === 0 ? "grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#e0f0e5] text-[12px] font-black text-[#187a51]" : "grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#f0f3f0] text-[12px] font-bold text-[#68766e]"}>
-                      {entry.initial}
-                    </span>
-                    <div className="min-w-0">
-                      <h2 className="truncate text-[12px] font-extrabold text-[#26342b]">{entry.name}</h2>
-                      <p className="mt-0.5 truncate text-[9px] text-[#87928b]">{city || "Kabupaten/Kota"}</p>
-                    </div>
-                  </div>
-                  <div className="whitespace-nowrap text-right">
-                    <div className="text-[12px] font-extrabold tabular-nums text-[#187a51]">{rupiah(entryStake(entry))}</div>
-                  </div>
-                </article>
+            <div className="category-strip" aria-label="Kategori UMKM">
+              {categories.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setCategory(item)}
+                  aria-pressed={category === item}
+                  className={category === item ? "category-chip active" : "category-chip"}
+                >
+                  <span>{categoryEmoji[item]}</span>{item}
+                </button>
               ))}
             </div>
 
-            <div className="flex items-center justify-between border-t border-[#edf0ed] px-4 py-3 text-[9px] text-[#929c95] sm:px-5">
-              <span>1–{rows.length} dari {rows.length}</span>
+            <div className="period-row">
+              <div className="period-tabs" role="tablist" aria-label="Periode leaderboard">
+                <button type="button" role="tab" aria-selected={period === "all-time"} onClick={() => setPeriod("all-time")} className={period === "all-time" ? "period-tab active" : "period-tab"}>All Time</button>
+                <button type="button" role="tab" aria-selected={period === "today"} onClick={() => setPeriod("today")} className={period === "today" ? "period-tab active" : "period-tab"}>Hari Ini</button>
+                <button type="button" role="tab" aria-selected={period === "daily"} onClick={() => setPeriod("daily")} className={period === "daily" ? "period-tab active" : "period-tab"}>Harian</button>
+              </div>
+              {period === "today" && <span className="live-pill"><i /> LIVE</span>}
+              {period === "daily" && (
+                <label className="date-select">
+                  <CalendarDays size={13} />
+                  <select aria-label="Tanggal leaderboard harian" value={dailyDate} onChange={(event) => setDailyDate(event.target.value)}>
+                    {dates.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                  </select>
+                  <ChevronDown size={12} />
+                </label>
+              )}
+            </div>
+
+            <div className="column-head">
+              <span>POS</span><span>UMKM</span><span>STAKE</span><span>KLIK</span>
+            </div>
+            <div className="ranking-list">
+              {rows.map((entry, index) => {
+                const stake = entryStake(entry);
+                const clicks = entryClicks(entry);
+                const leaderStake = rows[0] ? entryStake(rows[0]) : 0;
+                const share = leaderStake ? Math.max(8, (stake / leaderStake) * 100) : 0;
+                return (
+                  <article key={entry.id} className={"ranking-row rank-" + (index + 1)}>
+                    <div className="rank-cell">
+                      {index === 0 ? <span className="rank-medal">🥇</span> : index === 1 ? <span className="rank-medal">🥈</span> : index === 2 ? <span className="rank-medal">🥉</span> : <span className="rank-number">{String(index + 1).padStart(2, "0")}</span>}
+                    </div>
+                    <div className="business-cell">
+                      <span className={"business-avatar avatar-" + (index + 1)}>{entry.initial}</span>
+                      <div className="business-main">
+                        <strong>{entry.name}</strong>
+                        <span>{city || "Kabupaten/Kota"}</span>
+                        <div className="stake-meter"><i style={{ width: share + "%" }} /></div>
+                      </div>
+                    </div>
+                    <strong className="stake-value">{shortRupiah(stake)}</strong>
+                    <span className="click-value">{new Intl.NumberFormat("id-ID", { notation: "compact", maximumFractionDigits: 1 }).format(clicks)}</span>
+                  </article>
+                );
+              })}
+            </div>
+
+            <div className="board-bottom">
+              <span>1–{rows.length} <span className="muted">dari {rows.length} UMKM</span></span>
               <span>{period === "all-time" ? "Sepanjang waktu" : period === "today" ? "Hari berjalan" : dates.find((item) => item.value === dailyDate)?.label}</span>
+            </div>
+            {mostClicked && (
+              <div className="most-clicked">
+                <span className="most-clicked-icon"><Flame size={15} /></span>
+                <span className="most-clicked-label">PALING BANYAK DIKLIK</span>
+                <strong>{mostClicked.name}</strong>
+                <b>{new Intl.NumberFormat("id-ID").format(entryClicks(mostClicked))} klik</b>
+              </div>
+            )}
+          </section>
+
+          <aside className="map-card" aria-label="Peta kompetisi Indonesia">
+            <div className="map-card-heading">
+              <div>
+                <div className="eyebrow"><MapPin size={13} /> JELAJAHI WILAYAH</div>
+                <h2>Peta Indonesia</h2>
+              </div>
+              <span className="province-count">38 PROVINSI</span>
+            </div>
+            <div className="map-frame">
+              <IndonesiaMap activeProvince={province} onProvinceSelect={chooseProvince} />
+            </div>
+            <div className="map-card-foot">
+              <span className="map-key" /><span>{province}</span>
+              <span className="map-foot-note">Pilih provinsi di peta</span>
+            </div>
+            <div className="map-tip">
+              <span>📍</span>
+              <p>Pilih provinsi, lalu tentukan Kabupaten/Kota untuk melihat papan persaingannya.</p>
             </div>
           </aside>
         </div>
       </section>
 
-      <footer id="daftarkan" className="border-t border-[#e8ece8] bg-white">
-        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 py-4 text-[10px] text-[#849087] sm:px-6 lg:px-8">
-          <span><strong className="text-[#415147]">KenalanUMKM</strong> · Indonesia</span>
-          <span className="font-semibold text-[#147b51]">Daftarkan usaha ↗</span>
-        </div>
+      <footer id="daftarkan" className="site-footer">
+        <div><strong>KenalanUMKM</strong><span> · Indonesia</span></div>
+        <span>Seluruh angka pada preview adalah data simulasi.</span>
       </footer>
     </main>
   );
