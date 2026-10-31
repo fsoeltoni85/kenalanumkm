@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.vite/
+.vinext/
+.wrangler/
+.cloudflare/
+.env
+.env.*
+!.env.example
+coverage/
+playwright-report/
+test-results/
