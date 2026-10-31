@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Map as MapLibreMap, Marker as MapLibreMarker } from "maplibre-gl";
 
 type Position = [number, number, ...number[]];
@@ -232,13 +232,12 @@ export default function IndonesiaMap({ activeProvince, userLocation, onProvinceS
     }
   }, [userLocation?.latitude, userLocation?.longitude, userIsOnMap]);
 
-  const fallback = useMemo(() => geoData && !mapRef.current, [geoData, mapError]);
   return (
     <div className="relative h-full min-h-0 w-full overflow-hidden rounded-[17px] bg-[#dcebf1]">
-      {geoData && mapError ? <ProvinceSvgFallback data={geoData} activeProvince={activeProvince} userLocation={userIsOnMap ? userLocation : null} onProvinceSelect={onProvinceSelect} /> :
-        <div ref={containerRef} className="absolute inset-0" aria-label="Peta interaktif 38 provinsi Indonesia" />}
-      {!geoData && <div className="map-loading">Memuat peta Indonesia…</div>}
-      {geoData && !mapError && fallback && <ProvinceSvgFallback data={geoData} activeProvince={activeProvince} userLocation={userIsOnMap ? userLocation : null} onProvinceSelect={onProvinceSelect} />}
+      {geoData && mapError
+        ? <ProvinceSvgFallback data={geoData} activeProvince={activeProvince} userLocation={userIsOnMap ? userLocation : null} onProvinceSelect={onProvinceSelect} />
+        : <div ref={containerRef} className="absolute inset-0" aria-label="Peta interaktif 38 provinsi Indonesia" />}
+      {!geoData && !mapError && <div className="map-loading">Memuat peta Indonesia…</div>}
       <div className="map-overlay-label"><span className="map-overlay-dot" />{activeProvince}</div>
       {userIsOnMap && <div className="map-user-label"><span /> Lokasi kamu</div>}
       {mapError && !geoData && <div className="map-loading">Peta belum dapat dimuat. Coba segarkan halaman.</div>}
