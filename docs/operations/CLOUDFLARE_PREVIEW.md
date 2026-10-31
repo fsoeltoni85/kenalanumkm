@@ -14,7 +14,7 @@ The current preview has been deployed directly through the authenticated Cloudfl
 - `/data/indonesia-38-provinces.geojson`: HTTP 200, served from the upstream province GeoJSON dataset.
 - This standalone Worker preview is **not** the compiled vinext/Next.js bundle. The source implementation is in the PR branch and CI checks the application build separately.
 
-The revised interface makes the Indonesia map the main surface, supports province selection, and frames the leaderboard around Kabupaten/Kota + category. It displays an honest empty state rather than invented UMKM pins, stake amounts, clicks, or participant counts.
+The revised interface keeps the Indonesia map as the main surface and frames the leaderboard around Kabupaten/Kota + category. The compact leaderboard has All Time, Hari Ini and Harian (date archive) views, category pills, rank, stake and clicks. Its clearly labelled synthetic examples are for UI review only; they are not registered businesses, real payments or traffic.
 
 ## Geography data
 
