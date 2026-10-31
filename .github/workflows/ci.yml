@@ -56,7 +56,7 @@ jobs:
     environment:
       name: preview
     concurrency:
-      group: cloudflare-preview-pr-${{ github.event.pull_request.number }}
+      group: cloudflare-preview-pr-1
       cancel-in-progress: true
     steps:
       - name: Check Cloudflare deployment secret
@@ -90,7 +90,7 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Deploy isolated preview Worker
         if: steps.credentials.outputs.enabled == 'true'
-        run: npx @vinext/cloudflare deploy --env preview --name "kenalanumkm-pr-${{ github.event_name == 'pull_request' && github.event.pull_request.number || inputs.pr_number }}"
+        run: npx @vinext/cloudflare deploy --env preview
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: 311649d38b2aa47efbff87cae6921e2a
@@ -99,7 +99,7 @@ jobs:
         if: steps.credentials.outputs.enabled == 'true'
         shell: bash
         run: |
-          preview_url="https://kenalanumkm-pr-${{ github.event_name == 'pull_request' && github.event.pull_request.number || inputs.pr_number }}.kenalanumkm-preview.workers.dev"
+          preview_url="https://kenalanumkm-pr-1.kenalanumkm-preview.workers.dev"
           for attempt in $(seq 1 20); do
             if curl --fail --silent --show-error "$preview_url/api/health"; then
               echo
@@ -160,7 +160,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: 311649d38b2aa47efbff87cae6921e2a
-          WORKER_NAME: kenalanumkm-pr-${{ github.event.pull_request.number }}
+          WORKER_NAME: kenalanumkm-pr-1
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
             echo "Cleanup skipped: CLOUDFLARE_API_TOKEN is not configured."
