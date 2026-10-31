@@ -69,7 +69,7 @@ function ProvinceSvgFallback({
           <path
             key={String(feature.properties.KODE_PROV ?? name)}
             d={featurePath(feature)}
-            fill={selected ? "#16835b" : "#c8dfd2"}
+            fill={selected ? "#ff5b27" : "#f7d8c6"}
             fillRule="evenodd"
             stroke="#ffffff"
             strokeWidth="1.3"
@@ -77,7 +77,7 @@ function ProvinceSvgFallback({
             role="button"
             tabIndex={0}
             aria-label={`Pilih provinsi ${name}`}
-            className="cursor-pointer transition-colors hover:fill-[#8fbea4] focus:outline-none focus:stroke-[#0f6445]"
+            className="cursor-pointer transition-colors hover:fill-[#ff9b73] focus:outline-none focus:stroke-[#bd3e17]"
             onClick={() => onProvinceSelect(name)}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
@@ -146,7 +146,7 @@ export default function IndonesiaMap({ activeProvince, onProvinceSelect }: Indon
                 {
                   id: "ocean",
                   type: "background",
-                  paint: { "background-color": "#e8f2f3" },
+                  paint: { "background-color": "#eaf2f3" },
                 },
                 {
                   id: "province-fill",
@@ -156,8 +156,8 @@ export default function IndonesiaMap({ activeProvince, onProvinceSelect }: Indon
                     "fill-color": [
                       "case",
                       ["==", ["get", "PROVINSI"], activeProvince],
-                      "#16835b",
-                      "#c8dfd2",
+                      "#ff5b27",
+                      "#f7d8c6",
                     ],
                     "fill-opacity": 1,
                   },
@@ -177,7 +177,7 @@ export default function IndonesiaMap({ activeProvince, onProvinceSelect }: Indon
                   type: "line",
                   source: "provinces",
                   paint: {
-                    "line-color": "#8bb8a1",
+                    "line-color": "#e8bca4",
                     "line-width": 0.45,
                     "line-opacity": 0.9,
                   },
@@ -243,8 +243,8 @@ export default function IndonesiaMap({ activeProvince, onProvinceSelect }: Indon
       map.setPaintProperty("province-fill", "fill-color", [
         "case",
         ["==", ["get", "PROVINSI"], activeProvince],
-        "#16835b",
-        "#c8dfd2",
+        "#ff5b27",
+        "#f7d8c6",
       ]);
     };
     if (map.isStyleLoaded()) updateFill();
@@ -252,7 +252,7 @@ export default function IndonesiaMap({ activeProvince, onProvinceSelect }: Indon
   }, [activeProvince]);
 
   return (
-    <div className="relative h-full min-h-[430px] w-full overflow-hidden rounded-[1.45rem] bg-[#e8f2f3]">
+    <div className="relative h-full min-h-[430px] w-full overflow-hidden rounded-[1.45rem] bg-[#eaf2f3]">
       {fallbackData ? (
         <ProvinceSvgFallback
           data={fallbackData}
@@ -268,7 +268,7 @@ export default function IndonesiaMap({ activeProvince, onProvinceSelect }: Indon
         </div>
       )}
       <div className="pointer-events-none absolute left-4 top-4 z-[1] flex items-center gap-2 rounded-xl border border-white/80 bg-white/95 px-3 py-2 text-xs font-semibold text-[#34443b] shadow-sm">
-        <span className="h-2.5 w-2.5 rounded-full bg-[#16835b]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#ff5b27]" />
         {activeProvince || "Indonesia"}
         <span className="font-normal text-[#78877f]">· pilih provinsi</span>
       </div>
