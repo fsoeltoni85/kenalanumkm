@@ -44,6 +44,7 @@ const categoryNames: Record<string, string[]> = {
 };
 
 const dates = [
+  { value: "2026-10-31", label: "31 Okt 2026 · Live" },
   { value: "2026-10-30", label: "30 Okt 2026" },
   { value: "2026-10-29", label: "29 Okt 2026" },
   { value: "2026-10-28", label: "28 Okt 2026" },
@@ -193,8 +194,7 @@ export default function HomePage() {
                   <div className="text-[9px] font-extrabold uppercase tracking-[.15em] text-[#87938b]">{city ? "Leaderboard kota" : "Leaderboard"}</div>
                   <h1 className="mt-1 truncate text-[22px] font-black leading-tight tracking-[-.045em]">{city || "Pilih Kota"}</h1>
                 </div>
-                <span className="shrink-0 rounded-full bg-[#fff5df] px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[.08em] text-[#94681b]">Simulasi</span>
-              </div>
+                </div>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {categories.map((item) => (
                   <button
@@ -242,7 +242,7 @@ export default function HomePage() {
                     </span>
                     <div className="min-w-0">
                       <h2 className="truncate text-[12px] font-extrabold text-[#26342b]">{entry.name}</h2>
-                      <p className="mt-0.5 truncate text-[9px] text-[#87928b]">{city || "Kabupaten/Kota"} · {compactNumber(entryClicks(entry))} klik</p>
+                      <p className="mt-0.5 truncate text-[9px] text-[#87928b]">{city || "Kabupaten/Kota"}</p>
                     </div>
                   </div>
                   <div className="whitespace-nowrap text-right">
@@ -258,7 +258,6 @@ export default function HomePage() {
             </div>
           </aside>
         </div>
-        <div className="mt-2 text-right text-[9px] text-[#929c95]">Angka dan nama usaha hanya data simulasi tampilan.</div>
       </section>
 
       <footer id="daftarkan" className="border-t border-[#e8ece8] bg-white">
