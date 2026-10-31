@@ -61,6 +61,7 @@ export default function HomePage() {
   const [dailyDate, setDailyDate] = useState("2026-11-01");
   const [search, setSearch] = useState("");
   const [registrationOpen, setRegistrationOpen] = useState(false);
+  const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!registrationOpen) return;
@@ -126,6 +127,7 @@ export default function HomePage() {
     setSearch("");
   }
 
+  const selectedBusiness = rows.find((row) => row.id === selectedBusinessId) ?? null;
   const topThree = scope === "city" || search.trim() ? [] : rows.slice(0, 3);
   const showCityChampion = scope === "city" && !search.trim() && rows.length > 0;
   const listRows = topThree.length > 0 ? rows.slice(3) : showCityChampion ? [] : rows;
@@ -249,7 +251,7 @@ export default function HomePage() {
               </div>
               <div className="podium-grid">
                 {topThree.map((row) => (
-                  <article key={row.id} className={"podium-card podium-" + row.rank}>
+                  <button key={row.id} type="button" className={"podium-card podium-" + row.rank} onClick={() => setSelectedBusinessId(row.id)} aria-label={`Lihat detail ${row.name}`}>
                     <div className="podium-card-top">
                       <span className="podium-medal">
                         {row.rank === 1 ? <Crown size={20} fill="currentColor" /> : <Medal size={19} />}
@@ -270,7 +272,7 @@ export default function HomePage() {
                       <span>{scope === "indonesia" ? "Peringkat Indonesia" : "Peringkat nasional"}</span>
                       <strong>#{row.nationalRank}</strong>
                     </div>
-                  </article>
+                  </button>
                 ))}
               </div>
               <div className="podium-note"><ShieldCheck size={13} /> Peringkat ditentukan oleh stake terkonfirmasi, bukan jumlah klik.</div>
@@ -308,11 +310,11 @@ export default function HomePage() {
               </div>
 
               <div className="column-head">
-                <span>POSISI</span><span>JUARA KOTA</span><span>STAKE</span><span><Eye size={12} /> KLIK</span>
+                <span>POSISI</span><span>JUARA KOTA</span><span>STAKE</span><span><Eye size={12} /> KLIK</span><span aria-hidden="true" />
               </div>
               <div className="ranking-list" aria-live="polite">
                 {listRows.length > 0 ? listRows.map((row) => (
-                  <article key={row.id} className="ranking-row">
+                  <button key={row.id} type="button" className="ranking-row" onClick={() => setSelectedBusinessId(row.id)} aria-label={`Lihat detail ${row.name}`}>
                     <div className="rank-cell"><span className="rank-number">{String(row.rank).padStart(2, "0")}</span></div>
                     <div className="business-cell">
                       <span className="business-avatar">{row.initial}</span>
@@ -326,7 +328,8 @@ export default function HomePage() {
                     </div>
                     <strong className="stake-value">{shortRupiah(row.stake)}</strong>
                     <span className="click-value">{compactNumber(row.periodClicks)}</span>
-                  </article>
+                    <span className="row-open"><ArrowUpRight size={15} /></span>
+                  </button>
                 )) : (
                   <div className="empty-state">
                     <span className="empty-icon"><Sparkles size={21} /></span>
@@ -354,6 +357,44 @@ export default function HomePage() {
 
         <div className="page-footnote">Data pada preview bersifat simulasi, bukan UMKM, transaksi, atau ranking terverifikasi.</div>
       </section>
+
+      {selectedBusiness && (
+        <div className="modal-backdrop detail-backdrop" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setSelectedBusinessId(null);
+        }}>
+          <section className="business-detail-modal" role="dialog" aria-modal="true" aria-labelledby="business-detail-title">
+            <button type="button" className="modal-close" onClick={() => setSelectedBusinessId(null)} aria-label="Tutup detail">
+              <X size={19} />
+            </button>
+            <div className="detail-hero">
+              <span className="detail-hero-orbit orbit-one" />
+              <span className="detail-hero-orbit orbit-two" />
+              <span className="detail-avatar">{selectedBusiness.initial}</span>
+              <span className="detail-champion-label"><Trophy size={13} /> JUARA KABUPATEN / KOTA</span>
+            </div>
+            <div className="detail-content">
+              <div className="detail-kicker">{selectedCategory?.icon} {category} <span>·</span> {periodLabel(period, dailyDate)}</div>
+              <h2 id="business-detail-title">{selectedBusiness.name}</h2>
+              <p className="detail-location"><MapPin size={14} /> {selectedBusiness.city}, {selectedBusiness.province}</p>
+              <div className="detail-rank-strip">
+                <div><span>POSISI DI WILAYAH</span><strong>#1</strong></div>
+                <div><span>RANK NASIONAL</span><strong>#{selectedBusiness.nationalRank}</strong></div>
+                <div><span>PERIODE</span><strong>{periodLabel(period, dailyDate)}</strong></div>
+              </div>
+              <div className="detail-stake-card">
+                <div><span>STAKE TERKONFIRMASI</span><strong>{rupiah(selectedBusiness.stake)}</strong></div>
+                <div className="detail-stake-icon"><Crown size={23} /></div>
+              </div>
+              <div className="detail-stats">
+                <div><Eye size={16} /><span>Total klik periode ini</span><strong>{compactNumber(selectedBusiness.periodClicks)}</strong></div>
+                <div><Medal size={16} /><span>Wilayah kompetisi</span><strong>{selectedBusiness.city}</strong></div>
+              </div>
+              <div className="detail-simulation-note"><ShieldCheck size={16} /><span>Ini adalah detail data simulasi. Angka stake dan klik bukan transaksi atau aktivitas UMKM sungguhan.</span></div>
+              <button type="button" className="detail-close-button" onClick={() => setSelectedBusinessId(null)}>Kembali ke leaderboard <ArrowRight size={16} /></button>
+            </div>
+          </section>
+        </div>
+      )}
 
       {registrationOpen && (
         <div className="modal-backdrop">
