@@ -16,6 +16,8 @@ Browser uses public/publishable credentials only. Server routes/actions validate
 Use the official `create-vinext-app` or `vinext init --platform=cloudflare` setup path. The current project is wired using vinext's Cloudflare Vite plugin and `cf` project config. Run dependency install, compatibility checks and a production build in CI. Workers is the target runtime. Keep preview and production environments isolated.
 
 ## GitHub Actions
+Preview deployment is documented in [the Cloudflare preview runbook](../operations/CLOUDFLARE_PREVIEW.md). It uses an isolated Worker per PR; production Worker and production secrets are not touched by preview workflows.
+
 Checks: install dependencies, lint, typecheck, unit tests, production build. Preview deploy only after checks pass. Production deploy only from main and only after explicit approval. Use protected GitHub environments and least-privilege secrets. Never expose secrets in logs or NEXT_PUBLIC variables.
 
 ## Supabase
