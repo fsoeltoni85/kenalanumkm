@@ -2,15 +2,16 @@
 
 ## Product experience
 
-KenalanUMKM is an Indonesia-only public competition for UMKM city champions. The public interface is a leaderboard-first experience inspired by the clarity and compactness of Outbid.lol. It is not a map, a directory or a corporate analytics dashboard.
+KenalanUMKM is an Indonesia-only public competition for UMKM city champions. The public interface is a bright, compact, leaderboard-first experience inspired by the clarity of Outbid.lol, while keeping KenalanUMKM's own geography and ranking rules. It is not a map, a directory or a corporate analytics dashboard.
 
 ## Primary visual hierarchy
 
-1. The competition headline and a short explanation of the one-city-one-champion rule.
+1. The competition headline and one-city-one-champion explanation.
 2. Three scopes: Indonesia, selected province and selected Kabupaten/Kota.
 3. Category controls and All Time / Hari Ini / Harian period controls.
-4. A clear current leader/spotlight and a scannable Top 20 city-champion list.
-5. Stake as the primary number; clicks as secondary metadata.
+4. A celebratory Top 3 podium on Indonesia/province boards; one featured city champion on city scope.
+5. A scannable list for the remaining ranks.
+6. Stake as the primary numeric signal; clicks are secondary metadata.
 
 ## Geography and competition
 
@@ -26,12 +27,13 @@ Information hierarchy: Indonesia → Province → Kabupaten/Kota → Category �
 
 - Open the Indonesia Top 20 immediately; do not request device location.
 - Keep a persistent DATA SIMULASI badge while content is synthetic.
-- Use compact scope tabs, selectors, horizontally scrollable category chips and simple period controls.
-- Show a leader spotlight with city/province and stake, followed by rows with rank, business name, city/province, stake and clicks.
+- Use compact scope tabs, selectors, horizontally scrollable category chips and clear period controls.
+- The Top 3 use distinct light gold, sky/silver and peach/bronze podium cards; do not change their rank or stake values.
+- Other ranks remain neutral and easy to scan. Business name and stake are visually prominent; city and national rank are supporting metadata; clicks remain muted.
 - Search filters the visible list only; it does not recalculate or alter ranking.
-- Use a lightweight top-three treatment; the other positions should be neutral and easy to scan.
-- The participation CTA remains visibly disabled until rules are approved.
-- Desktop uses one centered board; mobile keeps the same order in a single column without a map panel.
+- The active “Daftarkan UMKM” CTA opens an informational registration-flow preview. It does not collect user data, submit a registration or initiate payment. Label the preview as not yet open.
+- Desktop uses one centered board; mobile keeps the same information order in a single column without horizontal page overflow.
+- The registration dialog is dismissible by close button and Escape.
 
 ## Ranking and money
 
@@ -39,12 +41,14 @@ Stake is the sole ranking metric. Clicks are secondary statistics only. Do not i
 
 ## Visual system
 
-- Warm off-white canvas, orange competition accent, charcoal text and restrained neutral surfaces.
-- Playful but restrained badges, compact typography, clear numeric alignment and generous readable row height.
-- Use a single primary board surface with thin dividers; avoid excessive cards or dashboard KPI grids.
-- Top three receive subtle medal/tint treatment; later ranks remain compact and scannable.
+- Bright, airy canvas with pale mint, white, sky, peach and butter-yellow surfaces.
+- Plus Jakarta Sans typography with friendly, rounded display headings and strong readable numeric hierarchy.
+- Fresh green as the primary action/accent; coral, sky blue, lilac and warm yellow as supporting accents.
+- Keep backgrounds light; do not use dark-mode surfaces or large dark panels.
+- Use restrained borders, soft shadows and generous row spacing.
+- Top 3 cards should feel celebratory without using heavy dark gradients or altering ranking semantics.
 - Mobile rows preserve readable names, location and stake without horizontal page overflow.
 
 ## Demo integrity
 
-The preview uses generated synthetic business names, stake and click values. DATA SIMULASI must remain visible. These are not real UMKM, payments, traffic or verified rankings. Keep participation disabled until stake/payment rules are approved.
+The preview uses generated synthetic business names, stake and click values. DATA SIMULASI must remain visible. These are not real UMKM, payments, traffic or verified rankings. Registration and participation remain inactive until product and payment rules are approved.
