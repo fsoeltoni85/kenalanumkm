@@ -20,7 +20,7 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -51,7 +51,8 @@ jobs:
       (github.event_name == 'pull_request' &&
        github.event.action != 'closed' &&
        github.event.pull_request.head.repo.full_name == github.repository) ||
-      github.event_name == 'workflow_dispatch'
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/bootstrap/kenalanumkm-foundation')
     runs-on: ubuntu-latest
     environment:
       name: preview
