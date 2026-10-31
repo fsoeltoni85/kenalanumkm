@@ -1,6 +1,15 @@
 # Cloudflare Preview Deployment
 
 ## Purpose
+## Current preview status
+
+An initial visual-shell preview has already been deployed directly through the authenticated Cloudflare connection (no Cloudflare API token was stored in GitHub):
+
+- Worker: `kenalanumkm-pr-1`
+- URL: https://kenalanumkm-pr-1.kenalanumkm-preview.workers.dev
+- `/api/health` returned HTTP 200 with `{"status":"ok","app":"kenalanumkm","preview":true}`.
+- This is a lightweight static visual shell for UI review. It is not the compiled vinext/Next.js bundle. CI has independently passed the vinext production build.
+
 PR previews run as isolated Cloudflare Workers and never replace the production Worker. The account workers.dev subdomain configured for this project is:
 
 `kenalanumkm-preview.workers.dev`
