@@ -1,38 +1,50 @@
 # Design Brief — KenalanUMKM
 
 ## Product experience
-KenalanUMKM is a public competition board for real, fixed-location Indonesian UMKM. The leaderboard is the product and the main visual surface: visitors should immediately see the selected city, the current ranking and the stake behind each position. The Indonesia map is the geographic way to move between competition areas, not a decorative hero or a larger competing panel.
+KenalanUMKM is an Indonesia-only public competition for real, fixed-location UMKM. The interface pairs a prominent interactive map of Indonesia with a live-feeling geographic leaderboard. The map and the ranking board are co-primary: neither is a small decorative widget.
 
 ## Primary visual hierarchy
-1. Selected Kabupaten/Kota and category.
-2. The board's total stake, period tabs and ranked UMKM rows.
-3. Top-three positions, with stake values visually dominant.
-4. Indonesia province map as a compact, interactive area selector.
-5. Click counts as secondary information only.
+1. Large, immediately visible map of Indonesia and its 38 selectable provinces.
+2. Prominent location context: the visitor's device location (only after browser permission) and selected province/city.
+3. Three clear competition scopes: Indonesia, selected province, selected Kabupaten/Kota.
+4. A Top 20 board for the currently selected scope.
+5. Stake amounts as the primary metric; click counts as secondary.
 
-The page must feel like a playful public scoreboard, not a corporate SaaS dashboard, company website, marketplace or business directory.
+The visual language is playful and competition-led, not a corporate SaaS dashboard, company website or generic business directory.
 
 ## Geography and competition
 Information hierarchy: Indonesia → Province → Kabupaten/Kota → Category → Leaderboard.
 - Province is a navigation/grouping layer, not a competition unit.
-- The competition unit is Kabupaten/Kota + category.
+- Competition scopes are Indonesia overall, one province, or one Kabupaten/Kota + category.
 - Kecamatan, Kelurahan and Desa must not appear as competition levels or filters.
 - A listing represents a real fixed physical UMKM location. Exact address and coordinates are for pin placement/geocoding only.
 - Businesses in different subdistricts but in the same Kabupaten/Kota and category compete on the same board.
 
-## Leaderboard interaction and layout
-Reference patterns: Outbid.lol treats price and rank as the headline, exposes the leaderboard immediately, uses playful pills, top-three emphasis and public click counts. WorldMap.lol makes geographic competition legible through a map.
+## Map and visitor location
+- Keep the whole Indonesia map large and visible beside the leaderboard on desktop.
+- On mobile, place the map above the leaderboard while keeping the location strip and three scope controls accessible.
+- All 38 province shapes are selectable and the selected province receives strong orange emphasis.
+- Request device location permission on the initial visit. When granted, show a distinct blue device marker on the map and identify the province by testing the point against the local province GeoJSON.
+- Do not infer a city/regency from province-only boundaries. The visitor selects Kabupaten/Kota from the selector.
+- If permission is denied or unavailable, retain manual province/city selection and offer a retry control.
+- Coordinates remain in client-side state for map display in this prototype; do not send exact coordinates to a reverse-geocoding API or store them.
+- The current GeoJSON contains province boundaries only. Do not draw fabricated city boundaries or UMKM pins.
 
-KenalanUMKM preview uses three views:
+## Leaderboard interaction and layout
+The leaderboard provides three scope tabs:
+- **Indonesia** — national Top 20.
+- **Provinsi** — Top 20 in the selected province.
+- **Kota/Kab** — Top 20 in the selected Kabupaten/Kota.
+
+Each scope displays 20 ranked entries. Controls remain on the same board:
+- Category pills.
 - **All Time** — cumulative confirmed stake.
 - **Hari Ini** — current-day stake.
-- **Harian** — a selectable calendar-day archive.
+- **Harian** — selectable calendar-day archive.
 
-Leaderboard rows show rank, business name, stake and clicks. Stake is the primary visual number and the sole ranking basis. Clicks are a smaller secondary metric and never affect rank. The board total is the sum of the visible rows in the selected city/category/period.
+Rows show rank, business name, stake and clicks. Stake is the primary visual number and the sole ranking basis. Clicks are secondary and never affect rank. The board total is the sum of the rows displayed for the current selection.
 
-Keep the controls close to the board heading. Use dense rows, tabular numbers, playful top-three treatment, category pills, and compact activity/secondary-stat treatment. Do not add explanatory product paragraphs, feature cards or marketing hero copy.
-
-Do not add weekly/monthly periods in this iteration; they are not present in the two reference patterns. The timezone/day cutoff for production must be approved separately. Reference sites use UTC boundaries; preview values are illustrative only.
+Do not add weekly/monthly periods in this iteration. Production timezone/day cutoff must be approved separately. The period figures currently shown are illustrative UI data only.
 
 ## Ranking and money
 - Ranking is determined only by cumulative confirmed stake for All Time.
@@ -41,23 +53,18 @@ Do not add weekly/monthly periods in this iteration; they are not present in the
 - Do not imply voting, reviews, stars, editorial scoring, popularity or a winner prize.
 - Do not invent minimums, outbid increments, tie-breaks, expiry, refunds or payment terms; those rules remain pending approval.
 
-## Homepage layout
-- Thin playful header: wordmark, visible simulation label, one concise participation action.
-- Compact location breadcrumb and Kabupaten/Kota selector.
-- Desktop: wide leaderboard (roughly two-thirds of the main grid) beside a smaller interactive province map.
-- Mobile: leaderboard appears first; map follows as a geographic exploration panel.
-- Total stake summary is part of the board, not a marketing statistic.
-- Category pills and All Time / Hari Ini / Harian controls sit directly above the rows.
-- Top 3 use distinct soft tints/medal marks; later ranks remain dense and easy to scan.
-- Warm off-white canvas, orange money/action accent, restrained supporting neutrals, quick hover feedback.
-- Avoid corporate green dashboards, large explanatory panels, generic SaaS gradients and decorative illustrations.
-
-## Map implementation
-The current preview uses a GeoJSON outline/fill of Indonesia's 38 provinces with MapLibre GL JS, without third-party raster tiles. Province polygons are selectable. When WebGL is unavailable, the same GeoJSON is rendered as an interactive SVG fallback with selectable province shapes.
-Dataset: denyherianto/indonesia-geojson-topojson-maps-with-38-provinces, GeoJSON file under CC BY 4.0. Attribution and license must remain visible. Upstream provenance/terms must be reviewed before production use. This geographic dataset does not provide Kabupaten/Kota competition polygons or business locations.
+## Visual system
+- Warm off-white canvas, orange/peach competition accent, charcoal text and restrained neutral UI.
+- Map ocean is light blue; provinces use warm pale fills; selected province uses orange; device location is marked with a distinct blue dot.
+- Map and board share the main horizontal area at near-equal visual weight.
+- Top 3 rows get medals and soft tints; later ranks stay compact and scannable.
+- Use playful pills, short labels and minimal copy.
+- On smaller screens the map comes first, followed by the board.
+- Do not use large corporate marketing hero text, generic dashboard cards or long explanations.
 
 ## Demo integrity
-The current visual preview uses synthetic sample rows so the period tabs and leaderboard density can be reviewed. "Data simulasi" / "Contoh UI" must remain visible. The displayed board total is computed from the sample rows currently visible; it is not a national total. Sample names, stake and clicks are not real businesses, payments or traffic. Never display fabricated live UMKM counts, verified badges, addresses or payment details.
+The preview uses generated synthetic names, stake and click values to exercise 20-row lists and the three geographic scopes. The "Data simulasi" badge must remain visible. These are not real businesses, payments, click traffic, live rankings or national totals. Keep the participation action disabled until the stake and payment terms are approved.
 
-## Responsive design
-Desktop: leaderboard is the dominant, wider panel and map is the smaller side panel. Mobile: leaderboard comes first and remains readable without horizontal scrolling; map follows. Provide accessible controls and keyboard-operable selects. If the map fails, the leaderboard remains usable.
+## Map implementation
+The preview uses a GeoJSON outline/fill for Indonesia's 38 provinces with MapLibre GL JS and an interactive SVG fallback when WebGL is unavailable. The user device pin is an overlay marker. The current dataset has provincial shapes only; it does not provide Kabupaten/Kota competition polygons or business locations.
+Dataset: denyherianto/indonesia-geojson-topojson-maps-with-38-provinces, declared CC BY 4.0. Attribution/license must remain visible. Verify the upstream provenance and terms before production/commercial use. Do not present these polygons as authoritative legal boundaries.
