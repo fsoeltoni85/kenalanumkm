@@ -15,7 +15,7 @@ describe("city champion leaderboard", () => {
   it("shows one champion per city on the Indonesia board, ordered by stake", () => {
     const rows = buildLeaderboard(createDemoCityChampions("Makanan & Minuman"), filter);
     expect(rows).toHaveLength(20);
-    expect(rows[0].city).toBe("Kota Bekasi");
+    expect(rows[0].city).toBe("Kota Bandung");
     expect(rows[0].rank).toBe(1);
     expect(rows.every((row, index) => index === 0 || rows[index - 1].stake >= row.stake)).toBe(true);
     expect(new Set(rows.map((row) => row.city)).size).toBe(rows.length);
@@ -31,14 +31,25 @@ describe("city champion leaderboard", () => {
     expect(rows[0].nationalRank).toBe(1);
   });
 
-  it("shows exactly one local champion and preserves its national rank in city scope", () => {
+  it("shows one local champion at #1 in Bekasi and #5 nationally", () => {
+    const rows = buildLeaderboard(createDemoCityChampions("Makanan & Minuman"), {
+      ...filter, scope: "city", city: "Kota Bekasi",
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0].city).toBe("Kota Bekasi");
+    expect(rows[0].name).toBe("Martabak Simulasi");
+    expect(rows[0].rank).toBe(1);
+    expect(rows[0].nationalRank).toBe(5);
+  });
+
+  it("preserves the selected city's national rank in city scope", () => {
     const rows = buildLeaderboard(createDemoCityChampions("Makanan & Minuman"), {
       ...filter, scope: "city", city: "Kabupaten Bekasi",
     });
     expect(rows).toHaveLength(1);
     expect(rows[0].city).toBe("Kabupaten Bekasi");
     expect(rows[0].rank).toBe(1);
-    expect(rows[0].nationalRank).toBe(3);
+    expect(rows[0].nationalRank).toBe(2);
   });
 
   it("uses stake, not clicks, to determine the ranking", () => {
