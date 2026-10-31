@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowDownRight, ArrowUpRight, ChevronDown, Info, Trophy } from "lucide-react";
+import { ArrowUpRight, CalendarDays, ChevronDown, MapPin } from "lucide-react";
 import IndonesiaMap from "./components/IndonesiaMap";
 
 const provinces = [
@@ -31,163 +31,240 @@ const categories = [
   "Kesehatan", "Otomotif", "Pendidikan", "Lainnya",
 ];
 
+const categoryNames: Record<string, string[]> = {
+  "Makanan & Minuman": ["Martabak Simulasi", "Kedai Kopi Simulasi", "Bakso Simulasi", "Ayam Bakar Simulasi", "Roti Bakar Simulasi"],
+  Fashion: ["Butik Simulasi", "Hijab Store Simulasi", "Streetwear Simulasi", "Batik Simulasi", "Sepatu Simulasi"],
+  Retail: ["Toko Kelontong Simulasi", "Minimarket Simulasi", "Toko Plastik Simulasi", "Toko ATK Simulasi", "Toko Elektronik Simulasi"],
+  Jasa: ["Laundry Simulasi", "Percetakan Simulasi", "Salon Simulasi", "Studio Foto Simulasi", "Jasa Jahit Simulasi"],
+  Kecantikan: ["Beauty Studio Simulasi", "Barbershop Simulasi", "Nail Art Simulasi", "Skincare Store Simulasi", "Makeup Artist Simulasi"],
+  Kesehatan: ["Apotek Simulasi", "Klinik Simulasi", "Optik Simulasi", "Praktik Gigi Simulasi", "Toko Herbal Simulasi"],
+  Otomotif: ["Bengkel Motor Simulasi", "Cuci Mobil Simulasi", "Bengkel Mobil Simulasi", "Toko Ban Simulasi", "Variasi Motor Simulasi"],
+  Pendidikan: ["Bimbel Simulasi", "Kursus Bahasa Simulasi", "Kursus Musik Simulasi", "Toko Buku Simulasi", "Les Privat Simulasi"],
+  Lainnya: ["Usaha Lokal Simulasi 1", "Usaha Lokal Simulasi 2", "Usaha Lokal Simulasi 3", "Usaha Lokal Simulasi 4", "Usaha Lokal Simulasi 5"],
+};
+
+const dates = [
+  { value: "2026-10-30", label: "30 Okt 2026" },
+  { value: "2026-10-29", label: "29 Okt 2026" },
+  { value: "2026-10-28", label: "28 Okt 2026" },
+  { value: "2026-10-27", label: "27 Okt 2026" },
+  { value: "2026-10-26", label: "26 Okt 2026" },
+];
+
+type Period = "all-time" | "today" | "daily";
+
+type Entry = {
+  id: number;
+  name: string;
+  initial: string;
+  allTime: number;
+  today: number;
+  daily: Record<string, number>;
+  clicks: number;
+  todayClicks: number;
+  dailyClicks: Record<string, number>;
+};
+
+const allTimeValues = [14500000, 12200000, 9700000, 7800000, 6200000];
+const todayValues = [1900000, 1450000, 980000, 720000, 510000];
+const clicksValues = [2481, 1940, 1620, 1190, 870];
+const todayClicksValues = [172, 143, 98, 76, 51];
+
+function makeEntries(category: string): Entry[] {
+  const names = categoryNames[category] ?? categoryNames["Lainnya"];
+  return names.map((name, index) => ({
+    id: index + 1,
+    name,
+    initial: name.charAt(0).toUpperCase(),
+    allTime: allTimeValues[index],
+    today: todayValues[index],
+    daily: {
+      "2026-10-31": [1250000, 980000, 750000, 420000, 310000][index],
+      "2026-10-30": [1700000, 1120000, 910000, 680000, 440000][index],
+      "2026-10-29": [980000, 850000, 640000, 520000, 290000][index],
+      "2026-10-28": [1450000, 920000, 770000, 510000, 380000][index],
+      "2026-10-27": [1100000, 940000, 690000, 470000, 350000][index],
+      "2026-10-26": [890000, 780000, 610000, 430000, 280000][index],
+    },
+    clicks: clicksValues[index],
+    todayClicks: todayClicksValues[index],
+    dailyClicks: {
+      "2026-10-31": [105, 82, 66, 41, 30][index],
+      "2026-10-30": [128, 91, 71, 53, 38][index],
+      "2026-10-29": [83, 69, 55, 44, 25][index],
+      "2026-10-28": [102, 76, 62, 39, 29][index],
+      "2026-10-27": [91, 73, 58, 36, 24][index],
+      "2026-10-26": [75, 61, 47, 32, 20][index],
+    },
+  }));
+}
+
+function rupiah(value: number) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function compactNumber(value: number) {
+  return new Intl.NumberFormat("id-ID").format(value);
+}
+
 export default function HomePage() {
   const [province, setProvince] = useState("Jawa Barat");
   const [city, setCity] = useState("Kota Bekasi");
   const [category, setCategory] = useState("Makanan & Minuman");
+  const [period, setPeriod] = useState<Period>("all-time");
+  const [dailyDate, setDailyDate] = useState("2026-10-30");
+
   const cityOptions = useMemo(() => citiesByProvince[province] ?? [], [province]);
+  const rows = useMemo(() => makeEntries(category).sort((a, b) => {
+    const valueA = period === "all-time" ? a.allTime : period === "today" ? a.today : (a.daily[dailyDate] ?? 0);
+    const valueB = period === "all-time" ? b.allTime : period === "today" ? b.today : (b.daily[dailyDate] ?? 0);
+    return valueB - valueA;
+  }), [category, period, dailyDate]);
 
   function chooseProvince(nextProvince: string) {
     setProvince(nextProvince);
     setCity(citiesByProvince[nextProvince]?.[0] ?? "");
   }
 
-  const locationReady = city.length > 0;
+  function entryStake(entry: Entry) {
+    return period === "all-time" ? entry.allTime : period === "today" ? entry.today : (entry.daily[dailyDate] ?? 0);
+  }
+
+  function entryClicks(entry: Entry) {
+    return period === "all-time" ? entry.clicks : period === "today" ? entry.todayClicks : (entry.dailyClicks[dailyDate] ?? 0);
+  }
 
   return (
-    <main className="min-h-screen bg-[#f5f7f4] text-[#17251d]">
-      <header className="sticky top-0 z-20 border-b border-[#e4ebe5] bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#f7f8f6] text-[#202a24]">
+      <header className="sticky top-0 z-20 border-b border-[#e8ece8] bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <a href="/" className="flex shrink-0 items-center gap-2.5" aria-label="KenalanUMKM beranda">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#137b51] text-base font-black text-white">K</span>
-            <span className="text-[18px] font-extrabold tracking-[-0.04em]">Kenalan<span className="text-[#16845a]">UMKM</span></span>
+            <span className="grid h-8 w-8 place-items-center rounded-[10px] bg-[#147b51] text-sm font-black text-white">K</span>
+            <span className="text-[17px] font-extrabold tracking-[-0.05em]">Kenalan<span className="text-[#16845a]">UMKM</span></span>
           </a>
-          <nav className="hidden items-center gap-7 text-[13px] font-semibold text-[#68766e] md:flex">
-            <a className="text-[#167d55]" href="#peta">Peta kompetisi</a>
-            <a href="#cara-kerja" className="transition hover:text-[#167d55]">Cara kerja</a>
-            <a href="#tentang" className="transition hover:text-[#167d55]">Tentang</a>
-          </nav>
           <div className="flex items-center gap-2">
-            <span className="hidden rounded-full bg-[#fff5df] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.12em] text-[#94681b] sm:inline-flex">Preview · data contoh</span>
-            <a href="#daftarkan" className="inline-flex items-center gap-1.5 rounded-xl bg-[#137b51] px-3.5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#0d6843] sm:px-4 sm:text-[13px]">
-              Daftarkan UMKM <ArrowUpRight size={15} />
+            <span className="hidden rounded-full bg-[#fff5df] px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[.1em] text-[#94681b] sm:inline-flex">Data simulasi</span>
+            <a href="#daftarkan" className="inline-flex items-center gap-1.5 rounded-full bg-[#147b51] px-3.5 py-2 text-xs font-bold text-white transition hover:bg-[#0d6843]">
+              Daftarkan UMKM <ArrowUpRight size={14} />
             </a>
           </div>
         </div>
       </header>
 
-      <section className="mx-auto max-w-[1600px] px-4 pb-4 pt-7 sm:px-6 lg:px-8 lg:pt-9">
-        <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
-          <div className="max-w-3xl">
-            <p className="mb-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-[#16845a]">Peta kompetisi UMKM Indonesia</p>
-            <h1 className="text-[32px] font-black leading-[1.06] tracking-[-.055em] sm:text-[42px] lg:text-[48px]">
-              Setiap kota punya<br className="hidden sm:block" /> panggungnya sendiri.
-            </h1>
-            <p className="mt-3 max-w-2xl text-[14px] leading-6 text-[#66746c] sm:text-[15px]">
-              Jelajahi usaha lokal berdasarkan lokasi. Lihat siapa yang memimpin di setiap kategori melalui total stake terkonfirmasi.
-            </p>
+      <section className="mx-auto max-w-[1600px] px-3 py-4 sm:px-5 lg:px-7">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-[11px] font-semibold text-[#758078]">
+            <span>Indonesia</span><span className="text-[#bbc4bd]">/</span>
+            <span>{province}</span><span className="text-[#bbc4bd]">/</span>
+            <strong className="text-[#29372e]">{city || "Pilih Kabupaten/Kota"}</strong>
           </div>
-          <div className="flex items-center gap-2 self-start rounded-xl border border-[#e2e9e3] bg-white px-3 py-2 text-[11px] text-[#65736b] lg:self-auto">
-            <Info size={14} className="text-[#16845a]" />
-            Peringkat ditentukan oleh stake, bukan rating atau jumlah klik.
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <select aria-label="Provinsi" value={province} onChange={(event) => chooseProvince(event.target.value)} className="max-w-[145px] appearance-none rounded-full border border-[#e1e7e2] bg-white py-2 pl-3 pr-8 text-[11px] font-semibold outline-none focus:border-[#16845a]">
+                {provinces.map((item) => <option key={item} value={item}>{item}</option>)}
+              </select>
+              <ChevronDown size={12} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#748179]" />
+            </div>
+            <div className="relative">
+              <select aria-label="Kabupaten/Kota" value={city} disabled={!cityOptions.length} onChange={(event) => setCity(event.target.value)} className="max-w-[165px] appearance-none rounded-full border border-[#e1e7e2] bg-white py-2 pl-3 pr-8 text-[11px] font-semibold outline-none focus:border-[#16845a] disabled:opacity-50">
+                {cityOptions.length ? cityOptions.map((item) => <option key={item} value={item}>{item}</option>) : <option value="">Pilih area demo</option>}
+              </select>
+              <ChevronDown size={12} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#748179]" />
+            </div>
           </div>
         </div>
 
-        <div id="peta" className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,1fr)_370px]">
-          <section className="relative min-h-[520px] overflow-hidden rounded-[1.7rem] border border-[#dce7df] bg-[#e8f2f3] shadow-[0_10px_35px_rgba(27,61,43,.06)] lg:min-h-[650px]" aria-label="Peta Indonesia">
+        <div className="grid items-stretch gap-3 xl:grid-cols-[minmax(0,1fr)_430px]">
+          <section className="relative min-h-[400px] overflow-hidden rounded-[1.35rem] border border-[#dce7df] bg-[#e8f2f3] shadow-sm lg:min-h-[640px]" aria-label="Peta Indonesia">
             <IndonesiaMap activeProvince={province} onProvinceSelect={chooseProvince} />
+            <div className="absolute bottom-4 right-4 z-[2] rounded-full border border-white/80 bg-white/90 px-3 py-1.5 text-[10px] text-[#66766d] shadow-sm">
+              <MapPin size={11} className="mr-1 inline-block" />38 provinsi
+            </div>
           </section>
 
-          <aside className="flex flex-col rounded-[1.7rem] border border-[#e2e9e3] bg-white p-4 shadow-[0_10px_35px_rgba(27,61,43,.045)] sm:p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[.13em] text-[#16845a]">
-                <Trophy size={15} /> Leaderboard wilayah
+          <aside className="flex min-h-[580px] flex-col overflow-hidden rounded-[1.35rem] border border-[#e3e9e4] bg-white shadow-sm">
+            <div className="border-b border-[#edf0ed] px-4 pb-3 pt-4 sm:px-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[9px] font-extrabold uppercase tracking-[.15em] text-[#87938b]">{city ? "Leaderboard kota" : "Leaderboard"}</div>
+                  <h1 className="mt-1 truncate text-[22px] font-black leading-tight tracking-[-.045em]">{city || "Pilih Kota"}</h1>
+                </div>
+                <span className="shrink-0 rounded-full bg-[#fff5df] px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[.08em] text-[#94681b]">Simulasi</span>
               </div>
-              <span className="rounded-full bg-[#fff5df] px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wider text-[#94681b]">Demo</span>
-            </div>
-
-            <label className="mb-1.5 text-[11px] font-bold text-[#6c7971]" htmlFor="province">Provinsi</label>
-            <div className="relative mb-3">
-              <select id="province" value={province} onChange={(event) => chooseProvince(event.target.value)} className="w-full appearance-none rounded-xl border border-[#e1e9e2] bg-[#fbfcfa] px-3.5 py-3 pr-9 text-[13px] font-semibold outline-none transition focus:border-[#16845a]">
-                {provinces.map((item) => <option key={item} value={item}>{item}</option>)}
-              </select>
-              <ChevronDown size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#748179]" />
-            </div>
-
-            <label className="mb-1.5 text-[11px] font-bold text-[#6c7971]" htmlFor="city">Kabupaten/Kota</label>
-            <div className="relative mb-3">
-              <select id="city" value={city} disabled={!cityOptions.length} onChange={(event) => setCity(event.target.value)} className="w-full appearance-none rounded-xl border border-[#e1e9e2] bg-[#fbfcfa] px-3.5 py-3 pr-9 text-[13px] font-semibold outline-none transition focus:border-[#16845a] disabled:cursor-not-allowed disabled:opacity-55">
-                {cityOptions.length ? cityOptions.map((item) => <option key={item} value={item}>{item}</option>) : <option value="">Pilihan area demo belum tersedia</option>}
-              </select>
-              <ChevronDown size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#748179]" />
-            </div>
-
-            <label className="mb-1.5 text-[11px] font-bold text-[#6c7971]" htmlFor="category">Kategori</label>
-            <div className="relative mb-5">
-              <select id="category" value={category} onChange={(event) => setCategory(event.target.value)} className="w-full appearance-none rounded-xl border border-[#e1e9e2] bg-[#fbfcfa] px-3.5 py-3 pr-9 text-[13px] font-semibold outline-none transition focus:border-[#16845a]">
-                {categories.map((item) => <option key={item} value={item}>{item}</option>)}
-              </select>
-              <ChevronDown size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#748179]" />
-            </div>
-
-            <div className="mb-3 flex items-start justify-between gap-2 border-b border-[#edf1ed] pb-3">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[.12em] text-[#87938b]">Papan peringkat</p>
-                <h2 className="mt-1 text-[19px] font-extrabold leading-tight tracking-[-.035em]">{locationReady ? city : "Pilih Kabupaten/Kota"}</h2>
-                <p className="mt-1 text-[11px] text-[#77847c]">{category}</p>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {categories.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => setCategory(item)}
+                    className={category === item
+                      ? "rounded-full bg-[#187a51] px-3 py-1.5 text-[10px] font-bold text-white"
+                      : "rounded-full bg-[#f3f5f3] px-3 py-1.5 text-[10px] font-semibold text-[#65736a] transition hover:bg-[#e9efeb]"}
+                  >
+                    {item}
+                  </button>
+                ))}
               </div>
-              <span className="mt-1 whitespace-nowrap rounded-lg bg-[#f1f6f2] px-2 py-1.5 text-[9px] font-bold text-[#357759]">Kota + kategori</span>
             </div>
 
-            <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-[#d9e5dc] bg-[#fafcf9] px-5 py-8 text-center">
-              <span className="mb-3 grid h-11 w-11 place-items-center rounded-2xl bg-[#eaf4ed] text-[#16845a]"><Trophy size={20} /></span>
-              <h3 className="text-[14px] font-extrabold">Leaderboard belum tersedia</h3>
-              <p className="mt-2 max-w-[250px] text-[11px] leading-5 text-[#78857d]">
-                Tampilan ini belum terhubung ke data peserta dan stake nyata. Tidak ada peringkat atau nominal simulasi yang ditampilkan sebagai data aktif.
-              </p>
+            <div className="flex items-center justify-between gap-2 border-b border-[#edf0ed] px-4 py-2.5 sm:px-5">
+              <div className="flex items-center gap-1 rounded-full bg-[#f3f5f3] p-1" role="tablist" aria-label="Periode leaderboard">
+                <button type="button" role="tab" aria-selected={period === "all-time"} onClick={() => setPeriod("all-time")} className={period === "all-time" ? "rounded-full bg-white px-3 py-1.5 text-[10px] font-extrabold text-[#202a24] shadow-sm" : "rounded-full px-3 py-1.5 text-[10px] font-semibold text-[#77837b]"}>All Time</button>
+                <button type="button" role="tab" aria-selected={period === "today"} onClick={() => setPeriod("today")} className={period === "today" ? "rounded-full bg-white px-3 py-1.5 text-[10px] font-extrabold text-[#202a24] shadow-sm" : "rounded-full px-3 py-1.5 text-[10px] font-semibold text-[#77837b]"}>Hari Ini</button>
+                <button type="button" role="tab" aria-selected={period === "daily"} onClick={() => setPeriod("daily")} className={period === "daily" ? "rounded-full bg-white px-3 py-1.5 text-[10px] font-extrabold text-[#202a24] shadow-sm" : "rounded-full px-3 py-1.5 text-[10px] font-semibold text-[#77837b]"}>Harian</button>
+              </div>
+              {period === "today" && <span className="inline-flex items-center gap-1.5 text-[9px] font-bold text-[#238455]"><i className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#20a15c]" />LIVE</span>}
+              {period === "daily" && (
+                <div className="relative">
+                  <CalendarDays size={12} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[#758078]" />
+                  <select aria-label="Tanggal leaderboard harian" value={dailyDate} onChange={(event) => setDailyDate(event.target.value)} className="max-w-[115px] appearance-none rounded-full border border-[#e3e9e4] bg-white py-1.5 pl-7 pr-2 text-[9px] font-semibold text-[#4f5b53] outline-none">
+                    {dates.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                  </select>
+                </div>
+              )}
             </div>
 
-            <div className="mt-4 rounded-xl bg-[#f1f6f2] p-3.5">
-              <p className="text-[11px] font-extrabold text-[#315b43]">Bagaimana peringkat ditentukan?</p>
-              <p className="mt-1 text-[10px] leading-[1.6] text-[#64756a]">Urutan berdasarkan akumulasi stake yang sudah dikonfirmasi. Klik hanya ditampilkan sebagai statistik dan tidak memengaruhi posisi.</p>
+            <div className="grid grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-2 bg-[#fafbfa] px-4 py-2 text-[9px] font-extrabold uppercase tracking-[.1em] text-[#929c95] sm:px-5">
+              <span>#</span><span>UMKM</span><span className="text-right">Stake</span>
+            </div>
+
+            <div className="flex-1">
+              {rows.map((entry, index) => (
+                <article key={entry.id} className={index < 3 ? "grid grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-2 border-b border-[#edf0ed] bg-[#f8fbf8] px-4 py-3 sm:px-5" : "grid grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-2 border-b border-[#edf0ed] px-4 py-3 sm:px-5"}>
+                  <span className={index === 0 ? "text-[16px] font-black tabular-nums text-[#187a51]" : "text-[13px] font-bold tabular-nums text-[#8c9790]"}>{String(index + 1).padStart(2, "0")}</span>
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <span className={index === 0 ? "grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#e0f0e5] text-[12px] font-black text-[#187a51]" : "grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#f0f3f0] text-[12px] font-bold text-[#68766e]"}>
+                      {entry.initial}
+                    </span>
+                    <div className="min-w-0">
+                      <h2 className="truncate text-[12px] font-extrabold text-[#26342b]">{entry.name}</h2>
+                      <p className="mt-0.5 truncate text-[9px] text-[#87928b]">{city || "Kabupaten/Kota"} · {compactNumber(entryClicks(entry))} klik</p>
+                    </div>
+                  </div>
+                  <div className="whitespace-nowrap text-right">
+                    <div className="text-[12px] font-extrabold tabular-nums text-[#187a51]">{rupiah(entryStake(entry))}</div>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between border-t border-[#edf0ed] px-4 py-3 text-[9px] text-[#929c95] sm:px-5">
+              <span>1–{rows.length} dari {rows.length}</span>
+              <span>{period === "all-time" ? "Sepanjang waktu" : period === "today" ? "Hari berjalan" : dates.find((item) => item.value === dailyDate)?.label}</span>
             </div>
           </aside>
         </div>
-
-        <div className="mt-4 flex flex-col justify-between gap-2 rounded-xl border border-[#e2e9e3] bg-white px-4 py-3 text-[10px] text-[#758178] sm:flex-row sm:items-center">
-          <span><strong className="text-[#4f6056]">Catatan preview:</strong> geometri provinsi ditampilkan dari dataset GeoJSON; pilihan kota dan leaderboard belum memakai data produksi.</span>
-          <span className="whitespace-nowrap">38 provinsi · Indonesia saja</span>
-        </div>
+        <div className="mt-2 text-right text-[9px] text-[#929c95]">Angka dan nama usaha hanya data simulasi tampilan.</div>
       </section>
 
-      <section id="cara-kerja" className="mx-auto max-w-[1600px] px-4 pb-14 pt-7 sm:px-6 lg:px-8">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#16845a]">Cara kerja</p>
-            <h2 className="mt-2 text-2xl font-black tracking-[-.045em] sm:text-[30px]">Kompetisi di tingkat kota.</h2>
-          </div>
-          <p className="max-w-md text-[12px] leading-5 text-[#748078]">Semua UMKM dalam kota dan kategori yang sama berada di papan peringkat yang sama—tanpa pembagian kompetisi sampai tingkat kecamatan atau kelurahan.</p>
-        </div>
-        <div className="grid gap-3 md:grid-cols-3">
-          {[
-            ["01", "Jelajahi wilayah", "Mulai dari peta Indonesia, pilih provinsi, lalu Kabupaten/Kota."],
-            ["02", "Pilih kategori", "Lihat UMKM yang bersaing dalam kategori yang sama di kota tersebut."],
-            ["03", "Naikkan posisi", "Stake terkonfirmasi menentukan peringkat. Pemilik usaha dapat berpartisipasi saat fitur stake diluncurkan."],
-          ].map(([number, title, description]) => (
-            <article key={number} className="rounded-2xl border border-[#e2e9e3] bg-white p-5">
-              <span className="text-[11px] font-black tracking-[.12em] text-[#16845a]">{number}</span>
-              <h3 className="mt-3 text-[15px] font-extrabold">{title}</h3>
-              <p className="mt-1.5 text-[12px] leading-5 text-[#748078]">{description}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section id="daftarkan" className="mx-auto max-w-[1600px] px-4 pb-12 sm:px-6 lg:px-8">
-        <div className="flex flex-col justify-between gap-5 rounded-[1.6rem] bg-[#123f2d] px-6 py-7 text-white sm:flex-row sm:items-center sm:px-8">
-          <div>
-            <p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#a7d7b9]">Untuk pemilik usaha</p>
-            <h2 className="mt-2 text-2xl font-black tracking-[-.04em]">Bawa usaha lokalmu ke peta.</h2>
-            <p className="mt-2 max-w-xl text-[12px] leading-5 text-[#d0e3d6]">Pendaftaran dan verifikasi listing belum aktif di preview ini.</p>
-          </div>
-          <span className="inline-flex items-center gap-2 self-start rounded-xl border border-white/20 px-4 py-3 text-[12px] font-bold text-white/85 sm:self-auto">Segera hadir <ArrowDownRight size={15} /></span>
-        </div>
-      </section>
-
-      <footer id="tentang" className="border-t border-[#e2e9e3] bg-white">
-        <div className="mx-auto flex max-w-[1600px] flex-col gap-2 px-4 py-6 text-[10px] leading-5 text-[#77847c] sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <span><strong className="text-[#34443a]">KenalanUMKM</strong> · Peta kompetisi UMKM Indonesia.</span>
-          <span>Batas provinsi: denyherianto · <a className="underline" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a> · Sumber dan provenance perlu diverifikasi untuk produksi.</span>
+      <footer id="daftarkan" className="border-t border-[#e8ece8] bg-white">
+        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 py-4 text-[10px] text-[#849087] sm:px-6 lg:px-8">
+          <span><strong className="text-[#415147]">KenalanUMKM</strong> · Indonesia</span>
+          <span className="font-semibold text-[#147b51]">Daftarkan usaha ↗</span>
         </div>
       </footer>
     </main>
