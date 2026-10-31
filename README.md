@@ -1,22 +1,36 @@
 # KenalanUMKM
 
-KenalanUMKM is an Indonesia-only, map-first local business discovery and geographic leaderboard product inspired by the core interaction model of WorldMap.lol.
+KenalanUMKM is an Indonesia-only, map-first discovery and geographic leaderboard for UMKM with real physical locations.
 
-This repository is the source of truth for product requirements, design references, architecture, database migrations, application code, tests, and delivery workflows.
-
-## Project status
-
-Foundation setup in progress. See `docs/` for approved product constraints and implementation decisions.
+## Project references
+All product, technical, design, backend and delivery reference documents live in [docs/](docs/README.md). Start with [docs/README.md](docs/README.md) and follow the repository rules in [AGENTS.md](AGENTS.md).
 
 ## Technology
-
-- Next.js + vinext + TypeScript
-- Tailwind CSS and shadcn/ui
-- MapLibre GL JS
-- Supabase PostgreSQL + PostGIS, Auth, Storage, and Edge Functions
+- Next.js API surface via vinext + Vite + TypeScript
+- Tailwind CSS
+- MapLibre GL JS (live tile/style provider pending licensing review)
+- Supabase PostgreSQL + PostGIS, Auth, Storage and Edge Functions
 - Cloudflare Workers
-- GitHub Actions for CI/CD
+- GitHub Actions CI/CD
 
 ## Local development
+Requires Node.js 22 or later.
 
-Setup instructions will be added after the application scaffold is committed.
+```bash
+npm install
+npm run dev
+```
+
+Checks:
+
+```bash
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+```
+
+Copy .env.example to .env.local only when ready to connect a Supabase environment. Do not use production credentials for preview/test work.
+
+## Delivery
+Changes are made in feature branches and reviewed through pull requests. Cloudflare preview deployment is gated behind passing CI and repository environment configuration. Production deployment is not automated until an explicit release workflow is approved.
