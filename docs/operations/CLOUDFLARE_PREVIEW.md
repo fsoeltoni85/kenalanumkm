@@ -24,7 +24,7 @@ The preview uses the 38-province GeoJSON from:
 - Dataset license declared by the repository: CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/
 - Attribution is shown in the interface and recorded in `public/data/README.md`.
 
-The preview Worker proxies this dataset from the upstream GitHub raw URL. The dataset provides provincial shapes only; it does not include Kabupaten/Kota competition polygons or UMKM locations. The upstream provenance/source terms could not be verified from the repository's referenced source file during implementation. Review those terms and validate the boundary dataset before production/commercial use. Do not treat these polygons as authoritative cadastral or legal boundaries.
+The preview Worker proxies this dataset from the upstream GitHub raw URL. MapLibre renders it when WebGL is available; a GeoJSON-driven SVG fallback keeps province selection working when WebGL is unavailable. The dataset provides provincial shapes only; it does not include Kabupaten/Kota competition polygons or UMKM locations. The upstream provenance/source terms could not be verified from the repository's referenced source file during implementation. Review those terms and validate the boundary dataset before production/commercial use. Do not treat these polygons as authoritative cadastral or legal boundaries.
 
 No third-party raster basemap tiles are used. A production tile/style provider has not been selected.
 
