@@ -149,7 +149,7 @@ export function buildLeaderboard(champions: CityChampion[], filter: LeaderboardF
   // Resolve the local #1 champion first; only those winners enter the national ranking.
   const cityChampions = new Map<string, CityChampion>();
   for (const candidate of champions) {
-    const cityKey = candidate.id + "|" + candidate.city + "|" + candidate.province;
+    const cityKey = candidate.province + "|" + candidate.city;
     const current = cityChampions.get(cityKey);
     if (!current || stakeFor(candidate, filter.period, filter.dailyDate) > stakeFor(current, filter.period, filter.dailyDate)) {
       cityChampions.set(cityKey, candidate);
