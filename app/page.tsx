@@ -46,6 +46,9 @@ function compactNumber(value: number) {
   return new Intl.NumberFormat("id-ID", { notation: "compact", maximumFractionDigits: 1 }).format(value);
 }
 
+// Prototype-only quote step. Final minimum increment remains a pricing decision.
+const DEMO_CLAIM_INCREMENT = 10_000;
+
 function periodLabel(period: Period, dailyDate: string) {
   if (period === "all-time") return "All Time";
   if (period === "today") return "Hari Ini";
@@ -175,6 +178,8 @@ export default function HomePage() {
   const [search, setSearch] = useState("");
   const [registrationOpen, setRegistrationOpen] = useState(false);
   const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null);
+  const [claimProvince, setClaimProvince] = useState(province);
+  const [claimCity, setClaimCity] = useState(city);
 
   useEffect(() => {
     if (!registrationOpen) return;
@@ -211,16 +216,32 @@ export default function HomePage() {
   }, [allRows, search]);
 
   const selectedCategory = CATEGORIES.find((item) => item.name === category);
+  const claimCityOptions = useMemo(
+    () => champions.filter((champion) => champion.province === claimProvince).map((champion) => champion.city),
+    [champions, claimProvince],
+  );
+  const claimChampion = useMemo(
+    () => champions.find((champion) => champion.province === claimProvince && champion.city === claimCity) ?? null,
+    [champions, claimProvince, claimCity],
+  );
+  const claimCurrentStake = claimChampion
+    ? period === "today"
+      ? claimChampion.todayStake
+      : period === "daily"
+        ? claimChampion.dailyStake[dailyDate] ?? 0
+        : claimChampion.allTimeStake
+    : null;
+  const claimPrice = claimCurrentStake === null ? null : claimCurrentStake + DEMO_CLAIM_INCREMENT;
   const boardTitle = scope === "indonesia"
     ? "Top 20 Indonesia"
     : scope === "province"
       ? "Juara kota di " + province
       : "Juara " + city;
   const boardDescription = scope === "indonesia"
-    ? "Juara dari tiap kabupaten/kota bersaing di papan nasional, berdasarkan stake terkonfirmasi."
+    ? "Juara dari tiap kabupaten/kota bersaing di papan nasional. Urutan ditentukan stake terkonfirmasi."
     : scope === "province"
-      ? "Lihat UMKM yang memimpin di tiap kabupaten/kota di provinsi ini."
-      : "Satu UMKM memimpin papan di kabupaten/kota ini.";
+      ? "Lihat siapa yang sedang #1 di tiap kabupaten/kota di provinsi ini."
+      : "Lihat UMKM yang sedang memimpin di kabupaten/kota ini.";
 
   function chooseProvince(nextProvince: string) {
     setProvince(nextProvince);
@@ -260,12 +281,16 @@ export default function HomePage() {
             <button
               type="button"
               className="join-button"
-              onClick={() => setRegistrationOpen(true)}
+              onClick={() => {
+                setClaimProvince(province);
+                setClaimCity(city);
+                setRegistrationOpen(true);
+              }}
               aria-haspopup="dialog"
               aria-expanded={registrationOpen}
             >
               <Store size={15} />
-              Lihat cara ikut
+              Klaim #1
               <ArrowUpRight size={14} />
             </button>
           </div>
@@ -274,12 +299,13 @@ export default function HomePage() {
 
       <section className="page-content">
         <section className="intro">
-          <div className="intro-kicker"><span className="kicker-icon"><Trophy size={14} /></span> PANGGUNG UMKM DARI SELURUH INDONESIA</div>
-          <h1>Kenalkan usahamu. <span>Banggakan kotamu.</span></h1>
-          <p>Ikut bersaing jadi wakil kabupaten/kotamu di papan nasional. Juara kota ditentukan dari stake terkonfirmasi—jumlah klik cuma statistik.</p>
+          <div className="intro-kicker"><span className="kicker-icon"><Trophy size={14} /></span> PAY-TO-RANK UMKM INDONESIA</div>
+          <h1>Rebut <span>#1 di kotamu.</span></h1>
+          <p>Pasang stake, incar posisi teratas. Ini papan pay-to-rank yang terbuka: makin tinggi stake terkonfirmasi, makin tinggi posisi. Juara kota ikut bersaing di papan nasional.</p>
           <div className="intro-tags">
-            <span><CheckCircle2 size={13} /> Satu wakil per kabupaten/kota</span>
-            <span><Sparkles size={13} /> Juara kota tampil nasional</span>
+            <span><CheckCircle2 size={13} /> Stake menentukan posisi</span>
+            <span><Sparkles size={13} /> Klik cuma statistik</span>
+            <span><Trophy size={13} /> Satu juara per kota</span>
           </div>
         </section>
 
@@ -461,11 +487,11 @@ export default function HomePage() {
         </section>
 
         <section className="rules-strip">
-          <div><span className="rule-icon rule-green"><Trophy size={15} /></span><strong>Stake terkonfirmasi</strong><span>satu-satunya dasar peringkat</span></div>
+          <div><span className="rule-icon rule-green"><Trophy size={15} /></span><strong>Stake terkonfirmasi</strong><span>penentu posisi di papan</span></div>
           <i />
           <div><span className="rule-icon rule-blue"><Eye size={15} /></span><strong>Klik</strong><span>statistik saja, bukan ranking</span></div>
           <i />
-          <div><span className="rule-icon rule-pink"><MapPin size={15} /></span><strong>Satu kota</strong><span>satu juara dari tiap kabupaten/kota</span></div>
+          <div><span className="rule-icon rule-pink"><MapPin size={15} /></span><strong>Satu kota</strong><span>satu juara, satu wakil nasional</span></div>
         </section>
 
         <div className="page-footnote">Data pada preview bersifat simulasi, bukan UMKM, transaksi, atau ranking terverifikasi.</div>
@@ -520,45 +546,84 @@ export default function HomePage() {
               <span className="modal-art-store"><Store size={31} /></span>
               <span className="modal-art-star star-two"><Trophy size={18} /></span>
             </div>
-            <span className="modal-kicker">KENALAN UMKM · PENDAFTARAN</span>
-            <h2 id="registration-title">Yuk, bawa usahamu ke <span>papan juara!</span></h2>
-            <p id="registration-description">Begini alur ikutnya nanti. Pendaftaran resmi belum dibuka, jadi belum ada data yang dikirim.</p>
+            <span className="modal-kicker">KLAIM POSISI · PAY-TO-RANK</span>
+            <h2 id="registration-title">Mau rebut <span>#1 di kotamu?</span></h2>
+            <p id="registration-description">Pilih wilayah untuk melihat harga klaimnya. Posisi ditentukan oleh stake terkonfirmasi—bukan voting, jumlah klik, atau penilaian editorial.</p>
+
+            <div className="claim-location-fields">
+              <GeoDropdown
+                label="Provinsi untuk klaim"
+                value={claimProvince}
+                options={PROVINCES}
+                placeholder="Pilih Provinsi"
+                onChange={(nextProvince) => {
+                  setClaimProvince(nextProvince);
+                  setClaimCity("");
+                }}
+              />
+              <GeoDropdown
+                label="Kabupaten atau kota untuk klaim"
+                value={claimCity}
+                options={claimCityOptions}
+                placeholder="Pilih Kabupaten/Kota"
+                disabled={claimCityOptions.length === 0}
+                onChange={setClaimCity}
+              />
+            </div>
+
+            {claimChampion && claimCurrentStake !== null && claimPrice !== null ? (
+              <div className="claim-price-card">
+                <div className="claim-price-topline">
+                  <span>CONTOH HARGA KLAIM #1</span>
+                  <span className="claim-simulation-pill">SIMULASI</span>
+                </div>
+                <strong className="claim-price-value">{rupiah(claimPrice)}</strong>
+                <span className="claim-price-explanation">
+                  Juara saat ini {shortRupiah(claimCurrentStake)} + kenaikan minimum contoh {rupiah(DEMO_CLAIM_INCREMENT)}.
+                </span>
+                <span className="claim-price-period">Papan {periodLabel(period, dailyDate)} · {claimChampion.city}</span>
+              </div>
+            ) : (
+              <div className="claim-price-empty">
+                Pilih kabupaten/kota untuk melihat contoh harga klaim #1.
+              </div>
+            )}
 
             <div className="registration-steps">
               <div className="registration-step">
                 <span className="step-number">01</span>
-                <span className="step-icon"><Store size={18} /></span>
-                <div><strong>Kenalkan usaha</strong><small>Profil dasar dan nama UMKM.</small></div>
+                <span className="step-icon"><MapPin size={18} /></span>
+                <div><strong>Pilih kota & kategori</strong><small>Tentukan papan tempat UMKM-mu akan bersaing.</small></div>
                 <CheckCircle2 size={16} />
               </div>
               <div className="registration-step">
                 <span className="step-number">02</span>
-                <span className="step-icon"><MapPin size={18} /></span>
-                <div><strong>Tentukan wilayah</strong><small>Kategori dan Kabupaten/Kota tempat usaha.</small></div>
+                <span className="step-icon"><Sparkles size={18} /></span>
+                <div><strong>Cek harga klaim</strong><small>Nominal minimum terlihat sebelum lanjut bayar.</small></div>
                 <CheckCircle2 size={16} />
               </div>
               <div className="registration-step">
                 <span className="step-number">03</span>
                 <span className="step-icon"><ShieldCheck size={18} /></span>
-                <div><strong>Tinjau data usaha</strong><small>Data diperiksa sebelum profil ditampilkan.</small></div>
+                <div><strong>Pasang stake</strong><small>Posisi berubah setelah pembayaran terkonfirmasi.</small></div>
                 <CheckCircle2 size={16} />
               </div>
               <div className="registration-step">
                 <span className="step-number">04</span>
                 <span className="step-icon"><Trophy size={18} /></span>
-                <div><strong>Lihat posisi di papan</strong><small>Profil yang lolos peninjauan akan tampil di papan kotanya.</small></div>
+                <div><strong>Masuk papan nasional</strong><small>Juara kota jadi wakil daerah di ranking Indonesia.</small></div>
                 <CheckCircle2 size={16} />
               </div>
             </div>
 
             <div className="registration-notice">
               <ShieldCheck size={17} />
-              <p><strong>Pendaftaran belum dibuka.</strong> Ini baru pratinjau alur—belum ada data yang dikirim atau pembayaran. Aturan verifikasi dan partisipasi masih disiapkan.</p>
+              <p><strong>Ini masih simulasi.</strong> Contoh harga memakai stake juara saat ini + Rp10.000. Pendaftaran dan pembayaran di preview belum aktif; nilai kenaikan minimum masih perlu ditetapkan.</p>
             </div>
             <button type="button" className="modal-done" onClick={() => setRegistrationOpen(false)}>
               Mengerti <ArrowRight size={16} />
             </button>
-            <span className="modal-footnote">Kami akan menampilkan formulir resmi setelah proses dan aturan final.</span>
+            <span className="modal-footnote">Pada versi aktif, nominal klaim akan dihitung ulang sebelum pembayaran agar harga yang ditampilkan tetap jelas.</span>
           </section>
         </div>
       )}
