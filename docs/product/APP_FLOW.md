@@ -36,6 +36,22 @@ Selecting a province opens its province board and resets the selected city. Sele
 
 Daily timezone/day cutoff remains subject to approval. Weekly/monthly boards are not part of the current MVP.
 
+## Top ranks and list hierarchy
+
+- Indonesia and province boards present ranks 1–3 in a dedicated podium.
+- Rank 1 uses a light gold treatment, rank 2 a light sky/silver treatment, and rank 3 a light peach/bronze treatment.
+- The remaining ranks stay in a neutral scannable list.
+- Business name and stake are the strongest row signals; city and national rank are supporting metadata; clicks are muted secondary statistics.
+- City scope features exactly one local champion and displays its national rank.
+
+## Registration CTA (preview only)
+
+1. Clicking **Daftarkan UMKM** opens an informational dialog titled “Saatnya usaha lo ikut dikenal.”
+2. The dialog shows a conceptual sequence: introduce the business, choose category and Kabupaten/Kota, data review, and eventual appearance on the city board.
+3. The dialog explicitly says registration is not open, the preview is not an active form, no data is submitted, and no payment is taken.
+4. The dialog can be closed with its close button or Escape.
+5. Do not implement a real registration form, data collection, verification requirements or payment until their rules and fields are separately approved.
+
 ## Demo data
 
 Preview rows are generated synthetic city champions so that the scopes, categories, periods and leaderboard density can be reviewed. The DATA SIMULASI label stays visible. Demo city/business pairings, stake and click counts are not real registered businesses, payments, traffic or live rankings.
@@ -44,7 +60,7 @@ The sample set currently represents 20 cities to demonstrate the interaction. Pr
 
 ## Participation and payment
 
-The participation button remains disabled until ownership/claim, minimum stake, tie-break, payment, expiry, fee and refund rules are approved. Do not implement a pay-to-rank checkout or import Outbid.lol's payment mechanics.
+Registration preview is informational only. Real registration and participation remain inactive until ownership/claim, minimum stake, tie-break, payment, expiry, fee and refund rules are approved. Do not implement a pay-to-rank checkout or import Outbid.lol's payment mechanics.
 
 ## Future business detail
 
