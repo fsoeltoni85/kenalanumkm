@@ -214,12 +214,13 @@ export default function IndonesiaMap({ activeProvince, userLocation, onProvinceS
     if (markerRef.current) markerRef.current.setLngLat([userLocation.longitude, userLocation.latitude]);
     else {
       void import("maplibre-gl").then((maplibre) => {
-        if (!mapRef.current || markerRef.current) return;
+        const currentMap = mapRef.current;
+        if (!currentMap || markerRef.current) return;
         const element = document.createElement("div");
         element.className = "device-location-pin";
         element.setAttribute("aria-label", "Lokasi perangkat kamu");
         markerRef.current = new maplibre.Marker({ element, anchor: "center" })
-          .setLngLat([userLocation.longitude, userLocation.latitude]).addTo(mapRef.current);
+          .setLngLat([userLocation.longitude, userLocation.latitude]).addTo(currentMap);
       });
     }
   }, [userLocation?.latitude, userLocation?.longitude, userIsOnMap]);
