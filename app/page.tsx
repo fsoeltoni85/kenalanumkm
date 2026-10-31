@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -50,6 +50,119 @@ function periodLabel(period: Period, dailyDate: string) {
   if (period === "all-time") return "All Time";
   if (period === "today") return "Hari Ini";
   return DAILY_DATES.find((item) => item.value === dailyDate)?.label ?? dailyDate;
+}
+
+
+type GeoDropdownProps = {
+  label: string;
+  value: string;
+  options: string[];
+  placeholder: string;
+  disabled?: boolean;
+  onChange: (value: string) => void;
+};
+
+function GeoDropdown({ label, value, options, placeholder, disabled = false, onChange }: GeoDropdownProps) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const listboxId = useId();
+  const labelId = useId();
+
+  useEffect(() => {
+    if (!open) return;
+    const root = rootRef.current;
+    const optionButtons = root?.querySelectorAll<HTMLButtonElement>('[role="option"]');
+    const selectedOption = Array.from(optionButtons ?? []).find((option) => option.getAttribute("aria-selected") === "true");
+    const initialOption = selectedOption ?? optionButtons?.[0];
+    initialOption?.focus();
+    initialOption?.scrollIntoView({ block: "nearest" });
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) setOpen(false);
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        rootRef.current?.querySelector<HTMLButtonElement>(".geo-trigger")?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
+  function moveFocus(index: number, direction: "next" | "previous" | "first" | "last") {
+    const optionsInMenu = Array.from(rootRef.current?.querySelectorAll<HTMLButtonElement>('[role="option"]') ?? []);
+    const targetIndex = direction === "first"
+      ? 0
+      : direction === "last"
+        ? optionsInMenu.length - 1
+        : index + (direction === "next" ? 1 : -1);
+    optionsInMenu[Math.max(0, Math.min(optionsInMenu.length - 1, targetIndex))]?.focus();
+  }
+
+  return (
+    <div className={open ? "geo-dropdown is-open" : "geo-dropdown"} ref={rootRef}>
+      <span className="sr-only" id={labelId}>{label}</span>
+      <button
+        type="button"
+        className="geo-trigger"
+        aria-labelledby={labelId}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={listboxId}
+        disabled={disabled}
+        onClick={() => setOpen((current) => !current)}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            setOpen(true);
+          }
+        }}
+      >
+        <span className={!value ? "geo-placeholder" : ""}>{value || placeholder}</span>
+        <ChevronDown size={14} />
+      </button>
+      {open && (
+        <div className="geo-menu" id={listboxId} role="listbox" aria-label={label}>
+          {options.map((option, index) => (
+            <button
+              key={option}
+              type="button"
+              role="option"
+              aria-selected={value === option}
+              className={value === option ? "geo-option selected" : "geo-option"}
+              onClick={() => {
+                onChange(option);
+                setOpen(false);
+                rootRef.current?.querySelector<HTMLButtonElement>(".geo-trigger")?.focus();
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "ArrowDown") {
+                  event.preventDefault();
+                  moveFocus(index, "next");
+                } else if (event.key === "ArrowUp") {
+                  event.preventDefault();
+                  moveFocus(index, "previous");
+                } else if (event.key === "Home") {
+                  event.preventDefault();
+                  moveFocus(index, "first");
+                } else if (event.key === "End") {
+                  event.preventDefault();
+                  moveFocus(index, "last");
+                }
+              }}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function HomePage() {
@@ -104,10 +217,10 @@ export default function HomePage() {
       ? "Juara kota di " + province
       : "Juara " + city;
   const boardDescription = scope === "indonesia"
-    ? "Satu wakil juara dari setiap kabupaten/kota, diurutkan berdasarkan stake."
+    ? "Juara dari tiap kabupaten/kota bersaing di papan nasional, berdasarkan stake terkonfirmasi."
     : scope === "province"
-      ? "Setiap baris adalah juara #1 dari satu kabupaten/kota di provinsi ini."
-      : "Satu UMKM memegang posisi #1 di kabupaten/kota ini.";
+      ? "Lihat UMKM yang memimpin di tiap kabupaten/kota di provinsi ini."
+      : "Satu UMKM memimpin papan di kabupaten/kota ini.";
 
   function chooseProvince(nextProvince: string) {
     setProvince(nextProvince);
@@ -152,7 +265,7 @@ export default function HomePage() {
               aria-expanded={registrationOpen}
             >
               <Store size={15} />
-              Daftarkan UMKM
+              Lihat cara ikut
               <ArrowUpRight size={14} />
             </button>
           </div>
@@ -161,12 +274,12 @@ export default function HomePage() {
 
       <section className="page-content">
         <section className="intro">
-          <div className="intro-kicker"><span className="kicker-icon"><Trophy size={14} /></span> PAPAN PERSAINGAN UMKM INDONESIA</div>
-          <h1>Setiap kota punya <span>juara.</span></h1>
-          <p>Para juara kabupaten/kota bersaing di papan Indonesia. Stake terkonfirmasi menentukan peringkat; klik hanya statistik.</p>
+          <div className="intro-kicker"><span className="kicker-icon"><Trophy size={14} /></span> PANGGUNG UMKM DARI SELURUH INDONESIA</div>
+          <h1>Kenalkan usahamu. <span>Banggakan kotamu.</span></h1>
+          <p>Ikut bersaing jadi wakil kabupaten/kotamu di papan nasional. Juara kota ditentukan dari stake terkonfirmasi—jumlah klik cuma statistik.</p>
           <div className="intro-tags">
-            <span><CheckCircle2 size={13} /> Satu kota, satu juara</span>
-            <span><Sparkles size={13} /> Persaingan seluruh Indonesia</span>
+            <span><CheckCircle2 size={13} /> Satu wakil per kabupaten/kota</span>
+            <span><Sparkles size={13} /> Juara kota tampil nasional</span>
           </div>
         </section>
 
@@ -184,21 +297,21 @@ export default function HomePage() {
               </button>
             </div>
             <div className="geo-selectors">
-              <label className="select-wrap">
-                <span className="sr-only">Pilih provinsi</span>
-                <select value={province} onChange={(event) => chooseProvince(event.target.value)}>
-                  {PROVINCES.map((item) => <option key={item} value={item}>{item}</option>)}
-                </select>
-                <ChevronDown size={14} />
-              </label>
-              <label className="select-wrap">
-                <span className="sr-only">Pilih kabupaten atau kota</span>
-                <select value={city} onChange={(event) => chooseCity(event.target.value)} disabled={cityOptions.length === 0}>
-                  <option value="">Pilih Kabupaten/Kota</option>
-                  {cityOptions.map((item) => <option key={item} value={item}>{item}</option>)}
-                </select>
-                <ChevronDown size={14} />
-              </label>
+              <GeoDropdown
+                label="Pilih provinsi"
+                value={province}
+                options={PROVINCES}
+                placeholder="Pilih Provinsi"
+                onChange={chooseProvince}
+              />
+              <GeoDropdown
+                label="Pilih kabupaten atau kota"
+                value={city}
+                options={cityOptions}
+                placeholder="Pilih Kabupaten/Kota"
+                disabled={cityOptions.length === 0}
+                onChange={chooseCity}
+              />
             </div>
           </div>
 
@@ -310,7 +423,7 @@ export default function HomePage() {
               </div>
 
               <div className="column-head">
-                <span>POSISI</span><span>JUARA KOTA</span><span>STAKE</span><span><Eye size={12} /> KLIK</span><span aria-hidden="true" />
+                <span>POSISI</span><span>UMKM / KOTA</span><span>STAKE</span><span><Eye size={12} /> KLIK</span><span aria-hidden="true" />
               </div>
               <div className="ranking-list" aria-live="polite">
                 {listRows.length > 0 ? listRows.map((row) => (
@@ -352,7 +465,7 @@ export default function HomePage() {
           <i />
           <div><span className="rule-icon rule-blue"><Eye size={15} /></span><strong>Klik</strong><span>statistik saja, bukan ranking</span></div>
           <i />
-          <div><span className="rule-icon rule-pink"><MapPin size={15} /></span><strong>Satu kota</strong><span>satu juara di papan nasional</span></div>
+          <div><span className="rule-icon rule-pink"><MapPin size={15} /></span><strong>Satu kota</strong><span>satu juara dari tiap kabupaten/kota</span></div>
         </section>
 
         <div className="page-footnote">Data pada preview bersifat simulasi, bukan UMKM, transaksi, atau ranking terverifikasi.</div>
@@ -408,8 +521,8 @@ export default function HomePage() {
               <span className="modal-art-star star-two"><Trophy size={18} /></span>
             </div>
             <span className="modal-kicker">KENALAN UMKM · PENDAFTARAN</span>
-            <h2 id="registration-title">Saatnya usaha lo <span>ikut dikenal.</span></h2>
-            <p id="registration-description">Tombol ini akan membuka proses pendaftaran UMKM. Untuk sekarang, lo bisa lihat gambaran tahap yang akan disiapkan.</p>
+            <h2 id="registration-title">Yuk, bawa usahamu ke <span>papan juara!</span></h2>
+            <p id="registration-description">Begini alur ikutnya nanti. Pendaftaran resmi belum dibuka, jadi belum ada data yang dikirim.</p>
 
             <div className="registration-steps">
               <div className="registration-step">
@@ -433,14 +546,14 @@ export default function HomePage() {
               <div className="registration-step">
                 <span className="step-number">04</span>
                 <span className="step-icon"><Trophy size={18} /></span>
-                <div><strong>Lihat posisi di papan</strong><small>Profil yang siap akan tampil di papan kotanya.</small></div>
+                <div><strong>Lihat posisi di papan</strong><small>Profil yang lolos peninjauan akan tampil di papan kotanya.</small></div>
                 <CheckCircle2 size={16} />
               </div>
             </div>
 
             <div className="registration-notice">
               <ShieldCheck size={17} />
-              <p><strong>Pendaftaran belum dibuka.</strong> Ini hanya pratinjau alur, bukan formulir aktif. Belum ada data yang dikirim dan belum ada pembayaran. Aturan verifikasi serta partisipasi masih disiapkan.</p>
+              <p><strong>Pendaftaran belum dibuka.</strong> Ini baru pratinjau alur—belum ada data yang dikirim atau pembayaran. Aturan verifikasi dan partisipasi masih disiapkan.</p>
             </div>
             <button type="button" className="modal-done" onClick={() => setRegistrationOpen(false)}>
               Mengerti <ArrowRight size={16} />
