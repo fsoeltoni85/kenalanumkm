@@ -1,7 +1,23 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ArrowUpRight, CalendarDays, ChevronDown, Eye, Search, Trophy } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  CalendarDays,
+  CheckCircle2,
+  ChevronDown,
+  Crown,
+  Eye,
+  MapPin,
+  Medal,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Store,
+  Trophy,
+  X,
+} from "lucide-react";
 import {
   buildLeaderboard,
   CATEGORIES,
@@ -26,6 +42,16 @@ function shortRupiah(value: number) {
   return rupiah(value);
 }
 
+function compactNumber(value: number) {
+  return new Intl.NumberFormat("id-ID", { notation: "compact", maximumFractionDigits: 1 }).format(value);
+}
+
+function periodLabel(period: Period, dailyDate: string) {
+  if (period === "all-time") return "All Time";
+  if (period === "today") return "Hari Ini";
+  return DAILY_DATES.find((item) => item.value === dailyDate)?.label ?? dailyDate;
+}
+
 export default function HomePage() {
   const [scope, setScope] = useState<Scope>("indonesia");
   const [province, setProvince] = useState("Jawa Barat");
@@ -34,6 +60,22 @@ export default function HomePage() {
   const [period, setPeriod] = useState<Period>("all-time");
   const [dailyDate, setDailyDate] = useState("2026-11-01");
   const [search, setSearch] = useState("");
+  const [registrationOpen, setRegistrationOpen] = useState(false);
+
+  useEffect(() => {
+    if (!registrationOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setRegistrationOpen(false);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+    document.getElementById("registration-close")?.focus();
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [registrationOpen]);
 
   const champions = useMemo(() => createDemoCityChampions(category), [category]);
   const cityOptions = useMemo(
@@ -54,7 +96,7 @@ export default function HomePage() {
     );
   }, [allRows, search]);
 
-  const leader = rows[0];
+  const selectedCategory = CATEGORIES.find((item) => item.name === category);
   const boardTitle = scope === "indonesia"
     ? "Top 20 Indonesia"
     : scope === "province"
@@ -65,7 +107,6 @@ export default function HomePage() {
     : scope === "province"
       ? "Setiap baris adalah juara #1 dari satu kabupaten/kota di provinsi ini."
       : "Satu UMKM memegang posisi #1 di kabupaten/kota ini.";
-  const selectedCategory = CATEGORIES.find((item) => item.name === category);
 
   function chooseProvince(nextProvince: string) {
     setProvince(nextProvince);
@@ -85,6 +126,8 @@ export default function HomePage() {
     setSearch("");
   }
 
+  const topThree = scope === "city" || search.trim() ? [] : rows.slice(0, 3);
+  const listRows = topThree.length > 0 ? rows.slice(3) : rows;
   const totalStake = rows.reduce((sum, row) => sum + row.stake, 0);
   const totalClicks = rows.reduce((sum, row) => sum + row.periodClicks, 0);
 
@@ -93,13 +136,21 @@ export default function HomePage() {
       <header className="site-header">
         <div className="header-inner">
           <a href="/" className="brand" aria-label="KenalanUMKM beranda">
-            <span className="brand-mark">K</span>
+            <span className="brand-mark"><span>K</span><i /></span>
             <span className="brand-name">Kenalan<span>UMKM</span></span>
           </a>
           <div className="header-right">
             <span className="demo-pill"><i /> DATA SIMULASI</span>
-            <button type="button" className="join-button" disabled title="Pendaftaran dan aturan stake belum dibuka">
-              Punya UMKM? Segera hadir <ArrowUpRight size={14} />
+            <button
+              type="button"
+              className="join-button"
+              onClick={() => setRegistrationOpen(true)}
+              aria-haspopup="dialog"
+              aria-expanded={registrationOpen}
+            >
+              <Store size={15} />
+              Daftarkan UMKM
+              <ArrowUpRight size={14} />
             </button>
           </div>
         </div>
@@ -107,9 +158,13 @@ export default function HomePage() {
 
       <section className="page-content">
         <section className="intro">
-          <div className="intro-kicker"><Trophy size={13} /> PAPAN PERSAINGAN UMKM INDONESIA</div>
+          <div className="intro-kicker"><span className="kicker-icon"><Trophy size={14} /></span> PAPAN PERSAINGAN UMKM INDONESIA</div>
           <h1>Setiap kota punya <span>juara.</span></h1>
           <p>Para juara kabupaten/kota bersaing di papan Indonesia. Stake terkonfirmasi menentukan peringkat; klik hanya statistik.</p>
+          <div className="intro-tags">
+            <span><CheckCircle2 size={13} /> Satu kota, satu juara</span>
+            <span><Sparkles size={13} /> Persaingan seluruh Indonesia</span>
+          </div>
         </section>
 
         <section className="leaderboard-card" aria-label="Leaderboard UMKM Indonesia">
@@ -131,7 +186,7 @@ export default function HomePage() {
                 <select value={province} onChange={(event) => chooseProvince(event.target.value)}>
                   {PROVINCES.map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
-                <ChevronDown size={13} />
+                <ChevronDown size={14} />
               </label>
               <label className="select-wrap">
                 <span className="sr-only">Pilih kabupaten atau kota</span>
@@ -139,7 +194,7 @@ export default function HomePage() {
                   <option value="">Pilih Kabupaten/Kota</option>
                   {cityOptions.map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
-                <ChevronDown size={13} />
+                <ChevronDown size={14} />
               </label>
             </div>
           </div>
@@ -160,11 +215,11 @@ export default function HomePage() {
             </div>
             {period === "daily" && (
               <label className="date-select">
-                <CalendarDays size={13} />
+                <CalendarDays size={14} />
                 <select aria-label="Tanggal leaderboard harian" value={dailyDate} onChange={(event) => setDailyDate(event.target.value)}>
                   {DAILY_DATES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
                 </select>
-                <ChevronDown size={12} />
+                <ChevronDown size={13} />
               </label>
             )}
             {period === "today" && <span className="period-note">Periode hari ini</span>}
@@ -182,81 +237,171 @@ export default function HomePage() {
             </div>
           </div>
 
-          {leader && (
-            <div className="leader-spotlight">
-              <div className="spotlight-rank">
-                <span>{scope === "city" ? "JUARA #1 KOTA" : "PEMIMPIN PAPAN"}</span>
-                <strong>{scope === "city" ? "1" : leader.rank}</strong>
-              </div>
-              <div className="spotlight-business">
-                <span className="spotlight-avatar">{leader.initial}</span>
+          {topThree.length > 0 && (
+            <section className="podium-section" aria-label="Tiga peringkat teratas">
+              <div className="podium-heading">
                 <div>
-                  <strong>{leader.name}</strong>
-                  <span>{leader.city} · {leader.province}</span>
+                  <span className="podium-kicker"><Sparkles size={13} /> THE TOP THREE</span>
+                  <h3>Podium juara</h3>
                 </div>
+                <span className="podium-period">{periodLabel(period, dailyDate)}</span>
               </div>
-              <div className="spotlight-stake">
+              <div className="podium-grid">
+                {topThree.map((row) => (
+                  <article key={row.id} className={"podium-card podium-" + row.rank}>
+                    <div className="podium-card-top">
+                      <span className="podium-medal">
+                        {row.rank === 1 ? <Crown size={20} fill="currentColor" /> : <Medal size={19} />}
+                      </span>
+                      <span className="podium-rank-label">{row.rank === 1 ? "JUARA UTAMA" : row.rank === 2 ? "JUARA KEDUA" : "JUARA KETIGA"}</span>
+                      <strong>#{row.rank}</strong>
+                    </div>
+                    <div className="podium-business">
+                      <span className="podium-avatar">{row.initial}</span>
+                      <strong>{row.name}</strong>
+                      <span className="podium-city"><MapPin size={12} /> {row.city}</span>
+                    </div>
+                    <div className="podium-stake">
+                      <span>STAKE TERKONFIRMASI</span>
+                      <strong>{rupiah(row.stake)}</strong>
+                    </div>
+                    <div className="podium-footer">
+                      <span>{scope === "indonesia" ? "Peringkat Indonesia" : "Peringkat nasional"}</span>
+                      <strong>#{row.nationalRank}</strong>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              <div className="podium-note"><ShieldCheck size={13} /> Peringkat ditentukan oleh stake terkonfirmasi, bukan jumlah klik.</div>
+            </section>
+          )}
+
+          {scope === "city" && rows[0] && (
+            <section className="city-champion-card" aria-label="Juara kabupaten atau kota">
+              <div className="city-champion-icon"><Trophy size={22} /></div>
+              <div className="city-champion-copy">
+                <span>PEMEGANG POSISI #1 DI KOTA INI</span>
+                <strong>{rows[0].name}</strong>
+                <small><MapPin size={12} /> {rows[0].city} · {rows[0].province}</small>
+              </div>
+              <div className="city-champion-value">
                 <span>STAKE</span>
-                <strong>{rupiah(leader.stake)}</strong>
-                <small>{scope === "city" ? "Peringkat #" + leader.nationalRank + " Indonesia" : scope === "province" ? "Juara #1 kota · peringkat #" + leader.nationalRank + " Indonesia" : "Stake tertinggi di papan Indonesia"}</small>
+                <strong>{rupiah(rows[0].stake)}</strong>
+                <small>Peringkat #{rows[0].nationalRank} Indonesia</small>
               </div>
-            </div>
+            </section>
           )}
 
           <div className="list-tools">
             <div className="list-heading">
-              <strong>{scope === "city" ? "Juara kota" : "Peringkat juara kota"}</strong>
-              <span>{rows.length} hasil · {period === "all-time" ? "All Time" : period === "today" ? "Hari Ini" : DAILY_DATES.find((item) => item.value === dailyDate)?.label}</span>
+              <strong>{search.trim() ? "Hasil pencarian" : topThree.length > 0 ? "Peringkat berikutnya" : scope === "city" ? "Juara kota" : "Peringkat juara kota"}</strong>
+              <span>{rows.length} hasil · {periodLabel(period, dailyDate)}</span>
             </div>
             <label className="search-box">
-              <Search size={14} />
+              <Search size={15} />
               <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari UMKM atau kota…" aria-label="Cari UMKM atau kota" />
             </label>
           </div>
 
           <div className="column-head">
-            <span>POS</span><span>JUARA KOTA</span><span>STAKE</span><span><Eye size={11} /> KLIK</span>
+            <span>POSISI</span><span>JUARA KOTA</span><span>STAKE</span><span><Eye size={12} /> KLIK</span>
           </div>
           <div className="ranking-list" aria-live="polite">
-            {rows.length > 0 ? rows.map((row) => (
-              <article key={row.id} className={"ranking-row rank-" + Math.min(row.rank, 3)}>
-                <div className="rank-cell">
-                  {row.rank === 1 ? <span className="rank-medal">🥇</span> : row.rank === 2 ? <span className="rank-medal">🥈</span> : row.rank === 3 ? <span className="rank-medal">🥉</span> : <span className="rank-number">{String(row.rank).padStart(2, "0")}</span>}
-                </div>
+            {listRows.length > 0 ? listRows.map((row) => (
+              <article key={row.id} className="ranking-row">
+                <div className="rank-cell"><span className="rank-number">{String(row.rank).padStart(2, "0")}</span></div>
                 <div className="business-cell">
-                  <span className={"business-avatar avatar-" + Math.min(row.rank, 3)}>{row.initial}</span>
+                  <span className="business-avatar">{row.initial}</span>
                   <div className="business-main">
                     <strong>{row.name}</strong>
-                    <span>Juara #1 · {row.city} · {row.province} · #{row.nationalRank} Indonesia</span>
+                    <div className="business-meta">
+                      <span className="city-pill"><MapPin size={11} /> {row.city}</span>
+                      <span className="national-rank-chip">#{row.nationalRank} Indonesia</span>
+                    </div>
                   </div>
                 </div>
                 <strong className="stake-value">{shortRupiah(row.stake)}</strong>
-                <span className="click-value">{new Intl.NumberFormat("id-ID", { notation: "compact", maximumFractionDigits: 1 }).format(row.periodClicks)}</span>
+                <span className="click-value">{compactNumber(row.periodClicks)}</span>
               </article>
             )) : (
               <div className="empty-state">
-                <strong>Belum ada juara simulasi di wilayah ini.</strong>
-                <span>Data contoh saat ini hanya mencakup beberapa kabupaten/kota. Wilayah lain akan menampilkan papan kosong sampai data tersedia.</span>
+                <span className="empty-icon"><Sparkles size={21} /></span>
+                <strong>{search.trim() ? "UMKM atau kota tidak ditemukan." : "Belum ada juara simulasi di wilayah ini."}</strong>
+                <span>{search.trim() ? "Coba kata kunci lain untuk menemukan juara kota." : "Data contoh saat ini hanya mencakup beberapa kabupaten/kota. Wilayah lain akan menampilkan papan kosong sampai data tersedia."}</span>
               </div>
             )}
           </div>
 
           <div className="board-bottom">
-            <span>1–{rows.length} <span className="muted">dari {rows.length} juara kota</span></span>
-            <span className="board-total">Total stake {shortRupiah(totalStake)} · {new Intl.NumberFormat("id-ID").format(totalClicks)} klik</span>
+            <span>Menampilkan {rows.length} <span className="muted">juara kota</span></span>
+            <span className="board-total">Total stake <strong>{shortRupiah(totalStake)}</strong><i /> <Eye size={12} /> {compactNumber(totalClicks)} klik</span>
           </div>
         </section>
 
         <section className="rules-strip">
-          <div><strong>Stake terkonfirmasi</strong><span>satu-satunya dasar peringkat</span></div>
+          <div><span className="rule-icon rule-green"><Trophy size={15} /></span><strong>Stake terkonfirmasi</strong><span>satu-satunya dasar peringkat</span></div>
           <i />
-          <div><strong>Klik</strong><span>statistik saja, bukan ranking</span></div>
+          <div><span className="rule-icon rule-blue"><Eye size={15} /></span><strong>Klik</strong><span>statistik saja, bukan ranking</span></div>
           <i />
-          <div><strong>Satu kota</strong><span>satu juara di papan nasional</span></div>
+          <div><span className="rule-icon rule-pink"><MapPin size={15} /></span><strong>Satu kota</strong><span>satu juara di papan nasional</span></div>
         </section>
 
         <div className="page-footnote">Data pada preview bersifat simulasi, bukan UMKM, transaksi, atau ranking terverifikasi.</div>
       </section>
+
+      {registrationOpen && (
+        <div className="modal-backdrop">
+          <section className="registration-modal" role="dialog" aria-modal="true" aria-labelledby="registration-title" aria-describedby="registration-description">
+            <button type="button" className="modal-close" id="registration-close" onClick={() => setRegistrationOpen(false)} aria-label="Tutup dialog">
+              <X size={19} />
+            </button>
+            <div className="modal-art">
+              <span className="modal-art-star star-one"><Sparkles size={20} /></span>
+              <span className="modal-art-store"><Store size={31} /></span>
+              <span className="modal-art-star star-two"><Trophy size={18} /></span>
+            </div>
+            <span className="modal-kicker">KENALAN UMKM · PENDAFTARAN</span>
+            <h2 id="registration-title">Saatnya usaha lo <span>ikut dikenal.</span></h2>
+            <p id="registration-description">Tombol ini akan membuka proses pendaftaran UMKM. Untuk sekarang, lo bisa lihat gambaran tahap yang akan disiapkan.</p>
+
+            <div className="registration-steps">
+              <div className="registration-step">
+                <span className="step-number">01</span>
+                <span className="step-icon"><Store size={18} /></span>
+                <div><strong>Kenalkan usaha</strong><small>Profil dasar dan nama UMKM.</small></div>
+                <CheckCircle2 size={16} />
+              </div>
+              <div className="registration-step">
+                <span className="step-number">02</span>
+                <span className="step-icon"><MapPin size={18} /></span>
+                <div><strong>Tentukan wilayah</strong><small>Kategori dan Kabupaten/Kota tempat usaha.</small></div>
+                <CheckCircle2 size={16} />
+              </div>
+              <div className="registration-step">
+                <span className="step-number">03</span>
+                <span className="step-icon"><ShieldCheck size={18} /></span>
+                <div><strong>Tinjau data usaha</strong><small>Data diperiksa sebelum profil ditampilkan.</small></div>
+                <CheckCircle2 size={16} />
+              </div>
+              <div className="registration-step">
+                <span className="step-number">04</span>
+                <span className="step-icon"><Trophy size={18} /></span>
+                <div><strong>Lihat posisi di papan</strong><small>Profil yang siap akan tampil di papan kotanya.</small></div>
+                <CheckCircle2 size={16} />
+              </div>
+            </div>
+
+            <div className="registration-notice">
+              <ShieldCheck size={17} />
+              <p><strong>Pendaftaran belum dibuka.</strong> Ini hanya pratinjau alur, bukan formulir aktif. Belum ada data yang dikirim dan belum ada pembayaran. Aturan verifikasi serta partisipasi masih disiapkan.</p>
+            </div>
+            <button type="button" className="modal-done" onClick={() => setRegistrationOpen(false)}>
+              Mengerti <ArrowRight size={16} />
+            </button>
+            <span className="modal-footnote">Kami akan menampilkan formulir resmi setelah proses dan aturan final.</span>
+          </section>
+        </div>
+      )}
     </main>
   );
 }
