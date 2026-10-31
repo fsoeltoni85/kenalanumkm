@@ -17,7 +17,7 @@ The preview Worker is deployed directly through the authenticated Cloudflare con
 - The Indonesia map and leaderboard have balanced, co-primary space.
 - The three leaderboard scopes are Indonesia, selected Province, and selected Kabupaten/Kota.
 - Each scope has 20 synthetic rows. Categories and All Time / Hari Ini / Harian controls apply to the active scope.
-- The browser asks permission to read device location on initial visit. When allowed, the map shows the device point and matches it to a province using the local GeoJSON.
+- The browser asks permission to read device location on initial visit. When allowed, the map shows the device point and matches it to a province using the local GeoJSON. Manual province/city selection continues to work when permission is refused or unavailable.
 - Province boundaries do not identify a city/regency. The visitor must choose the city/regency.
 - If geolocation is denied, manual province/city selection remains available.
 - The simulation label stays visible. Synthetic names, stakes, and clicks are not real businesses, transactions, or traffic. Participation remains disabled.
