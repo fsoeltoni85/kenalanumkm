@@ -27,7 +27,7 @@ Information hierarchy: Indonesia → Province → Kabupaten/Kota → Category �
 - Request device location permission on the initial visit. When granted, show a distinct blue device marker on the map and identify the province by testing the point against the local province GeoJSON.
 - Do not infer a city/regency from province-only boundaries. The visitor selects Kabupaten/Kota from the selector.
 - If permission is denied or unavailable, retain manual province/city selection and offer a retry control.
-- Coordinates remain in client-side state for map display in this prototype; do not send exact coordinates to a reverse-geocoding API or store them.
+- Coordinates remain in client-side state for map display in this prototype; do not send exact coordinates to a reverse-geocoding API or store them. The browser geolocation prompt is permission-gated and requires a secure context; a rejected permission leaves manual exploration available.
 - The current GeoJSON contains province boundaries only. Do not draw fabricated city boundaries or UMKM pins.
 
 ## Leaderboard interaction and layout
