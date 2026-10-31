@@ -33,7 +33,7 @@ Information hierarchy: Indonesia → Province → Kabupaten/Kota → Category �
 - Short explanation of how rank works and a clearly secondary owner-registration entry point.
 
 ## Map implementation
-The current preview uses a GeoJSON outline/fill of Indonesia's 38 provinces with MapLibre GL JS, without third-party raster tiles. Province polygons are selectable. It intentionally does not show fabricated business pins or fabricated ranking amounts.
+The current preview uses a GeoJSON outline/fill of Indonesia's 38 provinces with MapLibre GL JS, without third-party raster tiles. Province polygons are selectable. When WebGL is unavailable, the same GeoJSON is rendered as an interactive SVG fallback with selectable province shapes. It intentionally does not show fabricated business pins or fabricated ranking amounts.
 Dataset: denyherianto/indonesia-geojson-topojson-maps-with-38-provinces, GeoJSON file under CC BY 4.0. Attribution and license must remain visible. Upstream provenance/terms must be reviewed before production use. This geographic dataset does not provide Kabupaten/Kota competition polygons or business locations.
 
 ## Demo integrity
