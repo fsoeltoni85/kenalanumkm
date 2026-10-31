@@ -1,10 +1,9 @@
 import type { ReactNode } from "react";
-import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 
 export const metadata = {
-  title: "KenalanUMKM — Peta Kompetisi UMKM Indonesia",
-  description: "Jelajahi peta UMKM Indonesia dan leaderboard berdasarkan Kabupaten/Kota dan kategori.",
+  title: "KenalanUMKM — Papan Persaingan UMKM Indonesia",
+  description: "Satu juara dari setiap kabupaten/kota bersaing di leaderboard UMKM Indonesia berdasarkan stake terkonfirmasi.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
