@@ -135,7 +135,7 @@ export default function IndonesiaMap({ activeProvince, userLocation, onProvinceS
       try {
         const maplibre = await import("maplibre-gl");
         if (disposed || !containerRef.current) return;
-        localMap = new maplibre.Map({
+        const createdMap = new maplibre.Map({
           container: containerRef.current,
           attributionControl: false,
           style: {
@@ -154,29 +154,30 @@ export default function IndonesiaMap({ activeProvince, userLocation, onProvinceS
           center: [118, -2], zoom: 3, minZoom: 2.1, maxZoom: 8, maxBounds: [[90, -16], [146, 10]],
           dragRotate: false, pitchWithRotate: false, touchPitch: false, renderWorldCopies: false,
         });
-        mapRef.current = localMap;
-        localMap.addControl(new maplibre.NavigationControl({ showCompass: false }), "bottom-right");
-        localMap.once("load", () => {
-          localMap?.fitBounds([[94, -12], [142, 7]], { padding: { top: 55, right: 36, bottom: 50, left: 36 }, duration: 0 });
-          localMap?.on("click", "province-fill", (event) => {
+        localMap = createdMap;
+        mapRef.current = createdMap;
+        createdMap.addControl(new maplibre.NavigationControl({ showCompass: false }), "bottom-right");
+        createdMap.once("load", () => {
+          createdMap.fitBounds([[94, -12], [142, 7]], { padding: { top: 55, right: 36, bottom: 50, left: 36 }, duration: 0 });
+          createdMap.on("click", "province-fill", (event) => {
             const name = event.features?.[0]?.properties?.PROVINSI;
             if (typeof name === "string") onSelectRef.current(name);
           });
-          localMap?.on("mouseenter", "province-fill", () => { if (localMap) localMap.getCanvas().style.cursor = "pointer"; });
-          localMap?.on("mouseleave", "province-fill", () => { if (localMap) localMap.getCanvas().style.cursor = ""; });
+          createdMap.on("mouseenter", "province-fill", () => { createdMap.getCanvas().style.cursor = "pointer"; });
+          createdMap.on("mouseleave", "province-fill", () => { createdMap.getCanvas().style.cursor = ""; });
           if (userIsOnMap && userLocation) {
             const element = document.createElement("div");
             element.className = "device-location-pin";
             element.setAttribute("aria-label", "Lokasi perangkat kamu");
             localMarker = new maplibre.Marker({ element, anchor: "center" })
-              .setLngLat([userLocation.longitude, userLocation.latitude]).addTo(localMap);
+              .setLngLat([userLocation.longitude, userLocation.latitude]).addTo(createdMap);
             markerRef.current = localMarker;
           }
         });
-        localMap.on("error", (event) => {
+        createdMap.on("error", (event) => {
           const message = event.error instanceof Error ? event.error.message : String(event.error ?? "");
           if (/webgl|context/i.test(message) && !disposed) {
-            localMap?.remove();
+            createdMap.remove();
             localMap = null;
             mapRef.current = null;
             setMapError(true);
