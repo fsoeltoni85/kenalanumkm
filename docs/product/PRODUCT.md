@@ -12,7 +12,7 @@ KenalanUMKM is a map-first discovery and geographic leaderboard for Indonesian U
 4. Competition unit is Kabupaten/Kota only.
 5. Leaderboard scope is Kabupaten/Kota + category.
 6. Ranking is determined by cumulative confirmed stake, not reviews, stars, clicks, revenue, popularity, or an editorial score.
-7. Public listing pages expose business information, rank/stake and click statistics.
+7. Public listing pages expose business information, rank/stake and click statistics. Leaderboards expose All Time, Hari Ini and a date-based Harian archive; click counts never affect rank.
 8. Financial changes must be auditable.
 
 ## Geography
@@ -36,7 +36,7 @@ Moota is only a candidate for bank mutation reconciliation. Do not enable produc
 Global/world map; subdistrict-level competition; generic directory as primary product; Google Maps clone; reviews/ratings; booking, POS, CRM, inventory, delivery or marketplace; pay-per-lead; subscription-led monetization; territory ownership; rewards/payouts to winners; virtual listings.
 
 ## MVP
-First milestone: responsive map-first shell, Indonesia-focused navigation, category selection, city/category leaderboard with clearly labelled sample data, and detail-page shell. No claim that sample data, live map tiles, payment or backend ranking are live.
+First milestone: responsive map-first shell, Indonesia-focused navigation, category selection, city/category leaderboard with clearly labelled sample data, All Time/Hari Ini/Harian views, and detail-page shell. No claim that sample data, live map tiles, payment or backend ranking are live.
 
 ## Success criteria
 Visitors understand the map-first product; navigate Indonesia → province → Kabupaten/Kota → category; see correct city/category scope; every listing is a physical location; ranking is explainable from confirmed stake; financial changes are traceable.
