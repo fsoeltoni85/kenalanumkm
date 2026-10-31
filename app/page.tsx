@@ -167,12 +167,10 @@ export default function HomePage() {
   useEffect(() => { detectLocation(); }, [detectLocation]);
 
   const handleProvinceDetected = useCallback((detectedProvince: string) => {
-    setProvince((current) => {
-      if (current !== detectedProvince) setCity("");
-      return detectedProvince;
-    });
+    if (province !== detectedProvince) setCity("");
+    setProvince(detectedProvince);
     setLocationMessage("Kamu terdeteksi di " + detectedProvince);
-  }, []);
+  }, [province]);
 
   function chooseProvince(nextProvince: string) {
     setProvince(nextProvince);
@@ -346,7 +344,7 @@ export default function HomePage() {
 
       <footer className="site-footer">
         <div><strong>KenalanUMKM</strong><span> · Indonesia</span></div>
-        <span>Seluruh angka pada preview adalah data simulasi.</span>
+        <span>Seluruh angka pada preview adalah data simulasi. · Peta: denyherianto / CC BY 4.0</span>
       </footer>
     </main>
   );
