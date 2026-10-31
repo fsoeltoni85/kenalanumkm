@@ -17,11 +17,11 @@ The public product is leaderboard-first:
 
 ## Current standalone Worker preview
 
-The old standalone Worker kenalanumkm-pr-1 was created directly for visual review before the GitHub application was ready. It is not the compiled vinext/Next.js bundle and is not automatically synchronized with this repository. Treat it as a legacy preview only; do not use it to verify the current leaderboard-first source.
+The preview Worker is named `kenalanumkm-pr-1` and is managed by the GitHub PR workflow. Its URL is https://kenalanumkm-pr-1.kenalanumkm-preview.workers.dev. The workflow deploys the compiled vinext/Next.js application from this branch; the Worker name is configured in `cloudflare.config.ts` for preview mode.
 
 ## Automated GitHub PR preview
 
-The repository workflow .github/workflows/ci.yml runs lint, typecheck, tests and production build for PRs targeting main. When a CLOUDFLARE_API_TOKEN secret is configured in the GitHub preview environment, it deploys an isolated Worker named kenalanumkm-pr-{number} and checks /api/health.
+The repository workflow `.github/workflows/ci.yml` runs lint, typecheck, tests and production build for PRs targeting main. When `CLOUDFLARE_API_TOKEN` is configured in the GitHub `preview` environment, it deploys the configured Worker `kenalanumkm-pr-1` and checks `/api/health`. The current setup uses one shared preview Worker for this PR; do not use it for concurrent PR previews.
 
 When the secret is absent, code checks still run but the preview deployment is intentionally skipped. Do not deploy manually through the Cloudflare API as a workaround; GitHub remains the source of truth.
 
