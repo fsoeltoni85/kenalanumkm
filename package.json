@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite dev --port 3000",
-    "build": "vite build",
+    "dev": "vinext dev --port 3000",
+    "build": "vinext build",
     "start": "vinext start",
-    "preview": "vite preview --host 0.0.0.0",
+    "preview": "cf dev",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
