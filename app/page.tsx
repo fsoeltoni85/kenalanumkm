@@ -153,7 +153,7 @@ export default function HomePage() {
           </a>
           <div className="header-right">
             <span className="demo-pill"><i /> DATA SIMULASI</span>
-            <a href="#daftarkan" className="join-button">Ikut bersaing <ArrowUpRight size={15} /></a>
+            <button type="button" className="join-button" disabled title="Belum aktif di preview">Ikut bersaing <ArrowUpRight size={15} /></button>
           </div>
         </div>
       </header>
