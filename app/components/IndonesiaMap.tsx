@@ -135,6 +135,7 @@ export default function IndonesiaMap({ activeProvince, userLocation, onProvinceS
       try {
         const maplibre = await import("maplibre-gl");
         if (disposed || !containerRef.current) return;
+        // Keep a non-null instance for async callbacks; localMap remains nullable for cleanup.
         const createdMap = new maplibre.Map({
           container: containerRef.current,
           attributionControl: false,
