@@ -32,7 +32,7 @@ There are three independent scopes: Kabupaten/Kota, Provinsi and Indonesia. They
 ## Ranking behavior
 
 - The latest successfully confirmed claim appears at #1.
-- All other entries move down and keep their relative order.
+- A new profile is inserted at #1 and all existing entries move down one place. If the profile is already listed, move that existing row to #1; entries above its old position move down one place and entries below it keep their positions. Other profiles always keep their relative order.
 - A profile already on that board moves to #1 rather than appearing twice.
 - A separate claim can place the same profile on another board.
 - No payment total, score, points, category, click count, rating or profile view affects order.
