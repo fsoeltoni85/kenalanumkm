@@ -4,17 +4,17 @@
 
 This runbook describes isolated Cloudflare Workers previews for reviewing the compiled vinext application. It is not the production deployment procedure.
 
-## Current repository UI
+## Approved target behavior and current prototype status
 
-The public product is leaderboard-first:
-- Indonesia Top 20 of #1 Wilayah champions, one per represented Kabupaten/Kota.
-- Category leaderboard shows the #1 Kategori champion for the selected category in each Kabupaten/Kota.
-- Province is a grouping view of its city/regency champions.
-- Kabupaten/Kota scope presents the regional champion and category champions.
-- Fixed claim price is Rp20.000 per selected position; the latest successfully confirmed payment becomes champion.
+The target product rules are:
+- One #1 Wilayah position per Kabupaten/Kota across all categories.
+- One independent #1 Kategori position per Kabupaten/Kota/category.
+- Fixed claim price Rp20.000 for one selected position; the latest successfully confirmed payment becomes champion.
+- Province and Indonesia are grouping/display scopes; Kabupaten/Kota is the only competition geography.
 - Clicks are secondary statistics only.
-- Synthetic sample businesses and champion assignments are visibly labelled DATA SIMULASI.
-- There is no public map and no browser location permission request.
+- No public map, map pins or browser location permission request.
+
+The current preview remains the earlier leaderboard/foundation prototype. It uses synthetic sample businesses and values labelled DATA SIMULASI, and does not yet implement the two approved claim positions or real payment flow end to end. Do not interpret the current demo ranking/order or period controls as the approved production rules.
 
 ## Current standalone Worker preview
 
