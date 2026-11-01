@@ -21,7 +21,7 @@ Acceptance: documents describe exactly three independent board scopes, one Rp20.
 
 Build three independent leaderboard scopes: Kabupaten/Kota, Provinsi and Indonesia.
 
-Use synthetic data to demonstrate the ordered-list behavior: a new successful claim moves the selected profile to #1; all other rows move down and keep their relative order. A profile cannot appear twice on one board. A claim on one board does not create or change an entry on another board.
+Use synthetic data to demonstrate ordered-list behavior: a new profile is inserted at #1 and all existing rows move down one place. When a profile already on the board claims again, move its existing row to #1; rows above its old position move down one place and rows below it keep their positions. Other profiles keep their relative order. A profile cannot appear twice on one board. A claim on one board does not create or change an entry on another board.
 
 Acceptance:
 - Visitors can browse all boards without login.
@@ -64,8 +64,9 @@ Acceptance:
 On a valid payment confirmation, atomically update the selected board entry and movement history. Move the selected profile to #1; preserve the relative order of all other profiles. Update an existing entry instead of adding a duplicate when the same profile reclaims the same board. Other boards stay unchanged.
 
 Acceptance:
-- A profile at #5 can become #1 after a successful new claim.
-- Previous #1 through #4 move down one place in their existing order.
+- A new profile enters at #1 and all existing entries shift down one place.
+- A profile already at #5 can become #1; prior #1 through #4 move down one place, while prior #6 and later keep their positions.
+- Reclaim never creates a duplicate row.
 - Repeat claim never creates a duplicate row on the same board.
 - One profile can hold entries on multiple boards only through separate claims/payments.
 - Concurrent claims for one board get deterministic ordering.
