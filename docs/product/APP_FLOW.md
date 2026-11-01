@@ -1,84 +1,98 @@
 # App Flow
 
-## Information architecture
+## Public experience
 
-Public leaderboard: Indonesia → Province → Kabupaten/Kota → position type → leaderboard/profile.
+The public experience has three independent leaderboard scopes:
 
-Position types:
-- **#1 Wilayah:** the overall champion of one Kabupaten/Kota, across all categories.
-- **#1 Kategori:** the champion of one category inside one Kabupaten/Kota.
+- **Indonesia** — one national board.
+- **Provinsi** — one board for each selected province.
+- **Kabupaten/Kota** — one board for each selected city or regency.
 
-The Indonesia regional Top 20 contains #1 Wilayah champions. Category leaderboards show the #1 Kategori champion for the selected category in each Kabupaten/Kota. Province is a grouping/navigation layer. Kabupaten/Kota is the only competition geography.
+They are separate boards, not parent/child score aggregations. A claim at one level does not enter another level. Each board entry requires its own Rp20.000 claim.
 
-## Initial visit
+All UMKM compete together. A business category may appear as profile information, but there is no category leaderboard or category ranking filter.
 
-1. Open the leaderboard immediately on Indonesia scope.
-2. Do not request browser location permission or show a map.
-3. Keep DATA SIMULASI visible while the preview uses synthetic names and sample champion data.
-4. Explain that the two position types are independent, each claim costs Rp20.000, and the latest confirmed payment takes the selected position.
+## Initial visit and browsing
 
-## Explore and leaderboard scopes
+1. Open the Indonesia leaderboard without requiring login.
+2. Show entries in order of their latest successful claims.
+3. Keep DATA SIMULASI visible while the preview uses synthetic data.
+4. Explain the simple rule: each claim costs Rp20.000 and the latest confirmed claim goes to #1.
+5. Do not request browser location permission or show a map.
 
-The public experience has three geographic scopes:
-- **Indonesia** — a display of current #1 Wilayah champions, one per represented Kabupaten/Kota.
-- **Provinsi** — the #1 Wilayah champions in that province.
-- **Kab/Kota** — the current #1 Wilayah champion plus the #1 Kategori positions for the city's available categories.
+Visitors can browse every board without logging in:
+- Province boards contain only businesses that separately claimed that province board.
+- Kabupaten/Kota boards contain only businesses that separately claimed that exact city/regency board.
+- The Indonesia board contains only businesses that separately claimed the national board.
+- These boards are not calculated by adding up smaller boards.
+- Search filters visible rows but never changes rank.
+- Show #1, #2, #3 and subsequent positions within the selected board.
+- No daily/weekly/monthly ranking modes or automatic reset.
 
-A category leaderboard is a separate view: it shows the current #1 Kategori champion for that category in each represented Kabupaten/Kota. Selecting a province groups those category champions by province.
+For a Kabupaten/Kota board, select a province and then one city/regency. A province board needs one province selection. The Indonesia board needs no lower-level location.
 
-Selecting a province opens its board and resets the selected city. Selecting a city opens its regional champion and category champion information. Returning to Indonesia restores the regional champion list. Search only filters the visible results; it never changes rank.
+## Login state and navigation
 
-The relative ordering between champions from different Kabupaten/Kota is not yet approved. Until a separate rule is approved, do not assign cross-city rank numbers, show a Top 3 podium, or sort by cumulative payment, click count or payment recency. Local #1 labels remain valid because they describe each city's or category's own position.
+**Signed out**
+- Show a **Login dengan Google** button in the header.
+- Public boards remain usable.
+- Claim #1 cannot continue until Google Login succeeds.
 
-There is no map, no map pin, no city-centroid visualization and no browser geolocation flow. Kecamatan, Kelurahan and Desa are not exposed as filters or navigation.
+**Signed in**
+- Show the signed-in account identity (name/email/avatar where available) and a **Logout** button.
+- Provide access to the user's saved UMKM profiles.
+- Logout must not delete profiles, payment history or board entries.
 
-## Current champion and history
-
-- A position has one current champion at a time.
-- The champion remains in place until a later valid payment is confirmed for that exact position.
-- No automatic daily, weekly or monthly reset applies.
-- Historical payment and champion-change activity may be shown separately from the current leaderboard; history does not determine the current champion.
-- Do not present All Time, Hari Ini or date-based periods as separate ranking modes in the active leaderboard.
+Google Login through Supabase Auth is the only user sign-in method. Do not add anonymous sign-in, email OTP, SMS/WhatsApp OTP or a separate password form.
 
 ## Claim #1 flow
 
-There is no standalone registration or signup screen.
-
 1. Visitor clicks **Claim #1**.
-2. Visitor chooses the Kabupaten/Kota to compete in.
-3. Visitor chooses **#1 Wilayah** or **#1 Kategori**. If #1 Kategori is selected, the visitor must choose one category.
-4. Show the fixed price of **Rp20.000** for the selected position and explain that one payment only claims that position.
-5. Open the UMKM form as part of this claim. Collect business name, primary category, short description, Kabupaten/Kota, province, optional address, avatar, main website/social link, purchase link and order/contact link.
-6. The backend validates the data and creates a claim intent plus payment intent for exactly Rp20.000.
-7. Show payment instructions from the configured provider.
-8. Show a pending state while waiting for a trusted provider confirmation. Do not let the browser declare the payment successful.
-9. After server-side verification and one atomic commit, publish the profile and immediately assign the selected #1 position to that business.
-10. Show the new champion state and a receipt/reference for the successful claim.
+2. If signed out, start Google Login. Preserve the intended board and selected location through the OAuth redirect.
+3. After successful login, return the user to the claim flow they started.
+4. User selects exactly one board: Kabupaten/Kota, Provinsi or Indonesia.
+5. Ask only for the location needed by that board:
+   - Kabupaten/Kota: select province, then city/regency.
+   - Provinsi: select one province.
+   - Indonesia: no lower-level location.
+6. User selects an existing saved UMKM profile connected to the Google account or creates a new profile.
+7. Show a review step with the selected profile, target board and fixed price Rp20.000.
+8. Backend creates one claim and payment intent for exactly Rp20.000.
+9. Show payment instructions from the configured provider.
+10. Show a pending state while waiting for trusted provider confirmation. The browser cannot declare payment successful.
+11. After server-side validation, apply the claim to exactly one board.
+12. Move the selected profile to #1, move other entries down while preserving their relative order, and show the updated leaderboard.
+13. Show a receipt/reference for the successful claim.
 
-A single payment applies to one slot only. To claim both #1 Wilayah and #1 Kategori, the user completes and pays for two separate claims of Rp20.000 each. Reclaiming a position after losing it also costs Rp20.000.
+If the same profile already appears on the selected board, move that existing entry to #1 instead of creating a second row. A claim for another board is separate and does not change earlier boards.
 
-The first claim does not require creating an account. There is no manual listing review or approval stage between payment confirmation and publication.
+There is no manual admin approval between valid payment confirmation and ranking update.
 
-## Payment pending and confirmation
+## Profile reuse
 
-- A pending claim is not public and does not change a champion.
-- The backend creates and stores the amount and target position; the client cannot set either to an arbitrary value.
-- Provider notification must be authenticated and matched to the exact pending payment intent.
-- Validate reference, recipient/destination, currency, amount, freshness and duplicate status.
-- Process provider events idempotently.
-- Serialize competing confirmations for the same position so there is exactly one champion.
-- Client redirects, screenshots and client-side status values are never authoritative payment proof.
+A first-time user creates an UMKM profile after Google Login. Store the profile against the authenticated Supabase user ID.
 
-Moota is a candidate provider only. Do not claim it is approved or implement an assumed webhook/signature format until the current official API, account requirements, commercial permission, pricing and limits are verified.
+On a later claim, the same Google account sees its saved profiles and can select one without typing the business details again. Profile edits must not change ranking order. The maximum number of profiles per account has not been decided.
 
-## Profile content
+Google Login identifies the account controlling the profile within KenalanUMKM; it does not prove legal ownership of the business. Avoid verified-owner wording unless a separate ownership check is approved and completed.
 
-Profile content is collected inside Claim #1, not through separate registration. Keep public details limited to the business information and links needed for discovery. Personal contact data and claim/payment capability tokens must not be exposed in public profile responses.
+## Payment and confirmation
+
+- Server creates a claim and payment intent for exactly IDR 20.000.
+- The target board and profile are fixed by the server-side claim record.
+- Payment matching must use a unique provider transaction/reference or equivalent provider-supported mechanism; amount-only matching is insufficient.
+- Provider notification must be authenticated, matched to one pending payment intent and processed idempotently.
+- Validate provider identity, reference, destination, amount, currency, claim binding, trusted payment time and duplicate status.
+- Pending, failed, client-reported or unverified payments never change a board.
+- Claims for the same board must be applied deterministically so each profile has only one entry on that board.
+- Never use a browser-provided timestamp to determine order.
+
+Moota is only a candidate provider. Do not implement assumed webhook or signature behavior until its current official documentation, account requirements, commercial permission, pricing/limits and ability to match identical Rp20.000 payments are verified.
 
 ## Demo data
 
-The current preview is still the earlier leaderboard/foundation prototype. Its business names and sample values are synthetic; it does not yet implement or display the two approved position types end to end. Do not treat its old ranking order or period controls as approved product rules. DATA SIMULASI remains visible. Demo businesses, payments and claim confirmations are not real. Claim #1 and real payment actions remain disabled until the claim-first flow and payment verification are implemented and explicitly enabled.
+The current preview is still the earlier leaderboard/foundation prototype. Its generated business names, stake values, category modes and ranking order are synthetic and do not implement the approved three-board model. DATA SIMULASI must remain visible. Do not represent demo ranks or payments as real claims, real transactions or verified UMKM.
 
-## Future profile management
+## Not part of the flow
 
-A way to edit or recover a claimed profile may be designed later. It must not change the approved first-claim flow into a signup-first experience or add manual review to champion activation.
+No map, map pin, browser geolocation, Kecamatan/Kelurahan/Desa board, anonymous claim session, phone/SMS/WhatsApp OTP, email OTP, category competition, manual listing review, auction, bid increment, cumulative payment score or automatic ranking reset.
