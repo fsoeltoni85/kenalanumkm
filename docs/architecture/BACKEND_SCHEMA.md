@@ -1,101 +1,133 @@
-# Backend Schema — Legacy Foundation and Approved Claim-First Model
+# Backend Schema — Existing Legacy Foundation and New Board Model
 
 ## Important status
 
-The first backend foundation has already been applied to the linked Supabase project. It was created before the Claim #1 business rules were finalized and contains an owner-account and manual-moderation model. That model is **legacy scaffolding, not the approved product workflow**.
+The first backend foundation has already been applied to the linked Supabase project. It predates the current product rules and contains profile submission and moderation behavior that does not match the approved flow.
 
-Do not build new product behavior on the legacy signup, owner-only submission or moderation lifecycle. Do not rewrite migration files already applied to Supabase. Replace or disable conflicting paths through reviewed additive migrations. No production payment processing is enabled.
+Preserve every already-applied migration. Do not rewrite or delete applied migration files. Transition through reviewed additive migrations. No real paid claims or production payment processing are enabled by this documentation change.
 
-## Existing implemented tables and storage
+## Existing tables
 
 ### Categories — business_categories
 
-Curated taxonomy with slug, display name, icon, sort order and active flag. Nine categories are seeded: Makanan & Minuman, Fashion, Retail, Jasa, Kecantikan, Kesehatan, Otomotif, Pendidikan and Lainnya.
+The existing taxonomy contains nine descriptive categories. Category may remain on a profile as descriptive information, but it is not used to create separate leaderboards, determine eligibility or calculate rank.
 
 ### UMKM profiles — business_profiles
 
-The current table stores one physical UMKM profile with owner user ID, public slug, business name, short description, category, province and Kabupaten/Kota names, optional address, private avatar object path, moderation status and review timestamps.
+The existing table stores one UMKM profile with an owner user ID, public slug, business name, description, category, province/city names, optional address, avatar and legacy moderation fields.
 
-The owner_user_id and moderation lifecycle are part of the legacy scaffold. They must not define the new first-claim flow. The first implementation stores province and Kabupaten/Kota names rather than canonical geography IDs; an authoritative licensed geography dataset remains a prerequisite before relying on IDs or automated normalization.
+The authenticated Google account's Supabase user ID should own the profile. The old pending_review / approved workflow is legacy and must not block a valid paid claim. Review and replace any RLS policies, route handlers and storage policies that depend on that old moderation lifecycle.
 
 ### Profile links — business_profile_links
 
-Stores primary, purchase, order/contact and social links, plus server-managed provider metadata. Link parsing may normalize known platform hosts, but must not scrape arbitrary URLs or issue server-side requests to untrusted destinations.
+Stores public website, social, purchase and order/contact links plus server-managed parsing metadata. Do not scrape arbitrary URLs or issue server-side requests to untrusted destinations.
 
-### Avatar Storage
+### Avatar storage
 
-The existing business-avatars bucket is private and its policies were built around authenticated owners and approved profiles. Review and replace those assumptions for the claim-first model before enabling public paid claims. A claim-specific upload capability must be scoped to one pending claim and must not expose private personal/contact data.
+The existing avatar bucket and policies were designed around legacy owner and moderation behavior. Review them before enabling saved-profile uploads and public profile display. A private profile image must not become public merely because a claim is pending.
 
-## Approved logical model
+## Target logical model
 
-The following is the target design. Implement it through new reviewed migrations and tests.
+Implement the target through new reviewed migrations and tests.
 
-### Claim intents
+### User identity
 
-A claim intent stores the submitted UMKM profile data and the exact position being claimed before payment. It has a short-lived, unguessable capability for safely resuming the same claim without requiring a standalone signup. Do not expose this capability in public APIs or logs.
+Use Supabase Auth with Google OAuth. Public browsing does not require a session, but creating a claim or managing saved UMKM profiles requires an authenticated user.
 
-The claim target is exactly one slot:
-- #1 Wilayah: one Kabupaten/Kota, with no category target;
-- #1 Kategori: one Kabupaten/Kota and one category.
+Every UMKM profile is associated with the Supabase authenticated user ID that manages it. The authenticated user can reuse the profile on multiple boards. This relation proves which KenalanUMKM account controls the profile; it does not prove legal ownership of the business.
 
-The selected profile still has its business category even when the requested target is #1 Wilayah.
+### Leaderboard boards
 
-### Payment intents and provider events
+Model the three board scopes explicitly:
+- City/regency: one board per canonical Kabupaten/Kota.
+- Province: one board per canonical province.
+- Indonesia: one national board.
 
-A payment intent is server-created and bound to one claim intent. Its amount is exactly IDR 20.000, stored as an integer. The client cannot choose or modify the amount, recipient, target slot or paid state.
+The scope identity must be unambiguous. Use canonical stable geography IDs for province and Kabupaten/Kota after verifying the source dataset and licence. The Indonesia board has no province or city ID.
 
-Provider events are stored with a unique provider event/transaction identity and enough normalized metadata to validate recipient, amount, currency, reference and claim binding. Secrets and raw authentication material are not returned to clients.
+No board is created for a business category. Category is descriptive profile metadata only.
 
-### Leaderboard positions and champion history
+### Leaderboard entries
 
-Model each contestable target as one unique leaderboard position:
-- one regional position per Kabupaten/Kota;
-- one category position per Kabupaten/Kota/category.
+Each entry links one UMKM profile to one board.
 
-A position can have only one current champion. The current champion is the business associated with the latest successfully confirmed payment for that position. Store an immutable champion-transition record for each successful replacement, including the associated payment and claim reference.
+Enforce one entry per (board ID, business profile ID). A profile can have entries on more than one board, but each board requires its own paid claim.
 
-Do not sum old payments into a cumulative stake score. Old payments are history, not ranking weight. The same business may independently hold #1 Wilayah and #1 Kategori, but each requires its own Rp20.000 payment and claim. Reclaim after losing also requires a new Rp20.000 payment.
+Store the latest successful claim/payment reference and a trusted ordering timestamp or server-assigned sequence on the entry. Derive rank by sorting the board's entries newest-first. Do not store or accept a rank number from the browser.
+
+When the same profile makes another valid claim on the same board:
+1. update its latest claim/payment reference;
+2. update its trusted ordering timestamp/sequence;
+3. move that existing entry to #1;
+4. keep all other entries in their relative order.
+
+Do not create duplicate entries for the same profile on the same board. A claim on another board must not modify this entry.
+
+### Claims and payment intents
+
+A claim intent stores:
+- authenticated user ID;
+- selected UMKM profile ID;
+- exactly one board ID;
+- fixed amount IDR 20.000;
+- currency IDR;
+- status and timestamps;
+- unique internal reference.
+
+A payment intent is created by the server and bound to one claim intent. The client cannot change its amount, destination, board, profile or paid status.
+
+### Provider events and payment history
+
+Store unique provider event and transaction identities. Keep enough normalized data to verify recipient, amount, currency, payment reference, authoritative paid time and claim binding. Never return provider secrets or raw authentication material to the browser.
+
+A payment provider must reliably map identical Rp20.000 payments to unique claims. Amount-only matching is not acceptable. Moota remains a candidate until its current capabilities and commercial conditions are checked.
 
 ## Required payment transaction
 
-A trusted provider event must be validated and applied atomically:
-1. authenticate and deduplicate the provider event;
-2. find the exact pending payment intent and claim;
-3. validate destination, currency, amount (IDR 20.000), reference, freshness and claim state;
-4. mark the payment as paid;
-5. append immutable payment history;
-6. lock/serialize the target leaderboard position;
-7. replace its current champion with the claimant;
-8. append the champion-transition record;
-9. publish the claimed profile immediately.
+For a trusted provider event:
 
-If any step fails, the transaction must roll back. Duplicate provider events must not apply the claim twice. A pending, failed, expired or client-reported payment cannot change the champion.
+1. authenticate the provider event and reject duplicates;
+2. locate the exact pending payment intent and claim;
+3. validate reference, receiving destination, amount (IDR 20.000), currency, trusted payment time and claim state;
+4. mark the payment paid;
+5. append immutable payment history;
+6. lock or serialize the target board entry/order;
+7. insert the profile's board entry if it does not exist, or update the existing entry;
+8. assign the newest trusted order value so the profile becomes #1;
+9. append a leaderboard-movement record.
+
+The transaction must roll back if any step fails. A pending, failed, expired or client-reported payment cannot change the board.
+
+The ordering source must be defined before production. Prefer a trusted provider paid_at timestamp when authoritative and reliable. If the provider cannot supply one, use a documented server-side confirmation sequence and describe the public rule as “pembayaran terkonfirmasi terakhir”. Never trust a browser timestamp.
 
 ## API direction
 
-The new claim-first API should replace the legacy public profile submission path:
-- POST /api/claims — validate claim target and profile data, create private claim/payment intent and return payment instructions or the next payment step.
-- GET /api/claims/:id — return only safe status data for the holder of the claim capability.
+- GET /api/leaderboards — public board list and ranking rows by scope.
+- GET /api/leaderboards/:scope — public ranking rows for one board.
+- POST /api/claims — authenticated; create one claim/payment intent for one board and one saved profile.
+- GET /api/claims/:id — authenticated; return safe claim status to its owner.
 - POST /api/webhooks/{provider} — authenticate and process provider events server-side.
-- GET /api/business-profiles — expose only publicly live profiles/champions.
-- GET /api/business-profiles/:slug — expose a live public profile.
+- GET /api/business-profiles — authenticated user's saved profiles.
+- POST /api/business-profiles — authenticated; create a saved profile owned by the current Supabase user.
+- PATCH /api/business-profiles/:id — authenticated; edit the user's profile without changing ranking order.
+- GET /api/business-profiles/:slug — public live profile.
 
-The current POST /api/business-profiles auth-required submission route and /api/me/business-profiles owner account route are legacy and must be disabled or replaced before the Claim #1 experience is enabled. Do not add a signup step to make those routes fit.
+The existing auth-required profile submission route may be adapted, but remove the old assumption that new profiles must enter a manual review queue before they can appear. Keep profile management separate from payment and ranking mutation.
 
 ## Security, RLS and privacy
 
-- Anonymous public reads are limited to fields intentionally published after successful payment.
-- Unpaid claim and payment records are private.
-- Claim capability tokens are high entropy, hashed at rest where feasible, scoped to a single claim and rate-limited.
-- Contact and payment metadata are private; do not leak them in public profile data.
-- Provider event ingestion cannot be performed by a browser client.
-- Any privileged database routine must have a documented justification, fixed search_path, narrow execute grants and a security review.
-- Keep immutable audit records; do not silently rewrite payment or champion history.
-- Storage upload rights for an anonymous claim must be restricted to that exact claim and only before it is paid/expired.
+- Public reads expose only fields intentionally published on a profile and leaderboard.
+- Saved profiles are readable and editable only by their authenticated owner, apart from explicitly public fields.
+- Claims and payment records are private to the relevant authenticated user and server-side processing.
+- Provider events cannot be inserted or changed by browser clients.
+- Google Login proves the signed-in account, not legal business ownership.
+- Contact and payment metadata remain private.
+- Privileged routines require a documented justification, fixed search_path, narrow execute grants and security review.
+- Keep audit history append-only; do not silently rewrite payment or movement history.
 
 ## Migration and validation rules
 
 - Preserve the five already-applied legacy migration versions.
-- Add new versioned migrations to transition the schema and remove the legacy workflow from active APIs/policies without destructively rewriting migration history.
-- Add tests for duplicate provider event, exact amount mismatch, wrong recipient, replay, pending/failed payment, separate regional/category slots, independent champions, reclaim, concurrent payments to one slot and public privacy.
-- Run Supabase Security Advisor and performance checks after migration changes.
+- Add versioned migrations to introduce board scopes, unique profile-board entries, claim/payment linkage and the new access rules.
+- Disable or replace conflicting moderation gates through additive migrations.
+- Add tests for: Google-auth-required claim; public unauthenticated reads; one entry per profile per board; exact Rp20.000 price; one claim affects one board only; separate claims for each scope; moving an existing #5 entry to #1; keeping other entries in relative order; repeat claim without duplicate row; independent profile entries across boards; payment idempotency; identical-amount transaction matching; concurrent claims; and public privacy.
