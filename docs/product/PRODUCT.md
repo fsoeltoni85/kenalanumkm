@@ -25,6 +25,11 @@ The user chooses Kabupaten/Kota, Provinsi or Indonesia. All business types compe
 
 ## Geography and leaderboard scopes
 
+### Confirmed geographic eligibility
+
+A user may claim any city/regency or province board. The selected board does not need to match the UMKM's registered address, physical outlet or operating area. Do not validate the descriptive profile location against the selected board or require proof of local operation.
+
+
 - **Kabupaten/Kota:** one board for the selected city or regency.
 - **Provinsi:** one board for the selected province.
 - **Indonesia:** one national board.
@@ -47,19 +52,25 @@ No Kecamatan, Kelurahan or Desa boards. No public map, map pins, browser geoloca
 - No auction, bidding, outbid increments, dynamic pricing or cumulative payment score.
 - No automatic daily, weekly or monthly reset.
 - Pending, failed or unverified payments never change a leaderboard.
+
+- Each claim has a unique provider payment reference/invoice/QRIS/VA; amount-only matching is never sufficient.
+- A payment intent expires 15 minutes after server creation. Handling a payment that arrives after expiry remains open.
+- Rp20.000 is the all-in customer price; the platform absorbs provider/bank transaction fees.
+- No refund is given solely because the profile is displaced. Refund exceptions are duplicate charges, system/provider errors or legal requirements; the detailed exception workflow remains open.
 - Clicks, page views, ratings and social engagement never affect order.
 
-Use a trusted provider payment time when the provider supports a reliable authoritative timestamp. Otherwise, the server-side confirmation order must be the documented source of truth. Browser timestamps are never trusted.
+Ranking uses the server-recorded receipt time of a valid, authenticated provider webhook, not provider paid_at. If webhook A arrives after webhook B, A is ordered after B even if A's underlying payment happened first. Browser and provider paid_at timestamps do not determine rank. Equal server receipt timestamps need a tie-break rule that remains open.
 
 ## Login and saved UMKM profiles
 
-Public visitors can explore every board without logging in. When a visitor selects Claim #1, they must complete Google Login if signed out, then return to the intended claim flow. The user selects a saved UMKM profile or creates one. The profile and claim are associated with the authenticated Supabase user.
+Public visitors can explore every board without logging in. When a visitor selects Claim #1, they must complete Google Login if signed out, then return to the intended claim flow. The user selects a saved UMKM profile or creates one, then completes an OTP challenge sent to the UMKM business contact number through phone/SMS or WhatsApp. This verifies access to that contact channel only, not legal ownership or authority. The profile and claim are associated with the authenticated Supabase user.
 
 The header shows Login dengan Google when signed out; when signed in, it shows the account identity and Logout. Logout does not remove profiles or paid entries.
 
-Google authentication is not legal business-ownership verification. Do not use owner-verified wording based only on Google Login.
+Google authentication and business-contact OTP are not legal business-ownership verification. OTP confirms access to the supplied phone/WhatsApp channel only. Do not use owner-verified or legally-verified wording based on these checks.
 
 ## Claim experience
+1. Complete the business-contact OTP challenge after choosing or creating the profile; it confirms access to that phone/WhatsApp channel only.
 
 1. Click Claim #1.
 2. Complete Google Login if required.
@@ -74,7 +85,10 @@ For a Kabupaten/Kota board, choose a province and then a city/regency. For a pro
 
 ## Out of scope
 
-Category-specific contests; maps and map-based discovery; browser/device geolocation; Kecamatan/Kelurahan/Desa boards; anonymous claim access; password sign-in; phone/SMS/WhatsApp OTP; email OTP; auctions and variable bids; cumulative payment scoring; automatic periodic resets; reviews, ratings and voting as rank factors; manual editorial selection; marketplace checkout; booking, POS, CRM, inventory or delivery; pay-per-lead; subscription-led monetization; prizes or payouts to leaderboard winners; virtual businesses.
+Business-contact OTP through phone/SMS or WhatsApp is in scope for claim verification; it is not an account sign-in method. Each Google account may save unlimited profiles. Duplicate profiles describing the same brand, branch or physical UMKM are allowed, including across accounts; do not automatically detect, reject, merge or deduplicate them. The same exact profile ID still has only one row per board when it reclaims.
+
+
+Category-specific contests; maps and map-based discovery; browser/device geolocation; Kecamatan/Kelurahan/Desa boards; anonymous claim access; password sign-in; phone/SMS/WhatsApp OTP as an account-login method; email OTP; auctions and variable bids; cumulative payment scoring; automatic periodic resets; reviews, ratings and voting as rank factors; manual editorial selection; marketplace checkout; booking, POS, CRM, inventory or delivery; pay-per-lead; subscription-led monetization; prizes or payouts to leaderboard winners; virtual businesses.
 
 ## MVP direction
 
