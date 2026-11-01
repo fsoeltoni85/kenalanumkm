@@ -21,7 +21,7 @@ A claim targets exactly one board. These boards are not aggregated and are not a
 
 Every successful claim costs exactly Rp20.000, independent of the selected scope. All categories compete together. Category may be saved as descriptive profile data but is not a board key or ranking input.
 
-A valid new claim moves the selected profile to #1 on the target board. Other entries move down while preserving relative order. If the profile already exists on that board, update/move that one entry instead of inserting a duplicate. Do not alter the profile's entries on other boards.
+A valid claim moves the selected profile to #1 on the target board. If it is a new profile-board entry, insert it at the top and shift all existing entries down. If it already exists on that board, update its ordering value and move that same row to the top; because the old row is not duplicated, only entries previously above it change position and entries below it keep their positions. Preserve everyone else's relative order and do not alter the profile's entries on other boards.
 
 No bids, outbid increments, cumulative payment scores or periodic rank resets. Clicks and views are secondary metrics only.
 
