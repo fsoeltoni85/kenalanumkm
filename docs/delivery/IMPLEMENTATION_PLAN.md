@@ -74,7 +74,7 @@ Acceptance:
 - Reclaim never creates a duplicate row.
 - Repeat claim never creates a duplicate row on the same board.
 - One profile can hold entries on multiple boards only through separate claims/payments.
-- Concurrent claims for one board get deterministic ordering.
+- Concurrent claims are applied according to server-recorded receipt time of valid authenticated webhooks. Identical receipt-time tie-breaking remains an open decision and must be resolved before production ranking is enabled.
 - Server-recorded receipt time of the valid authenticated provider webhook determines rank; provider paid_at and browser timestamps are ignored.
 - Out-of-order webhook delivery affects rank by design.
 - Equal webhook receipt-time tie-break remains an open release decision.
