@@ -69,7 +69,7 @@ Google Login through Supabase Auth is the only account sign-in method. Do not ad
 
 If the same profile already appears on the selected board, move that existing entry to #1 instead of creating a second row. Only entries that were above it move down; entries below it keep their positions. A new profile is inserted at #1 and all existing entries move down one place. A claim for another board is separate and does not change earlier boards.
 
-There is no manual admin approval between valid payment confirmation and ranking update.
+There is no manual admin approval between a valid authenticated provider webhook and ranking update. The ranking timestamp is the server-recorded webhook receipt time; provider paid_at does not determine order.
 
 ## Profile reuse
 
