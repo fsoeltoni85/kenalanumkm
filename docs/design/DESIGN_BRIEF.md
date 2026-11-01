@@ -66,4 +66,4 @@ Information hierarchy: Indonesia → Province → Kabupaten/Kota → position ty
 
 ## Demo integrity
 
-The preview uses generated synthetic businesses and sample champion assignments. DATA SIMULASI must remain visible. These are not real UMKM, paid claims, transactions, traffic or verified rankings. Claim #1 and real payment actions stay disabled until the claim-first flow and payment verification are implemented and tested.
+The current preview is still the earlier leaderboard/foundation prototype. Its generated businesses and sample values are synthetic; it does not yet implement the two approved position types end to end. DATA SIMULASI must remain visible. These are not real UMKM, paid claims, transactions, traffic or verified rankings. Claim #1 and real payment actions stay disabled until the claim-first flow and payment verification are implemented and tested.
