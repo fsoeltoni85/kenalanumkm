@@ -176,7 +176,9 @@ function result(
  * Ordering is based only on the UTC webhook-received timestamp captured by our
  * server. Provider paid_at values are intentionally absent from this contract.
  * Receipt timestamps are compared at microsecond precision; equal timestamps
- * are surfaced as unresolved instead of inventing a tie-break rule.
+ * are surfaced as unresolved instead of inventing a tie-break rule. The claim
+ * and verification state must be loaded by the server from trusted storage;
+ * never accept these fields from a browser request.
  */
 export function applyClaimPaymentWebhook(
   state: LeaderboardRankingState,
