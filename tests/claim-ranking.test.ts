@@ -216,6 +216,89 @@ describe("independent leaderboard claim ordering", () => {
       ["profile-new", 3],
     ]);
   });
+  it("inserts an out-of-order event between entries using its webhook receipt time", () => {
+    const state = {
+      ...emptyLeaderboardRankingState(),
+      entries: [
+        makeEntry("profile-newer", 1, "2026-11-01T10:02:00.000100Z"),
+        makeEntry("profile-older", 2, "2026-11-01T10:01:00.000100Z"),
+      ],
+    };
+    const result = applyClaimPaymentWebhook(
+      state,
+      makeClaim(),
+      makeWebhook({ receivedAt: "2026-11-01T10:01:30.000100Z" }),
+    );
+
+    expect(positions(result.state.entries, "board-kota-bekasi")).toEqual([
+      ["profile-newer", 1],
+      ["profile-new", 2],
+      ["profile-older", 3],
+    ]);
+  });
+
+  it("does not let a delayed, earlier webhook replace a newer claim for the same profile", () => {
+    const state = {
+      ...emptyLeaderboardRankingState(),
+      entries: [makeEntry("profile-new", 1, "2026-11-01T10:03:00.000100Z")],
+    };
+    const result = applyClaimPaymentWebhook(
+      state,
+      makeClaim(),
+      makeWebhook({ receivedAt: "2026-11-01T10:01:00.000100Z" }),
+    );
+
+    expect(result.outcome).toEqual({
+      status: "recorded_without_rank_change",
+      reason: "older_receipt_for_existing_profile",
+    });
+    expect(result.state.entries).toEqual(state.entries);
+    expect(result.state.processedClaimIds).toContain("claim-1");
+  });
+
+  it("allows the same saved profile to claim a second board independently", () => {
+    const cityClaim = makeClaim();
+    const cityResult = applyClaimPaymentWebhook(
+      emptyLeaderboardRankingState(),
+      cityClaim,
+      makeWebhook(),
+    );
+    const provinceClaim = makeClaim({
+      id: "claim-province",
+      boardId: "board-provinsi-jawa-barat",
+      paymentReference: "INV-PROVINCE",
+    });
+    const provinceResult = applyClaimPaymentWebhook(
+      cityResult.state,
+      provinceClaim,
+      makeWebhook({
+        eventId: "evt-province",
+        transactionId: "txn-province",
+        paymentReference: "INV-PROVINCE",
+        receivedAt: "2026-11-01T10:02:00.000100Z",
+      }),
+    );
+
+    expect(provinceResult.state.entries.filter((entry) => entry.profileId === "profile-new")).toHaveLength(2);
+    expect(positions(provinceResult.state.entries, "board-kota-bekasi")).toEqual([["profile-new", 1]]);
+    expect(positions(provinceResult.state.entries, "board-provinsi-jawa-barat")).toEqual([["profile-new", 1]]);
+  });
+
+  it("allows different profile IDs for the same real-world business on one board", () => {
+    const state = {
+      ...emptyLeaderboardRankingState(),
+      entries: [makeEntry("profile-created-by-account-a", 1, "2026-11-01T10:00:00.000000Z")],
+    };
+    const result = applyClaimPaymentWebhook(
+      state,
+      makeClaim({ profileId: "profile-created-by-account-b" }),
+      makeWebhook(),
+    );
+
+    expect(result.outcome.status).toBe("applied");
+    expect(result.state.entries.filter((entry) => entry.boardId === "board-kota-bekasi")).toHaveLength(2);
+  });
+
 });
 
 describe("payment validation and unresolved cases", () => {
