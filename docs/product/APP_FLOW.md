@@ -58,7 +58,7 @@ Google Login through Supabase Auth is the only account sign-in method. Do not ad
    - Provinsi: select one province.
    - Indonesia: no lower-level location.
 6. User selects an existing saved UMKM profile connected to the Google account or creates a new profile.
-7. User supplies or confirms the UMKM business contact number and completes an OTP challenge through phone/SMS or WhatsApp. This confirms access to that contact channel only, not legal ownership or authority.
+7. Ensure the UMKM business contact number is OTP-verified through phone/SMS or WhatsApp before proceeding. Complete the challenge if it is not yet verified. This confirms access to that contact channel only, not legal ownership or authority; validity and re-verification timing remain open.
 8. Show a review step with the selected profile, target board and fixed all-in price Rp20.000.
 9. Backend creates one claim and payment intent for exactly Rp20.000; the intent expires 15 minutes after server creation.
 10. Show payment instructions from the configured provider.
