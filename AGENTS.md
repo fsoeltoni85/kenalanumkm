@@ -20,7 +20,7 @@ If documents conflict, BUSINESS_RULES.md is authoritative for price, board scope
 - There are three independent boards: one Kabupaten/Kota, one Provinsi and one Indonesia board.
 - A claim changes exactly one selected board. There is no automatic move, aggregation or point accumulation between levels.
 - All UMKM compete together regardless of category. Category is profile metadata only, not a leaderboard dimension.
-- The latest valid confirmed claim moves the selected profile to #1. All other entries move down while preserving relative order.
+- A new profile is inserted at #1 and all existing entries move down one place. If the profile already exists on the board, move that same row to #1; entries above its old position shift down one place and entries below it keep their positions. All other profiles keep their relative order.
 - If the same profile claims the same board again, move its existing entry to #1; do not create a duplicate.
 - A separate Rp20.000 payment is required to enter another board.
 - Public leaderboard browsing is available without login. Claim #1 requires Google Login through Supabase Auth.
