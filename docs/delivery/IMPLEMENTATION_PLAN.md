@@ -2,64 +2,88 @@
 
 ## Delivery rules
 
-Small reviewable milestones. Every completed milestone ends with CI results and, where applicable, a reachable Cloudflare preview URL deployed from GitHub and verified. User reviews the preview before the next major milestone. No production deployment or PR merge without explicit approval. Preview uses synthetic data and no real payment processing.
+Keep milestones small and reviewable. Each completed milestone ends with CI results and, where applicable, a reachable Cloudflare preview URL deployed from GitHub and verified. User reviews the preview before the next major milestone. No production deployment or PR merge without explicit approval. Preview uses synthetic data and no real payment processing.
 
-## Phase 0 — Foundation
+## Phase 0 — Foundation and approved rules
 
-- Approved product definition and business rules.
+- Product definition and authoritative business rules.
 - App flow, technical requirements, backend schema, design and delivery documents.
 - AGENTS.md and repository workflow.
-- Initialize Next.js + vinext + TypeScript + Tailwind.
+- Next.js + vinext + TypeScript + Tailwind foundation.
 - Responsive leaderboard-first UI shell and health endpoint.
 - GitHub Actions checks and Cloudflare preview workflow.
 - Supabase migrations folder and environment example.
 - No real claim or payment processing.
 
-Acceptance: docs agree on two position types and fixed Rp20.000 claim price; scaffold starts/builds; CI valid; preview reachable and health endpoint returns ok; no secrets committed.
+Acceptance: documents describe exactly three independent board scopes, one Rp20.000 price, latest confirmed claim moves a profile to #1, Google Login required for claims, and no category competition. Scaffold builds; CI passes; preview is reachable and health endpoint returns ok; no secrets committed.
 
-## Phase 1 — Leaderboard-first UI
+## Phase 1 — Public leaderboard UI
 
-Build the Indonesia Top 20 #1 Wilayah board, province grouping view and Kabupaten/Kota view. Add a clear switch to #1 Kategori and category-specific champion lists. Use synthetic examples that demonstrate the independent positions.
+Build three independent leaderboard scopes: Kabupaten/Kota, Provinsi and Indonesia.
+
+Use synthetic data to demonstrate the ordered-list behavior: a new successful claim moves the selected profile to #1; all other rows move down and keep their relative order. A profile cannot appear twice on one board. A claim on one board does not create or change an entry on another board.
 
 Acceptance:
-- One #1 Wilayah champion per Kabupaten/Kota.
-- One #1 Kategori champion per Kabupaten/Kota/category.
-- A business in one position does not automatically occupy the other.
-- Indonesia Top 20 regional board contains at most one #1 Wilayah row per city/regency.
-- Province view groups champions for the selected board.
-- City view presents its overall and category champions.
+- Visitors can browse all boards without login.
+- Correct location selectors appear for each scope.
+- All business types compete together.
+- No category-specific board or category ranking filter.
+- Rank numbers reflect order within the selected board only.
+- No payment total, points, clicks or profile views determine rank.
 - No map, pins or browser geolocation.
-- Payment totals and clicks do not determine rank.
 - Responsive review passes; DATA SIMULASI remains visible.
 
-## Phase 2 — Geography and claim-first profile
+## Phase 2 — Google Login and saved UMKM profiles
 
-Verify the authoritative Kabupaten/Kota identity dataset and licensing. Add the canonical geography/category references required by the product. Design the Claim #1 experience: select city/regency, choose #1 Wilayah or #1 Kategori, fill the UMKM profile inside the claim, and create a private claim intent.
+Configure Google OAuth through Supabase Auth. Implement the header states, sign-in callback, logout and return-to-claim behavior. Require a valid Google session before Claim #1. Associate profiles with the authenticated Supabase user ID. Let returning users select a saved profile or create a new one.
 
-Replace the legacy signup/owner/moderation assumptions using additive migrations. Do not rewrite already-applied migrations. Do not create a standalone registration route, owner account prerequisite or manual review queue.
+Acceptance:
+- Public leaderboard reads work signed out.
+- Claim #1 redirects signed-out visitors to Google Login and resumes the intended claim afterward.
+- Signed-in header shows account identity and Logout.
+- Logout does not delete profiles or paid leaderboard entries.
+- Same account can reuse saved profiles.
+- RLS prevents access to another account's private profiles.
+- UI does not claim Google Login proves legal business ownership.
 
-Acceptance: a claim targets exactly one valid position; category is required for a category claim; profile/claim data remains private before payment; the browser cannot assign champion status.
+## Phase 3 — Claim creation and fixed-price payment
 
-## Phase 3 — Fixed-price payment and champion ledger
+Implement server-priced claim/payment intents for exactly Rp20.000 per selected board. A claim binds one profile and one board. Verify provider API, webhook/notification authenticity, supported accounts, commercial permission, fees/limits and unique payment matching before choosing the production adapter. Moota remains a candidate only pending that verification.
 
-Implement server-priced payment intents at exactly Rp20.000 per selected position. Verify the provider's current API, webhook/notification authenticity, supported banks/accounts, commercial permission, plan, pricing and limits before choosing the production adapter. Moota remains a candidate pending that verification.
+Acceptance:
+- One unique payment intent per claim.
+- Exact amount and destination validation.
+- Every identical Rp20.000 payment can be reliably matched to one exact claim.
+- Browser cannot modify price, payment state, target board or profile owner.
+- Duplicate/replayed provider events are ignored safely.
+- Pending/failed/unverified payment does not change a board.
+- Payment records are immutable and auditable.
 
-On valid payment confirmation, atomically mark payment paid, store immutable payment/provider-event history, serialize access to the target position, replace its current champion, append a champion-transition record and publish the profile immediately.
+## Phase 4 — Ordered board ledger
 
-Acceptance: exact amount and destination validation; idempotent provider events; duplicate/replay rejection; one payment updates only one slot; separate regional/category positions; reclaim at Rp20.000; concurrent claims serialize deterministically; pending/failed payments do not alter champion; no manual review.
+On a valid payment confirmation, atomically update the selected board entry and movement history. Move the selected profile to #1; preserve the relative order of all other profiles. Update an existing entry instead of adding a duplicate when the same profile reclaims the same board. Other boards stay unchanged.
 
-## Phase 4 — Public profile and safe management
+Acceptance:
+- A profile at #5 can become #1 after a successful new claim.
+- Previous #1 through #4 move down one place in their existing order.
+- Repeat claim never creates a duplicate row on the same board.
+- One profile can hold entries on multiple boards only through separate claims/payments.
+- Concurrent claims for one board get deterministic ordering.
+- Trusted provider payment time or an explicitly approved server confirmation order is used; never a browser timestamp.
+- No time-based reset.
 
-Expose only live claimed profiles and their intended public links. Design future profile editing or recovery separately, without converting first claim into signup-first onboarding. Secure claim-scoped avatar upload and private contact data.
+## Phase 5 — Public profile and safe management
 
-Acceptance: public privacy tests; capability tokens scoped and protected; no cross-claim access; owner recovery does not permit rank/payment mutation.
+Expose only intentionally public business information and board entries. Implement safe profile editing and avatar handling. Profile edits must not modify leaderboard order. Keep account ownership and private contact/payment data protected.
 
-## Phase 5 — Payment and operational hardening
+Acceptance: public privacy tests; account-level RLS; no cross-account profile access; no profile edit can alter payment or rank; no sensitive data leaks.
 
-Add reconciliation, provider event monitoring, alerting, support procedures and immutable audit inspection. Refund, fee, expiry and failure-resolution behavior must remain disabled until separately approved.
+## Phase 6 — Operational and payment hardening
 
-Acceptance: recovery from duplicate, delayed, malformed and out-of-order provider events is tested; no secret or personal payment data leaks to logs.
+Add reconciliation, provider event monitoring, alerting, support procedures and immutable audit inspection. Refund, chargeback, expiry, provider fees and mistaken-payment behavior remain disabled until separately approved.
 
-## Phase 6 — Production readiness
+Acceptance: recovery from duplicate, delayed, malformed and out-of-order provider events is tested; payment matching and ranking chronology are proven; no secret or personal payment data leaks to logs.
+
+## Phase 7 — Production readiness
 
 Security/performance/privacy/legal review, backup/restore, monitoring, domain, production secrets, rollback and explicit release approval. Do not deploy production or activate real payments without owner approval.
