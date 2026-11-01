@@ -35,11 +35,11 @@ There is no auction, bid, outbid increment, minimum increase, dynamic price, spe
 
 ## 4. How the ranking moves
 
-**The latest successfully confirmed claim is shown at #1.** All other entries move down by one place while keeping their previous order.
+**The latest successfully confirmed claim is shown at #1.** If the profile is new to that board, insert it at #1 and move every existing entry down one place. If the profile is already on that board, remove its old row and move it to #1; entries that were above it move down one place, while entries below it keep their positions. In both cases, all other businesses preserve their relative order.
 
 Example: if Business E is at #5 and pays Rp20.000, E moves to #1. The previous #1 moves to #2, #2 moves to #3, #3 moves to #4 and #4 moves to #5.
 
-If a business already appears on the same board and pays again, its existing entry moves to #1. It must not appear twice on that board. Other businesses keep their relative order.
+If a business already appears on the same board and pays again, its existing entry moves to #1. It must not appear twice on that board. Businesses that were above it move down one place; businesses below it keep their positions. All other businesses preserve their relative order.
 
 A business can appear on several boards only by paying separately for each one. A claim on one board never changes its position on another board.
 
