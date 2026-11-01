@@ -12,6 +12,14 @@ KenalanUMKM is an Indonesia-only pay-to-rank leaderboard for UMKM. A business pa
 - If the same profile claims the same board again, it moves to #1 instead of appearing twice.
 - A separate claim and Rp20.000 payment are required for each additional board.
 - Public browsing does not require login. Claim #1 requires Google Login.
+- Claim flow also requires OTP verification of the UMKM phone/SMS or WhatsApp contact channel; this does not prove legal business ownership.
+- Users may choose any city/regency or province board without matching the UMKM's physical location.
+- Duplicate profiles for the same business/branch are permitted, including across Google accounts; exact same profile ID still has one row per board.
+- Each Google account may save unlimited profiles.
+- Every claim costs Rp20.000 all-in; the platform absorbs provider fees.
+- Payment intents expire after 15 minutes; late-payment handling remains open.
+- Ranking order follows server-recorded receipt time of valid authenticated provider webhooks, not provider paid_at.
+- No refund solely because a profile is displaced; exceptions are duplicate charges, system/provider errors or legal requirements.
 - The header shows Login dengan Google when signed out and the account plus Logout when signed in.
 - Saved UMKM profiles are connected to the Google account and can be reused.
 - Google Login identifies the KenalanUMKM account, not legal ownership of the business.
