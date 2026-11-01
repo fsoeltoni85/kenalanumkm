@@ -46,6 +46,7 @@ Acceptance:
 - RLS prevents access to another account's private profiles.
 - UI does not claim Google Login proves legal business ownership.
 - UI does not claim Google Login plus business-contact OTP proves legal business ownership.
+- Do not assume the verified contact state is permanent or require OTP on every claim; verification validity and re-verification timing remain undecided until approved.
 - User may choose a city/regency/province board regardless of the profile's descriptive location.
 - Same-business duplicate profiles are not blocked or merged.
 
