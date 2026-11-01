@@ -1,18 +1,22 @@
 # KenalanUMKM
 
-KenalanUMKM is an Indonesia-only public leaderboard for UMKM city champions. The experience is a simple, competitive ranking board inspired by the clarity of Outbid.lol, while keeping KenalanUMKM's own rules and geography.
+KenalanUMKM is an Indonesia-only pay-to-rank platform for UMKM. A business claims one specific #1 position in its Kabupaten/Kota by paying a fixed Rp20.000 after completing the Claim #1 form.
 
-## Product rules
+## Approved product rules
 
-- The leaderboard is Indonesia-only.
-- Each Kabupaten/Kota contributes exactly one champion per category and selected period: the business ranked #1 in that city.
-- Indonesia ranks those city champions nationally by confirmed stake.
-- Province is a grouping/navigation layer; a province board lists its city champions.
-- City scope shows that city's single champion and its national rank.
-- Click counts are secondary statistics and never affect rank.
-- Kecamatan, Kelurahan and Desa are not competition, filter or navigation levels.
-- This is not a review/voting service, generic business directory, marketplace, booking, CRM or POS product.
-- Payment, claim and participation rules are not finalized; participation remains disabled in the preview.
+- Each Kabupaten/Kota has one **#1 Wilayah** champion across all business categories.
+- Each category in that Kabupaten/Kota has one separate **#1 Kategori** champion.
+- Those positions are independent. Winning one does not automatically win the other.
+- Every claim costs exactly Rp20.000. One payment claims one selected position.
+- The latest successfully confirmed payment for a position becomes its current champion.
+- Reclaiming a lost position costs Rp20.000 again. There is no outbid increment, bidding or cumulative payment score.
+- The Indonesia Top 20 regional board lists #1 Wilayah champions; category boards list the champion for the selected category.
+- Province groups its city/regency champions. Kabupaten/Kota is the only competition geography.
+- There is no public map, map pin or browser geolocation.
+- There is no standalone signup/registration or manual review. User clicks Claim #1, fills the UMKM profile, pays, and the profile/position go live immediately after trusted payment confirmation.
+- Clicks are secondary statistics only and never affect rank.
+
+See [Business Rules](docs/product/BUSINESS_RULES.md) for the full source of truth.
 
 ## Technology
 
@@ -26,27 +30,25 @@ KenalanUMKM is an Indonesia-only public leaderboard for UMKM city champions. The
 
 Requires Node.js 22 or later.
 
-\`\`\`bash
-npm install
-npm run dev
-\`\`\`
+    npm install
+    npm run dev
 
 Checks:
 
-\`\`\`bash
-npm run lint
-npm run typecheck
-npm run test
-npm run build
-\`\`\`
+    npm run lint
+    npm run typecheck
+    npm run test
+    npm run build
 
 Copy .env.example to .env.local only when ready to connect a Supabase environment. Do not use production credentials for preview/test work.
 
 ## Current preview
 
-The current application is a leaderboard-first UI prototype. Demo business names, stakes and click counts are synthetic and clearly labelled as DATA SIMULASI. They are not real registered UMKM, transactions, traffic or verified rankings. There is no map or browser location collection in the public experience.
+The current application is a leaderboard-first UI prototype. Demo business names and champion assignments are synthetic and visibly labelled DATA SIMULASI. They are not real registered UMKM, claims, payments, traffic or verified rankings. Claim and live payment actions remain disabled until the claim-first flow is implemented.
 
-The isolated Cloudflare preview Worker `kenalanumkm-preview` is deployed from the pull request branch by GitHub Actions after all CI checks pass. The older `kenalanumkm-pr-1` Worker is a legacy prototype and remains untouched. GitHub and the PR branch remain the source of truth; the preview is not production.
+There is no map or browser location collection in the public experience.
+
+The isolated Cloudflare preview Worker kenalanumkm-preview is deployed from the pull request branch by GitHub Actions after all CI checks pass. The older kenalanumkm-pr-1 Worker is a legacy prototype and remains untouched. GitHub and the PR branch remain the source of truth; the preview is not production.
 
 ## Delivery
 
