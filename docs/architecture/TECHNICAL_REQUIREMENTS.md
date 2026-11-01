@@ -34,8 +34,8 @@ No bids, outbid increments, cumulative payment scores or periodic rank resets. C
 - Link UMKM profiles to the authenticated Supabase user ID.
 - A user returning with the same Google account can select and reuse previously saved profiles.
 - Logging out must not delete profiles, paid claim records or leaderboard entries.
-- Do not implement anonymous auth, password sign-in, email OTP, phone OTP, SMS or WhatsApp OTP.
-- Google authentication proves control of the Google account, not legal ownership of a business. Do not label profiles owner-verified based on Google Login alone.
+- Do not implement anonymous auth, password sign-in, email OTP or phone/SMS/WhatsApp OTP as an account-login method.
+- Implement business-contact verification with an OTP delivered to the UMKM phone/SMS or WhatsApp number during claim flow. This proves access to that contact channel only; it does not prove legal ownership or representative authority. Do not label profiles owner-verified based on Google Login plus contact OTP.
 
 ## Architecture
 
@@ -46,7 +46,7 @@ Represent the board scope explicitly:
 - Province board with one canonical province identity.
 - Indonesia board with no province or city identity.
 
-Enforce one leaderboard entry per profile per board, using a unique constraint over board ID and profile ID. Each successful claim updates that entry's trusted order timestamp/sequence and payment reference. Derive visible rank by ordering entries newest first; do not store a client-controlled rank number.
+Enforce one leaderboard entry per exact saved profile ID per board, using a unique constraint over board ID and profile ID. Do not add cross-profile or cross-account uniqueness checks based on business name, address, phone, links, brand or branch: duplicate profiles are allowed. Each successful claim updates that exact profile-board entry's server-recorded valid-webhook-receipt timestamp and payment reference. Derive visible rank by ordering valid webhook receipt times newest first; do not store a client-controlled rank number. Equal receipt-time tie-breaking remains open.
 
 A payment/claim must target exactly one board and one profile. A board claim must never cascade to a parent board.
 
@@ -55,16 +55,22 @@ A payment/claim must target exactly one board and one profile. A board claim mus
 - Claim and payment creation require an authenticated user.
 - The server verifies that the selected UMKM profile is associated with the authenticated user.
 - The server sets the board target, currency and exact amount (IDR 20.000); never trust price, paid state or rank supplied by the client.
-- A payment intent must be uniquely identifiable and linked to exactly one claim. Amount-only matching is not acceptable because all claims have the same price.
-- Authenticate provider notifications, match each event to the exact payment intent, validate amount, currency, receiving destination and trusted payment time, and process idempotently.
+- A payment intent must be uniquely identifiable and linked to exactly one claim through a provider-issued unique invoice/QRIS/VA/payment reference. Amount-only matching is not acceptable because all claims have the same price.
+- The payment intent expires 15 minutes after server creation; late-payment handling remains undecided.
+- Rp20.000 is all-in for the customer; the platform absorbs provider/bank transaction fees.
+- Authenticate provider webhooks, record their server-side receipt time, match each event to the exact payment intent via its unique reference, validate amount, currency, receiving destination, expiry and duplicate status, and process idempotently. Rank by the recorded receipt time of the valid authenticated webhook, not provider paid_at.
 - On valid confirmation, one atomic database transaction marks payment paid, appends immutable payment history, updates the selected board entry to #1 order, records the movement history and leaves all other boards untouched.
 - A pending, failed or unverified payment does not change the leaderboard.
 - Concurrent claims on the same board must be serialized or assigned a deterministic server-side ordering.
-- Use a trusted provider paid timestamp when the provider exposes one that is authoritative and reliable. Otherwise define and document server confirmation order as the source of truth before launch. Never use browser timestamps or webhook delivery order as a substitute for payment chronology without an explicit decision.
+- Use server-recorded receipt time of the valid authenticated provider webhook as the ranking order. Do not use provider paid_at, browser timestamps or a later reconciliation timestamp to reorder entries. This means delayed webhook delivery affects rank order by design. A tie-break rule for identical receipt timestamps remains open.
 
 The ranking is not a sum of payments. Historical payments are audit data only.
+No refund is given solely because a profile is displaced. Refund exceptions are duplicate charges, system/provider errors or legal requirements. Detailed exception workflow, chargebacks, reversals, mistaken payments and late-payment handling remain open; do not implement assumptions for them.
+
 
 ## Geography
+Users may claim any city/regency or province board. The selected board does not need to match the UMKM's descriptive or actual operating location; do not enforce geographic eligibility matching.
+
 
 Use a canonical geography dataset for provinces and Kabupaten/Kota before production. Verify the exact source, licence and stable IDs. No Kecamatan, Kelurahan or Desa competition levels. No public map, map pins, browser geolocation or coordinate-based rank.
 
