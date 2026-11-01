@@ -12,7 +12,11 @@ The first profile foundation has already been applied to this Supabase project. 
 
 Preserve all already-applied migration history. Do not edit or delete applied migration files.
 
-The legacy manual review lifecycle does not match the current product. Replace its activation gates and conflicting policies through reviewed additive migrations. Existing tables may be adapted where appropriate; do not treat their old workflow as approved.
+The legacy manual review lifecycle and maximum-three-pending-profile check do not match the current target. Replace the activation gates and profile-count restriction through reviewed additive migrations. Existing tables may be adapted where appropriate; do not treat their old workflow as approved.
+
+## Phase 1 work branch status
+
+The proposed target schema is documented in [PHASE_1_DATABASE_DRAFT.md](../docs/architecture/PHASE_1_DATABASE_DRAFT.md). The TypeScript claim-ranking engine and unit tests are being added on the separate work branch. This draft is not a formal migration, has not been applied, and does not change the connected Supabase project. The linked project still has only its original five applied application migrations. Do not represent the new board or payment tables as existing until a formal migration is reviewed and applied in a later approved step.
 
 ## Approved target model
 
@@ -45,7 +49,7 @@ Do not derive province or national entries by summing smaller boards.
 The server creates each payment intent for exactly IDR 20.000 and binds it to one profile and one board.
 
 No refund is due solely because a profile is displaced. Refund exceptions are duplicate charges, system/provider errors or legal requirements; the detailed workflow remains open. Late payments after expiry, chargebacks, reversals and mistaken payments remain open. Business-contact OTP proves access to a phone/WhatsApp channel only. Exact OTP provider, OTP lifetime, resend/attempt limits, verified-state validity and re-verification frequency remain undecided.
- The customer price is all-in; the platform absorbs provider/bank fees. Every intent expires 15 minutes after server creation. A provider must issue a unique invoice/QRIS/VA/payment reference and authenticate a webhook that maps each same-amount payment to its own claim. Amount-only matching is insufficient. Ranking order uses the server-recorded receipt time of the valid webhook, not provider paid_at.
+The customer price is all-in; the platform absorbs provider/bank fees. Every intent expires 15 minutes after server creation. A provider must issue a unique invoice/QRIS/VA/payment reference and authenticate a webhook that maps each same-amount payment to its own claim. Amount-only matching is insufficient. Ranking order uses the server-recorded receipt time of the valid webhook, not provider paid_at. Identical receipt timestamps and late payments remain unresolved and do not automatically change ranking.
 
 ## Migration discipline
 
