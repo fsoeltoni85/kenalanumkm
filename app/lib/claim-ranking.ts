@@ -72,7 +72,6 @@ export type ClaimRankingOutcome =
   | {
       status: "rejected";
       reason:
-        | "invalid_provider"
         | "webhook_signature_not_verified"
         | "invalid_event_identity"
         | "invalid_claim_identity"
@@ -149,7 +148,7 @@ function withRecordedEvent(
   state: LeaderboardRankingState,
   webhookEventKey: string,
   transactionKey: string,
-  extra: Partial<Pick<LeaderboardRankingState, "unresolvedWebhookEventKeys" | "duplicatePaymentEventKeys">> = {},
+  extra: { unresolved?: boolean; duplicate?: boolean } = {},
 ): LeaderboardRankingState {
   return {
     ...state,
@@ -198,7 +197,7 @@ export function applyClaimPaymentWebhook(
   }
   if (state.processedTransactionKeys.includes(transactionKey)) {
     return result(
-      withRecordedEvent(state, webhookEventKey, transactionKey, { duplicatePaymentEventKeys: [] }),
+      withRecordedEvent(state, webhookEventKey, transactionKey, { duplicate: true }),
       { status: "duplicate_transaction" },
     );
   }
@@ -241,6 +240,7 @@ export function applyClaimPaymentWebhook(
     || expiresAt === null
     || receivedAt === null
     || expiresAt - createdAt !== PAYMENT_INTENT_TTL_MICROSECONDS
+    || receivedAt < createdAt
   ) {
     return result(state, { status: "rejected", reason: "invalid_claim_timestamps" });
   }
@@ -275,11 +275,9 @@ export function applyClaimPaymentWebhook(
   }
 
   const timestampCounts = new Map<string, number>();
-  for (const entry of boardEntries) {
-    timestampCounts.set(
-      entry.lastWebhookReceivedAt,
-      (timestampCounts.get(entry.lastWebhookReceivedAt) ?? 0) + 1,
-    );
+  for (const timestamp of entryTimestamps) {
+    const key = timestamp?.toString() ?? "invalid";
+    timestampCounts.set(key, (timestampCounts.get(key) ?? 0) + 1);
   }
   if ([...timestampCounts.values()].some((count) => count > 1)) {
     const nextState = withRecordedEvent(state, webhookEventKey, transactionKey, {
@@ -307,7 +305,7 @@ export function applyClaimPaymentWebhook(
     });
   }
 
-  if (boardEntries.some((entry) => entry.lastWebhookReceivedAt === webhook.receivedAt)) {
+  if (entryTimestamps.some((timestamp) => timestamp === receivedAt)) {
     const nextState = withRecordedEvent(state, webhookEventKey, transactionKey, {
       unresolvedWebhookEventKeys: [],
     });
@@ -349,9 +347,7 @@ export function applyClaimPaymentWebhook(
     ? (newPosition === 1
       ? { status: "applied", reason: "new_entry" }
       : { status: "applied", reason: "entry_inserted_by_receipt_order" })
-    : (previousPosition === newPosition
-      ? { status: "recorded_without_rank_change", reason: "older_receipt_for_existing_profile" }
-      : { status: "applied", reason: "profile_moved" });
+    : { status: "applied", reason: "profile_moved" };
 
   return result(nextState, outcome);
 }
