@@ -1,33 +1,60 @@
-# Backend Schema — Logical Design
+# Backend Schema — Current Foundation and Next Stages
 
-**Important:** logical model only. No application tables have been created in Supabase. Review this model and access rules before applying migrations.
+## Current implemented schema
 
-## Geography
-`provinces`: authoritative code, name, source metadata, active flag.
-`regencies`: authoritative code, province reference, name, type (Kabupaten/Kota), source metadata, active flag.
-Only province and Kabupaten/Kota are product navigation/competition levels. No Kecamatan/Kelurahan/Desa hierarchy tables. Store full address text and coordinates only on physical listing for geocoding/pin placement. Verify official boundary data source, license and freshness before import.
+The first database/backend foundation is applied to the KenalanUMKM Supabase project.
 
-## Categories
-`categories`: slug, display name, optional parent, sort order, active flag. Curated taxonomy; user text cannot create new leaderboard categories.
+### Categories — `business_categories`
 
-## Listings
-`business_listings`: id, slug, name, category_id, regency_id, province_id (or derived), description, address_text, PostGIS Point(4326), public contact/site fields, status and timestamps. One row means one real physical business location. Index city/category/status, slug, search fields and spatial location.
+Curated taxonomy with slug, display name, icon, sort order and active flag. Nine categories are seeded: Makanan & Minuman, Fashion, Retail, Jasa, Kecantikan, Kesehatan, Otomotif, Pendidikan and Lainnya.
 
-## Future ownership
-`listing_claims`, `listing_ownership`, `verification_events`. Verification method and permissions are undecided. Do not enable owner edits before policy design.
+### UMKM profiles — `business_profiles`
 
-## Future payments / stake
-`payment_intents`: amount_minor, currency, unique reference, status, expiry, provider reference and timestamps.
-`stake_ledger_entries`: listing, payment intent, amount_minor, entry type, unique source event, timestamp and redacted metadata.
-`payment_provider_events`: provider, unique event_id, received/processed timestamps, status and redacted metadata.
-`listing_stats`: derived click counts and non-ranking metrics.
-Append-only ledger; reversals as compensating entries; idempotent posting; never trust client totals. Accounting and refund mechanics require approval.
+One row represents one physical UMKM listing. Fields include owner user ID, public slug, business name, short description, category, province and Kabupaten/Kota names, optional address, private avatar object path, moderation status and review timestamps.
 
-## Ranking
-Scope is regency_id + category_id. Rank by sum of confirmed stake ledger entries, descending. Tie-break, minimum increments and outbid rules are open decisions; no ranking function until approved and tested.
+The first implementation stores province and Kabupaten/Kota names, not administrative codes. We will import an authoritative licensed geography dataset before relying on codes or automated normalization. No Kecamatan/Kelurahan/Desa hierarchy is part of the product navigation.
 
-## Security
-RLS on every exposed table. Public read model exposes only approved fields. Owner write access requires verified ownership. Admin actions require explicit admin authorization and audit. Clients never insert/update/delete ledger or provider event rows. Prefer SECURITY INVOKER. Any SECURITY DEFINER requires separate review, fixed search_path, least privilege and identity checks.
+### Profile links — `business_profile_links`
+
+One primary link, one purchase link and one order/contact link are required. Up to five additional social links are accepted. Supported social hosts include Instagram, Threads, X/Twitter, TikTok and Facebook. Purchase/order destinations cover supported marketplaces, WhatsApp and delivery platforms, with an `other` fallback.
+
+The API normalizes the platform and extracts recognizable handles. It does not scrape arbitrary URLs or issue server-side requests to user-supplied URLs. Social provider IDs, display names and remote avatar URLs are server-managed fields, not caller-writable fields.
+
+### Avatar Storage
+
+The `business-avatars` bucket is private. Objects use the path `{auth-user-id}/{business-profile-id}/{random-file-name}`. Uploads are restricted to the authenticated owner's folder; anonymous signed URL creation is permitted only when the owning profile is approved. Owners can access their own pending profile avatar.
+
+## API surface
+
+- `GET /api/business-profiles`: approved public profiles, optional province, regency, category and limit filters.
+- `GET /api/business-profiles/:slug`: one approved public profile.
+- `POST /api/business-profiles`: verified Supabase user bearer token required; creates profile and links atomically as `pending_review`.
+- `GET /api/me/business-profiles`: verified owner-only list with moderation status.
+- `POST /api/business-profiles/:id/avatar`: verified owner upload, MIME signature validation, private object storage and signed URL response.
+
+Only the project URL and Supabase publishable key are used by the Worker. Every authenticated database request carries the caller's Supabase access token. No service-role/secret key is used.
+
+## RLS and lifecycle
+
+- Anonymous read: approved profiles and their links only.
+- Authenticated read: approved profiles plus the caller's own profile(s).
+- Profile creation: owner must equal `auth.uid()`; new status is always `pending_review`.
+- Link creation: profile must belong to caller and still be pending.
+- Profile update: owner may only update the avatar path at this stage.
+- Moderation fields and social resolution metadata are not owner-writable.
+- Maximum three pending/draft profiles per owner; an advisory transaction lock serializes submissions to prevent concurrent requests bypassing the cap.
+- Submission function is SECURITY INVOKER with a fixed search path. EXECUTE is granted only to authenticated users.
+
+Admin moderation permissions are intentionally not granted yet. The review process needs an explicit admin-role model and audit trail before status changes can be made through an API.
+
+## Not implemented yet
+
+- Admin review dashboard and moderation API.
+- Official social provider OAuth/profile lookups and automatic avatar discovery. Threads discovery needs the relevant Meta permission; X needs API access; Instagram public arbitrary-handle avatar lookup is not universally available. Manual avatar upload is the supported fallback.
+- Geography master data and canonical location IDs.
+- Payment intents, webhook verification, confirmed-stake ledger and rank calculations.
+- Database-backed leaderboard read model. The current leaderboard remains demo data until a separate integration part.
 
 ## Migrations
-Version every schema change in `supabase/migrations/`; review PR and apply staging before production. No direct production DDL outside migration workflow. Run Supabase security/performance advisors after DDL.
+
+Migration filenames match the versions recorded in the Supabase project. Future schema changes must be additive where possible, reviewed through GitHub, applied to the linked project, and followed by security/performance advisor checks.

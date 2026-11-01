@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   businessProfileInputSchema,
   normalizeProfileLink,
@@ -6,9 +6,6 @@ import {
 } from "../app/lib/business-profile";
 import { POST } from "../app/api/business-profiles/route";
 
-afterEach(() => {
-  // The route auth test does not need backend credentials.
-});
 
 describe("business profile input validation", () => {
   const base = {

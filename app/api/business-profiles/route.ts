@@ -66,7 +66,9 @@ export async function POST(request: Request): Promise<Response> {
 
   let body: unknown;
   try {
-    body = await request.json();
+    const rawBody = await request.text();
+    if (rawBody.length > 24_000) return apiJson({ error: "payload_too_large" }, 413);
+    body = JSON.parse(rawBody);
   } catch {
     return apiJson({ error: "invalid_json" }, 400);
   }

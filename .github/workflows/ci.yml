@@ -102,20 +102,30 @@ jobs:
         run: |
           preview_url="https://kenalanumkm-preview.kenalanumkm-preview.workers.dev"
           for attempt in $(seq 1 20); do
-            if curl --fail --silent --show-error "$preview_url/api/health"; then
-              echo
-              echo "Preview is healthy: $preview_url"
-              {
-                echo "### Cloudflare Preview"
-                echo "$preview_url"
-              } >> "$GITHUB_STEP_SUMMARY"
-              echo "url=$preview_url" >> "$GITHUB_OUTPUT"
-              exit 0
+            if curl --fail --silent --show-error "$preview_url/api/health" >/dev/null; then
+              break
             fi
             sleep 3
           done
-          echo "Preview did not return a healthy response: $preview_url" >&2
-          exit 1
+
+          public_response=$(curl --fail --silent --show-error "$preview_url/api/business-profiles?limit=1")
+          echo "$public_response" | jq -e '.data != null and (.count | type == "number")' >/dev/null
+
+          owner_status=$(curl --silent --output /dev/null --write-out "%{http_code}" "$preview_url/api/me/business-profiles")
+          if [ "$owner_status" != "401" ]; then
+            echo "Unauthenticated owner API should return 401, received $owner_status" >&2
+            exit 1
+          fi
+
+          echo "Preview, Supabase public read, and owner API auth checks passed: $preview_url"
+          {
+            echo "### Cloudflare Preview"
+            echo "$preview_url"
+            echo
+            echo "- Supabase public profile endpoint: passed"
+            echo "- Unauthenticated owner endpoint: correctly returned 401"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "url=$preview_url" >> "$GITHUB_OUTPUT"
   cleanup-preview:
     name: Delete closed PR preview Worker
     if: >-
