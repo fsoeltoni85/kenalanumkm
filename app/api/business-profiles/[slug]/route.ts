@@ -1,5 +1,10 @@
 import { apiJson, createPublicSupabaseClient } from "@/app/lib/supabase/server";
 
+type PublicBusinessProfileRecord = {
+  avatar_path: string | null;
+  [key: string]: unknown;
+};
+
 const selection = [
   "id", "slug", "name", "description", "province_name", "regency_name",
   "address_text", "avatar_path", "approved_at", "created_at",
@@ -27,15 +32,16 @@ export async function GET(
     .maybeSingle();
 
   if (error) return apiJson({ error: "could_not_load_business_profile" }, 500);
-  if (!data) return apiJson({ error: "not_found" }, 404);
+  const profile = data as unknown as PublicBusinessProfileRecord | null;
+  if (!profile) return apiJson({ error: "not_found" }, 404);
 
   let avatarUrl: string | null = null;
-  if (data.avatar_path) {
+  if (profile.avatar_path) {
     const { data: signed, error: signedError } = await supabase
       .storage.from("business-avatars")
-      .createSignedUrl(data.avatar_path, 15 * 60);
+      .createSignedUrl(profile.avatar_path, 15 * 60);
     if (!signedError) avatarUrl = signed.signedUrl;
   }
 
-  return apiJson({ data: { ...data, avatar_url: avatarUrl, avatar_path: undefined } });
+  return apiJson({ data: { ...profile, avatar_url: avatarUrl, avatar_path: undefined } });
 }

@@ -6,6 +6,11 @@ import {
   isMissingSupabaseConfig,
 } from "@/app/lib/supabase/server";
 
+type PublicBusinessProfileRecord = {
+  avatar_path: string | null;
+  [key: string]: unknown;
+};
+
 const publicProfileSelection = [
   "id", "slug", "name", "description", "province_name", "regency_name",
   "address_text", "avatar_path", "approved_at", "created_at",
@@ -38,7 +43,8 @@ export async function GET(request: Request): Promise<Response> {
   const { data, error } = await query;
   if (error) return apiJson({ error: "could_not_load_business_profiles" }, 500);
 
-  const profiles = await Promise.all((data ?? []).map(async (profile) => {
+  const rows = (data ?? []) as unknown as PublicBusinessProfileRecord[];
+  const profiles = await Promise.all(rows.map(async (profile) => {
     let avatarUrl: string | null = null;
     if (profile.avatar_path) {
       const { data: signed, error: signedError } = await supabase
