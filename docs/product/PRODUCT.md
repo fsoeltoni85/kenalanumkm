@@ -4,73 +4,82 @@
 
 ## Product
 
-KenalanUMKM is an Indonesia-only pay-to-rank platform for real, location-based UMKM. A business claims a specific #1 position in its Kabupaten/Kota by completing the Claim #1 flow and paying the fixed price. The concept takes inspiration from the clarity and competitive simplicity of Outbid.lol, but KenalanUMKM uses its own rules for Indonesia.
+KenalanUMKM is an Indonesia-only pay-to-rank leaderboard for UMKM. A business pays a fixed **Rp20.000** to move its profile to the top of one selected leaderboard.
 
-This is not a conventional business directory with a signup queue, editorial ranking or manual approval process.
+The user chooses Kabupaten/Kota, Provinsi or Indonesia. All business types compete together on the selected board. The latest successfully confirmed claim appears at #1; existing entries move down while keeping their relative order.
 
-## Non-negotiable product principles
+## Core product rules
 
-1. Indonesia-only. Every competing UMKM has a physical business location in one Kabupaten/Kota.
-2. There are two separate #1 position types in each Kabupaten/Kota:
-   - **#1 Wilayah:** one overall champion for the city/regency, across all business categories.
-   - **#1 Kategori:** one champion for each category within that same city/regency.
-3. The overall position and category positions are independent. Winning one does not automatically grant the other.
-4. One confirmed payment of **Rp20.000** claims one selected position. The price is fixed and equal for every city, category, challenger and previous champion.
-5. The latest successfully confirmed payment for a position becomes its current champion. Previous payments do not accumulate into ranking points.
-6. A champion who loses the position may claim it again by paying Rp20.000 again.
-7. Province and Indonesia are leaderboard aggregation/navigation scopes, not additional claimable competition units.
-8. Clicks are secondary statistics only. They never determine or change rank.
-9. A Claim is part of the payment flow. There is no separate signup/registration, no manual listing review and no approval queue.
-10. Financial and champion changes must be auditable.
+1. Every successful claim costs exactly Rp20.000 at every geographic scope.
+2. There are three independently claimable boards: one Kabupaten/Kota, one Provinsi or the Indonesia board.
+3. Each claim affects exactly one selected board. There is no automatic entry, aggregation or point accumulation between levels.
+4. The latest successfully confirmed claim moves that business to #1 on the selected board. Other entries shift down and preserve their relative order.
+5. If a profile already appears on the selected board, a new successful claim moves that entry to #1; it does not create a duplicate row.
+6. All business types compete together. Category is optional descriptive profile information only, not a separate competition or ranking filter.
+7. Public browsing does not require login. Claim #1 requires Google Login.
+8. The header shows Login dengan Google when signed out and the signed-in account plus Logout when signed in.
+9. Saved UMKM profiles are connected to the Google account so a returning user can reuse a profile.
+10. Google Login identifies the account controlling the profile in KenalanUMKM. It does not prove legal ownership of the business.
+11. Clicks and views are statistics only; they never determine rank.
+12. Ranking and payment changes must be auditable.
 
-## Geography and leaderboard hierarchy
+## Geography and leaderboard scopes
 
-Indonesia → Province → Kabupaten/Kota → Position type → Leaderboard.
+- **Kabupaten/Kota:** one board for the selected city or regency.
+- **Provinsi:** one board for the selected province.
+- **Indonesia:** one national board.
 
-- Kabupaten/Kota is the only geographic competition unit.
-- Province groups its Kabupaten/Kota champions.
-- The Indonesia regional board shows the Top 20 #1 Wilayah champions, one per represented Kabupaten/Kota.
-- Category boards show the #1 Kategori champion for the selected category in each Kabupaten/Kota.
-- A city/regency view can show its #1 Wilayah champion and its category champions.
+These boards are independent, not an aggregation tree. A business that pays Rp20.000 to enter Kota Bekasi appears on that board only. It does not automatically appear on the Jawa Barat board or Indonesia board. Each additional board requires another separate Rp20.000 claim.
 
-The local champion rules do not define how different cities should be ordered against one another. Until a separate cross-city display rule is approved, do not infer national rank from cumulative payments, clicks or payment recency; the Top 20 is a list of current regional champions, not a paid-stake score.
-- Kecamatan, Kelurahan and Desa are never competition, filter or navigation levels.
-- No map, map pins, public coordinates, browser geolocation or map-based leaderboard is part of the product.
+There is no #1 Kategori competition. Category may appear as profile information but does not separate the rankings.
 
-Physical address details may be collected when needed for business context or operational verification, but do not turn them into a map experience or a lower-level competition hierarchy.
-
-## Claim #1 experience
-
-1. Visitor chooses a Kabupaten/Kota.
-2. Visitor chooses the target position: #1 Wilayah or #1 Kategori. A category must also be selected for a category claim.
-3. Visitor fills in the UMKM profile as part of that claim: business name, category, short description, location, avatar and relevant public links/contact details.
-4. The server creates the claim and payment intent for exactly Rp20.000.
-5. The visitor pays using the enabled payment instructions.
-6. The server verifies a trusted payment confirmation. Only then does the selected position change and the profile become publicly live.
-7. There is no standalone account signup and no manual review stage.
-
-A single Rp20.000 payment applies to one selected position. Claiming both #1 Wilayah and #1 Kategori requires two separate claims and payments. Reclaiming a position also costs Rp20.000.
+No Kecamatan, Kelurahan or Desa boards. No public map, map pins, browser geolocation or coordinate-based leaderboard.
 
 ## Ranking and payment rules
 
-- Price: Rp20.000 per successful claim of one position.
-- No outbid increment, minimum increase, auction, bid, variable price or special price for the current champion.
-- The current champion is the business associated with the latest successfully confirmed payment for that exact position.
-- A pending, failed, expired or client-reported payment never changes the champion.
-- A verified payment is applied once only. Duplicate provider events cannot create duplicate claims.
-- The previous champion remains the champion until another valid payment is confirmed.
-- No automatic daily, weekly or monthly reset is part of the current ranking rules.
-- Historical payments and champion changes remain auditable, but old payment totals do not affect the current champion.
-- Clicks do not affect eligibility, price or rank.
+- One successful claim costs exactly Rp20.000.
+- A claim targets exactly one selected board and one UMKM profile.
+- The newest valid, server-confirmed claim is placed at #1.
+- All other entries move down while preserving their relative order.
+- A profile already on that board is moved to #1 rather than duplicated.
+- A business may appear on multiple boards only after separate claims and payments.
+- Previous payments are history, not ranking points.
+- No auction, bidding, outbid increments, dynamic pricing or cumulative payment score.
+- No automatic daily, weekly or monthly reset.
+- Pending, failed or unverified payments never change a leaderboard.
+- Clicks, page views, ratings and social engagement never affect order.
+
+Use a trusted provider payment time when the provider supports a reliable authoritative timestamp. Otherwise, the server-side confirmation order must be the documented source of truth. Browser timestamps are never trusted.
+
+## Login and saved UMKM profiles
+
+Public visitors can explore every board without logging in. When a visitor selects Claim #1, they must complete Google Login if signed out, then return to the intended claim flow. The user selects a saved UMKM profile or creates one. The profile and claim are associated with the authenticated Supabase user.
+
+The header shows Login dengan Google when signed out; when signed in, it shows the account identity and Logout. Logout does not remove profiles or paid entries.
+
+Google authentication is not legal business-ownership verification. Do not use owner-verified wording based only on Google Login.
+
+## Claim experience
+
+1. Click Claim #1.
+2. Complete Google Login if required.
+3. Choose a board: Kabupaten/Kota, Provinsi or Indonesia.
+4. Select the location required by that board.
+5. Choose a saved UMKM profile or create one.
+6. Review the selected board, profile and fixed Rp20.000 price.
+7. Pay.
+8. After trusted payment confirmation, move the profile to #1 and show the updated board.
+
+For a Kabupaten/Kota board, choose a province and then a city/regency. For a province board, choose one province. For Indonesia, no lower-level location is required.
 
 ## Out of scope
 
-Maps and map-based discovery; browser/device geolocation; Kecamatan/Kelurahan/Desa competitions; signup-first registration; manual listing review or editorial approval; auctions and variable bids; cumulative paid-stake ranking; daily/weekly/monthly rank resets; reviews, ratings and voting; generic directory as the primary experience; marketplace checkout; booking, POS, CRM, inventory or delivery; pay-per-lead; subscription-led monetization; territory ownership; prizes or payouts to leaderboard winners; virtual listings.
+Category-specific contests; maps and map-based discovery; browser/device geolocation; Kecamatan/Kelurahan/Desa boards; anonymous claim access; password sign-in; phone/SMS/WhatsApp OTP; email OTP; auctions and variable bids; cumulative payment scoring; automatic periodic resets; reviews, ratings and voting as rank factors; manual editorial selection; marketplace checkout; booking, POS, CRM, inventory or delivery; pay-per-lead; subscription-led monetization; prizes or payouts to leaderboard winners; virtual businesses.
 
 ## MVP direction
 
-Keep the public experience leaderboard-first and clearly label all synthetic rows as DATA SIMULASI. Build two explicitly distinct leaderboard modes: regional overall champions and category champions. Keep Claim #1 disabled in the preview until the claim-first flow and payment confirmation are implemented and tested end to end. Do not show a fake live payment or real champion.
+Keep the public experience leaderboard-first. Label synthetic rows and sample payments as **DATA SIMULASI**. Build the three independent boards and the “latest successful claim moves to #1” behavior. Implement Google Login before enabling Claim #1. Keep real payment actions disabled until provider matching and confirmation are verified end to end.
 
 ## Success criteria
 
-Visitors can distinguish #1 Wilayah from #1 Kategori; understand that each costs Rp20.000 per claim; see that the latest confirmed payment determines the current holder; understand that claim details are submitted inside the claim flow; and never encounter a map, signup-first process or manual-review promise.
+Visitors understand that any UMKM can claim any of the three board scopes for Rp20.000; each claim affects only one board; the latest confirmed claim moves the profile to #1 and shifts others down; categories do not create separate rankings; Claim #1 requires Google Login; saved profiles can be reused; and public browsing remains available without login.
