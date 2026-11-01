@@ -21,7 +21,7 @@ async function inspectAvatar(file: File): Promise<AvatarFileInfo | null> {
 
 export async function POST(
   request: Request,
-  context: { params: Promise<{ slug: string }> | { id: string } },
+  context: { params: Promise<{ slug: string }> | { slug: string } },
 ): Promise<Response> {
   const auth = await createAuthenticatedSupabaseClient(request);
   if (!auth) return apiJson({ error: "authentication_required" }, 401);
