@@ -4,17 +4,17 @@
 
 The initial profile backend exists, but its signup/moderation behavior predates the current product rules. Preserve already-applied migrations and transition through reviewed additive migrations.
 
-The current product uses Google Login to identify the KenalanUMKM account that manages a saved UMKM profile. No standalone username/password, email OTP, phone OTP or WhatsApp OTP flow is part of the product.
+Google Login through Supabase Auth is the only account sign-in method. In addition, a claimant must verify access to the UMKM business contact number through an OTP delivered by phone/SMS or WhatsApp. This is contact-channel verification, not legal ownership or representative-authority verification. No standalone username/password or email OTP sign-in is part of the product.
 
 ## User journey
 
 1. A visitor can browse leaderboards without login.
 2. The visitor clicks Claim #1.
 3. If signed out, the visitor completes Google Login and returns to the intended claim flow.
-4. The user selects one saved UMKM profile or creates a profile.
-5. The user chooses one board scope: Kabupaten/Kota, Provinsi or Indonesia.
-6. The user pays exactly Rp20.000 for that one board.
-7. After trusted payment confirmation, that profile moves to #1 on the selected board.
+4. The user selects one saved UMKM profile or creates a profile and completes the business-contact OTP challenge.
+5. The user chooses one board scope: Kabupaten/Kota, Provinsi or Indonesia. Any city/regency or province board may be selected regardless of the profile's address or operating area.
+6. The user pays exactly Rp20.000 all-in for that one board using a unique provider payment reference.
+7. After an authenticated provider webhook is received and validated, the server-recorded webhook receipt time determines ranking order and the profile moves to #1. The payment intent expires after 15 minutes.
 
 The interface header shows Login dengan Google when signed out, and the account plus Logout when signed in. Logging out does not delete profiles, payment history or board entries.
 
@@ -28,7 +28,7 @@ Category is descriptive only. It does not create a category leaderboard or affec
 
 Google Login identifies the account in KenalanUMKM. It does not prove the person is the legal owner or authorized representative of the UMKM. Do not display an owner-verified badge based on Google authentication alone.
 
-The maximum profile count per account has not been decided. Do not hard-code an arbitrary product limit without approval.
+Each Google account may save an unlimited number of UMKM profiles. Duplicate profiles are allowed, including multiple profiles for the same brand, branch or physical outlet across different accounts. Do not reject, merge or deduplicate based on matching business details.
 
 ## Profile reuse and editing
 
@@ -36,7 +36,7 @@ When the authenticated user returns, load the profiles belonging to that same Su
 
 Profile edits must not automatically move the profile on any board. Only a separately paid, successfully confirmed claim can change the board order.
 
-Changing business name, descriptive category, description, avatar or public links must not alter ranking. Changes to the business's province or Kabupaten/Kota need validation because those details describe the physical business; they must not silently move or create leaderboard entries.
+Changing profile details must not alter ranking. Profile province/Kabupaten/Kota are descriptive fields only; they do not restrict which city/regency or province board can be claimed. No address-to-board matching is required.
 
 ## Links and avatar handling
 
@@ -54,6 +54,10 @@ The three board scopes are independent:
 - Indonesia: the national board.
 
 A paid claim moves the selected profile to #1 on that board. If the profile already exists there, update the existing entry instead of creating a duplicate. A different board requires a new claim and payment. No category-specific board exists.
+Multiple distinct profile IDs that describe the same business may each have their own board entry. The no-duplicate rule applies only when the exact same profile ID claims the same board again.
+
+Customer price is exactly Rp20.000 inclusive of provider fees; the platform absorbs provider/bank fees. No refund is due solely because a profile is displaced. Refund exceptions are duplicate charges, system/provider errors or legal requirements; the detailed exception workflow is open. Late payments after the 15-minute expiry, chargebacks, reversals and mistaken payments remain open.
+
 
 ## Security requirements
 
