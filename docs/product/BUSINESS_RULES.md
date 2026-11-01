@@ -104,6 +104,7 @@ Do not invent these rules:
 - maximum number of rows shown and pagination;
 - whether a Kabupaten/Kota or Provinsi claim must match the UMKM's physical business address, or whether a user may choose another area;
 - any separate proof of legal business ownership or authorization;
+- how to detect and resolve duplicate profiles for the same physical UMKM created under different Google accounts;
 - maximum UMKM profiles per Google account.
 
 These do not change the approved core rule: one confirmed Rp20.000 claim moves one profile to #1 on one selected board.
