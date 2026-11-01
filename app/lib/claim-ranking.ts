@@ -95,8 +95,8 @@ export const emptyLeaderboardRankingState = (): LeaderboardRankingState => ({
   processedWebhookEventKeys: [],
   processedTransactionKeys: [],
   processedClaimIds: [],
-  unresolvedWebhookEventKeys: [],
-  duplicatePaymentEventKeys: [],
+  unresolved: true,
+  duplicate: true,
 });
 
 /**
@@ -253,14 +253,14 @@ export function applyClaimPaymentWebhook(
 
   if (receivedAt >= expiresAt) {
     const nextState = withRecordedEvent(state, webhookEventKey, transactionKey, {
-      unresolvedWebhookEventKeys: [],
+      unresolved: true,
     });
     return result(nextState, { status: "late_payment_unresolved" });
   }
 
   if (state.processedClaimIds.includes(claim.id)) {
     const nextState = withRecordedEvent(state, webhookEventKey, transactionKey, {
-      duplicatePaymentEventKeys: [],
+      duplicate: true,
     });
     return result(nextState, { status: "duplicate_claim_payment" });
   }
@@ -283,7 +283,7 @@ export function applyClaimPaymentWebhook(
   }
   if ([...timestampCounts.values()].some((count) => count > 1)) {
     const nextState = withRecordedEvent(state, webhookEventKey, transactionKey, {
-      unresolvedWebhookEventKeys: [],
+      unresolved: true,
     });
     return result(nextState, {
       status: "ambiguous_order",
@@ -309,7 +309,7 @@ export function applyClaimPaymentWebhook(
 
   if (entryTimestamps.some((timestamp) => timestamp === receivedAt)) {
     const nextState = withRecordedEvent(state, webhookEventKey, transactionKey, {
-      unresolvedWebhookEventKeys: [],
+      unresolved: true,
     });
     return result(nextState, {
       status: "ambiguous_order",
