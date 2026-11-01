@@ -35,7 +35,7 @@ No bids, outbid increments, cumulative payment scores or periodic rank resets. C
 - A user returning with the same Google account can select and reuse previously saved profiles.
 - Logging out must not delete profiles, paid claim records or leaderboard entries.
 - Do not implement anonymous auth, password sign-in, email OTP or phone/SMS/WhatsApp OTP as an account-login method.
-- Implement business-contact verification with an OTP delivered to the UMKM phone/SMS or WhatsApp number during claim flow. This proves access to that contact channel only; it does not prove legal ownership or representative authority. Do not label profiles owner-verified based on Google Login plus contact OTP.
+- Implement business-contact verification with an OTP delivered to the UMKM phone/SMS or WhatsApp number. A profile's contact channel must be verified before it is used for a claim. This proves access to that channel only; it does not prove legal ownership or representative authority. Whether verification is reused for later claims, its validity period and when re-verification is required remain undecided. Do not label profiles owner-verified based on Google Login plus contact OTP.
 
 ## Architecture
 
