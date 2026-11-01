@@ -21,12 +21,12 @@ async function inspectAvatar(file: File): Promise<AvatarFileInfo | null> {
 
 export async function POST(
   request: Request,
-  context: { params: Promise<{ id: string }> | { id: string } },
+  context: { params: Promise<{ slug: string }> | { id: string } },
 ): Promise<Response> {
   const auth = await createAuthenticatedSupabaseClient(request);
   if (!auth) return apiJson({ error: "authentication_required" }, 401);
 
-  const { id } = await context.params;
+  const { slug: id } = await context.params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) return apiJson({ error: "not_found" }, 404);
 
   const { data: profile, error: profileError } = await auth.client
