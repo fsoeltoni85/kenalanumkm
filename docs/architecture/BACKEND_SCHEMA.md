@@ -59,7 +59,7 @@ When the same profile makes another valid claim on the same board:
 1. update its latest claim/payment reference;
 2. update its trusted ordering timestamp/sequence;
 3. move that existing entry to #1;
-4. keep all other entries in their relative order.
+4. Keep the relative order of every other profile; profiles above the moved entry shift down, while profiles below it keep their positions.
 
 Do not create duplicate entries for the same profile on the same board. A claim on another board must not modify this entry.
 
