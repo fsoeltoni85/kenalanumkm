@@ -1,60 +1,58 @@
-# Business Profile Backend Foundation
+# Business Profile Backend — Legacy Scaffold and Claim-First Direction
 
-## Purpose
+## Status
 
-This foundation stores real UMKM listings and their public profile links. It replaces no existing leaderboard behavior yet: the current leaderboard is still marked as demo data until the next integration part switches its read model.
+This document originally described a signup-first profile submission flow with owner authentication and manual moderation. That implementation exists in the initial backend foundation, but it does not match the approved KenalanUMKM business rules.
 
-## Profile fields
+Treat the current owner/moderation routes, RLS policies and avatar ownership model as **legacy scaffolding**. Do not extend them as the primary product workflow. Do not rewrite migrations that have already been applied; transition through additive, reviewed migrations.
 
-- Business name and short description (20–280 characters).
-- Curated category slug.
-- Province and Kabupaten/Kota names.
-- Optional address text.
-- One primary link, one purchase link, one order/contact link, plus up to five social links.
-- Owner-managed avatar (JPEG, PNG or WebP, maximum 5 MB).
-- Moderation lifecycle: `pending_review`, `approved`, `rejected`, `suspended`.
+## Approved first-claim flow
 
-The profile model intentionally stores province and Kabupaten/Kota names rather than importing unverified administrative codes. An authoritative licensed reference dataset can be added separately.
+There is no standalone account signup, business registration queue or manual review.
 
-## Link detection
+1. User clicks Claim #1.
+2. User selects a Kabupaten/Kota and a target position: #1 Wilayah or #1 Kategori.
+3. Category is required for a #1 Kategori claim. The UMKM's own category is stored on its profile for both claim types.
+4. User fills in the UMKM profile inside the claim flow.
+5. Server creates one claim/payment intent at exactly Rp20.000.
+6. User completes payment.
+7. Trusted provider confirmation is validated server-side.
+8. The profile is published and the selected position is assigned immediately in the same database transaction.
 
-Accepted social profile hosts are Instagram, Threads, X/Twitter, TikTok and Facebook. The API normalizes the platform from the hostname and extracts a handle only for recognizable profile URL shapes. It does not scrape arbitrary profile pages or make server-side requests to user-supplied URLs.
+A #1 Wilayah position is the overall champion across all categories for one Kabupaten/Kota. A #1 Kategori position is one champion for one category in that same Kabupaten/Kota. They are independent positions. One Rp20.000 payment claims only one position; holding both requires two claims/payments. Reclaiming a lost position costs Rp20.000 again.
 
-Primary links may be websites or supported social profiles. Purchase links identify supported marketplaces when recognized. Order links identify WhatsApp, GoFood and Grab/other ordering channels when recognized. Unknown valid HTTPS destinations are stored as `other` where allowed.
+## Business profile fields
 
-Social avatar/profile metadata columns are server-managed: the authenticated profile submission RPC does not allow callers to set remote profile image URLs or provider IDs.
+The claim form collects the public business profile: business name, short description, one primary category, province and Kabupaten/Kota, optional address, avatar, website/social links, purchase link and order/contact link.
 
-## API
+Personal contact details, claim capability and payment references must be separated from public profile fields. Collect only what is needed for claim confirmation and later owner recovery.
 
-- `GET /api/business-profiles`: approved public profiles, with optional `province`, `regency`, `category`, and `limit` query parameters.
-- `GET /api/business-profiles/:slug`: one approved public profile.
-- `POST /api/business-profiles`: requires a verified Supabase user bearer token; creates the profile and its links atomically as `pending_review`.
-- `GET /api/me/business-profiles`: authenticated owner's own profiles, including moderation status.
-- `POST /api/business-profiles/:id/avatar`: authenticated owner upload, file-signature validation, private Storage object and signed response URL.
+The first claim must not require a standalone account. A future profile-management or recovery mechanism is a separate design task and must not delay automatic activation.
 
-The API uses only the project's publishable key plus each caller's access token. It does not use a service-role or secret key. Database access is subject to RLS.
+## Links and avatar handling
 
-## Security model
+The existing link parser recognizes common social, marketplace and ordering hosts and extracts handles only from known URL shapes. It must not scrape arbitrary profile pages or make server-side requests to untrusted user-provided URLs.
 
-- Anonymous users can read approved profiles and their approved links only.
-- Authenticated owners can read their own pending/rejected/approved profiles and manage their own avatar.
-- Submission is atomic through `submit_business_profile(jsonb,jsonb)`, with a limit of three active pending/draft profiles per owner.
-- Exactly one primary, purchase and order link are required. Total links are limited to 3–8.
-- Remote social metadata is not client-writable.
-- Avatar bucket is private. Storage read policies allow approved profile avatars to anonymous users and allow authenticated owners to read their own.
-- Admin moderation permissions are deliberately not granted yet. The review process needs a separate audited admin-role design.
+The existing private avatar bucket was designed for authenticated owners and approved profiles. Before claim-first activation, replace that access model with a narrow claim-scoped upload capability. An unpaid claim must never grant public profile visibility.
 
-## Environment
+## Legacy API routes to replace
 
-Cloudflare Worker bindings:
+- POST /api/business-profiles currently requires a verified Supabase bearer token and creates a pending_review profile. This is not the approved Claim #1 flow.
+- GET /api/me/business-profiles is based on standalone owner authentication and is not part of the first-claim journey.
+- Existing avatar upload route relies on authenticated owner identity and must be replaced with claim-scoped upload authorization.
 
-- `SUPABASE_URL`
-- `SUPABASE_PUBLISHABLE_KEY`
+Target API direction:
+- POST /api/claims — creates one claim for one position and a server-priced Rp20.000 payment intent.
+- GET /api/claims/:id — reads safe claim status using a scoped capability.
+- POST /api/webhooks/{provider} — processes authenticated provider events, idempotently.
+- Public business-profile GET endpoints expose only profiles activated by a successful verified claim.
 
-Both values are project configuration/public API details, not secret credentials. The backend never uses a Supabase secret/service-role key.
+## Security and correctness requirements
 
-For local development, set the same variables in the Worker runtime environment. Do not add Supabase secret keys to `.env`, GitHub, or Cloudflare plaintext variables.
+The browser cannot set payment amount, paid status, rank or current champion. The server must bind the claim to one unique position and one payment intent. A trusted provider event must match exact destination, amount, currency, reference and claim.
 
-## Verification status
+Apply verified events atomically and serialize concurrent claims for the same position. Duplicate events must not duplicate payment or champion transitions. Store payment and champion history append-only.
 
-Database migrations are applied to the currently empty KenalanUMKM Supabase project. CI/preview validation is required before treating the Worker routes as deployed. The leaderboard still uses simulated champion rows until a separate integration part changes its read source.
+## Payment provider
+
+Moota remains a candidate only. Verify current official API and webhook behavior, bank coverage, account requirements, pricing/limits and written commercial permission before production integration. Do not invent endpoint, signature or notification semantics.
