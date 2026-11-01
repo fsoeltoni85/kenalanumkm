@@ -61,10 +61,10 @@ Google Login through Supabase Auth is the only user sign-in method. Do not add a
 9. Show payment instructions from the configured provider.
 10. Show a pending state while waiting for trusted provider confirmation. The browser cannot declare payment successful.
 11. After server-side validation, apply the claim to exactly one board.
-12. Move the selected profile to #1, move other entries down while preserving their relative order, and show the updated leaderboard.
+12. If the profile is new to the board, insert it at #1 and shift current entries down one place. If the profile is already listed, move its existing row to #1; entries that were above it move down one place and entries below it keep their positions. Show the updated leaderboard.
 13. Show a receipt/reference for the successful claim.
 
-If the same profile already appears on the selected board, move that existing entry to #1 instead of creating a second row. A claim for another board is separate and does not change earlier boards.
+If the same profile already appears on the selected board, move that existing entry to #1 instead of creating a second row. Only entries that were above it move down; entries below it keep their positions. A new profile is inserted at #1 and all existing entries move down one place. A claim for another board is separate and does not change earlier boards.
 
 There is no manual admin approval between valid payment confirmation and ranking update.
 
