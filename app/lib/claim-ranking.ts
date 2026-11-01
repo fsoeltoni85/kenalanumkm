@@ -343,7 +343,6 @@ export function applyClaimPaymentWebhook(
     entries: [...otherBoardEntries, ...sortedEntries],
   };
 
-  const previousPosition = previousEntry?.position;
   const newPosition = sortedEntries.find((entry) => entry.profileId === claim.profileId)?.position;
   const outcome: ClaimRankingOutcome = !previousEntry
     ? (newPosition === 1
