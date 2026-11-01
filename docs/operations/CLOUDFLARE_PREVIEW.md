@@ -14,6 +14,14 @@ The approved target product rules are:
 - The latest successfully confirmed claim moves the selected profile to #1; other entries shift down while keeping their relative order.
 - Reclaiming the same board moves the existing profile entry to #1 instead of creating a duplicate.
 - Public browsing does not require login; Claim #1 requires Google Login.
+- Claim flow additionally requires OTP to the UMKM business phone/SMS or WhatsApp contact; this proves channel access only, not legal ownership.
+- Any city/regency or province board may be selected without matching the business's actual location.
+- Distinct duplicate profiles for the same brand/branch/business are allowed; only repeated claims by the exact same profile ID reuse its single board row.
+- Each Google account may save unlimited profiles.
+- Customer price is exactly Rp20.000 all-in; the platform absorbs payment-provider fees.
+- Each payment intent expires after 15 minutes; late-payment handling remains open.
+- Ranking order uses server-recorded receipt time of valid authenticated provider webhooks, not provider paid_at.
+- No refund solely because a profile is displaced; defined exceptions are duplicate charges, system/provider errors or legal requirements.
 - No public map, map pins or browser location permission request.
 
 The current preview remains the earlier leaderboard/foundation prototype. It uses synthetic sample businesses, stake values, category modes and ranking order labelled DATA SIMULASI. It does not yet implement the three approved board scopes, Google Login or the real payment flow end to end. Do not interpret the current demo ranking/order or period controls as the approved production rules.
