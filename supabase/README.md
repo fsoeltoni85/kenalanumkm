@@ -20,12 +20,15 @@ The legacy manual review lifecycle does not match the current product. Replace i
 - Public leaderboard browsing works without login.
 - Claim #1 and private profile management require a Google-authenticated Supabase user.
 - Profiles are linked to the authenticated auth.users ID so the same account can reuse them.
-- Google Login does not prove legal ownership of the named UMKM.
+- Google Login plus OTP to the UMKM phone/SMS or WhatsApp contact verifies account and contact-channel access only; it does not prove legal ownership or representative authority.
+- Any city/regency or province board may be selected regardless of profile address or operating location.
+- Each Google account may save unlimited profiles. Duplicate profiles are permitted across accounts and branches; do not implement duplicate business-name/address/contact constraints.
+- The exact same profile ID can have only one row per board; a new profile ID describing the same business is not deduplicated.
 - Three independently claimable boards exist: one Kabupaten/Kota, one Provinsi and one Indonesia.
 - Each successful claim costs exactly Rp20.000 and affects one board only.
 - All UMKM compete together; categories are descriptive metadata and not leaderboard dimensions.
 - A new profile is inserted at #1 and all existing entries shift down. If the profile already has an entry on that board, update and move that row to #1; entries that were above it shift down while entries below it keep their positions.
-- A profile can have only one row per board. Reclaim updates that row rather than inserting a duplicate.
+- The same exact profile ID can have only one row per board; reclaim updates that row rather than inserting a duplicate. Distinct profile IDs may represent the same business and are allowed to have separate rows on the same board.
 - To appear on another board, the business must make another separate Rp20.000 claim.
 
 ## Target database model
@@ -39,7 +42,10 @@ A leaderboard scope is one of:
 
 Do not derive province or national entries by summing smaller boards.
 
-The server creates each payment intent for exactly IDR 20.000 and binds it to one profile and one board. A provider must uniquely match each same-amount payment to its own claim reference. Amount-only matching is insufficient.
+The server creates each payment intent for exactly IDR 20.000 and binds it to one profile and one board.
+
+No refund is due solely because a profile is displaced. Refund exceptions are duplicate charges, system/provider errors or legal requirements; the detailed workflow remains open. Late payments after expiry, chargebacks, reversals and mistaken payments remain open. Business-contact OTP proves access to a phone/WhatsApp channel only.
+ The customer price is all-in; the platform absorbs provider/bank fees. Every intent expires 15 minutes after server creation. A provider must issue a unique invoice/QRIS/VA/payment reference and authenticate a webhook that maps each same-amount payment to its own claim. Amount-only matching is insufficient. Ranking order uses the server-recorded receipt time of the valid webhook, not provider paid_at.
 
 ## Migration discipline
 
