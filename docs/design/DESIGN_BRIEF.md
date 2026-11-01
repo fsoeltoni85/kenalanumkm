@@ -48,6 +48,7 @@ There are three independent scopes: Kabupaten/Kota, Provinsi and Indonesia. They
 - The header shows Login dengan Google when signed out.
 - When signed in, show the account and a Logout button.
 - Users can select a previously saved UMKM profile or create one. Avoid asking for the same business information on every claim.
+- Each account may save an unlimited number of profiles; do not show an arbitrary saved-profile quota.
 - Google Login identifies the KenalanUMKM account, not legal ownership of the business.
 - After choosing or creating a profile, the claim flow verifies access to the supplied business phone number through phone/SMS or WhatsApp OTP. This is contact-channel verification, not legal ownership verification.
 
@@ -57,7 +58,7 @@ Show Rp20.000 as the same fixed price for Kabupaten/Kota, Provinsi and Indonesia
 Rp20.000 is all-in for the customer; the platform absorbs provider fees. The claim payment intent expires after 15 minutes. Do not show a customer-facing processing-fee surcharge. No refund is due solely because a profile is displaced; the defined exceptions are duplicate charges, system/provider errors or legal requirements.
 
 
-Make pending payment distinct from success. Only trusted server-verified payment moves the profile to #1. Show a clear success state with the updated position and payment reference.
+Make pending payment distinct from success. Only a valid authenticated provider webhook moves the profile to #1; the server-recorded webhook receipt time determines ordering, not provider paid_at. Show a clear success state with the updated position and payment reference.
 
 ## Visual system
 
