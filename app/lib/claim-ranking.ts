@@ -155,10 +155,10 @@ function withRecordedEvent(
     processedWebhookEventKeys: [...state.processedWebhookEventKeys, webhookEventKey],
     processedTransactionKeys: [...state.processedTransactionKeys, transactionKey],
     unresolvedWebhookEventKeys: extra.unresolved
-      ? [...extra.unresolved, webhookEventKey]
+      ? [...state.unresolvedWebhookEventKeys, webhookEventKey]
       : state.unresolvedWebhookEventKeys,
     duplicatePaymentEventKeys: extra.duplicate
-      ? [...extra.duplicate, webhookEventKey]
+      ? [...state.duplicatePaymentEventKeys, webhookEventKey]
       : state.duplicatePaymentEventKeys,
   };
 }
