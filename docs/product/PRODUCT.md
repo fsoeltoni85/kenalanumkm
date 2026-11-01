@@ -71,16 +71,16 @@ The header shows Login dengan Google when signed out; when signed in, it shows t
 Google authentication and business-contact OTP are not legal business-ownership verification. OTP confirms access to the supplied phone/WhatsApp channel only. Do not use owner-verified or legally-verified wording based on these checks.
 
 ## Claim experience
-1. Complete the business-contact OTP challenge after choosing or creating the profile; it confirms access to that phone/WhatsApp channel only.
 
 1. Click Claim #1.
 2. Complete Google Login if required.
 3. Choose a board: Kabupaten/Kota, Provinsi or Indonesia.
-4. Select the location required by that board.
+4. Select the location required by that board. The selected city/regency or province does not need to match the business's descriptive or physical location.
 5. Choose a saved UMKM profile or create one.
-6. Review the selected board, profile and fixed Rp20.000 price.
-7. Pay.
-8. After trusted payment confirmation, move the profile to #1 and show the updated board.
+6. Complete the business-contact OTP challenge through phone/SMS or WhatsApp. It confirms access to that contact channel only, not legal ownership.
+7. Review the selected board, profile and fixed all-in price Rp20.000.
+8. Pay using the unique payment reference created for this claim.
+9. After an authenticated valid provider webhook is received, the server uses its receipt time to apply the profile to #1 on the selected board and displays the updated leaderboard.
 
 For a Kabupaten/Kota board, choose a province and then a city/regency. For a province board, choose one province. For Indonesia, no lower-level location is required.
 
