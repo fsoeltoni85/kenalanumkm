@@ -6,7 +6,7 @@
 
 KenalanUMKM is an Indonesia-only pay-to-rank leaderboard for UMKM. A business pays a fixed **Rp20.000** to move its profile to the top of one selected leaderboard.
 
-The user chooses Kabupaten/Kota, Provinsi or Indonesia. All business types compete together on the selected board. The latest successfully confirmed claim appears at #1. A new profile entry is inserted at the top and existing entries move down; an existing profile is moved to the top without creating a duplicate, while everyone else's relative order is preserved.
+The user chooses Kabupaten/Kota, Provinsi or Indonesia. All business types compete together on the selected board. The latest valid authenticated provider webhook received by the server moves the selected profile to #1; provider paid_at does not determine the order. A new profile entry is inserted at the top and existing entries move down; an existing profile is moved to the top without creating a duplicate, while everyone else's relative order is preserved.
 
 ## Core product rules
 
@@ -44,9 +44,10 @@ No Kecamatan, Kelurahan or Desa boards. No public map, map pins, browser geoloca
 
 - One successful claim costs exactly Rp20.000.
 - A claim targets exactly one selected board and one UMKM profile.
-- The newest valid, server-confirmed claim is placed at #1.
+- The newest valid authenticated provider webhook received by the server moves the selected profile to #1; provider paid_at does not determine order.
 - For a new profile on a board, insert at #1 and shift all current entries down one place. For an existing profile, move its row to #1; only entries previously above it change position. Other profiles always keep their relative order.
 - A profile already on that board is moved to #1 rather than duplicated.
+- Distinct profile IDs may represent the same brand, branch or physical UMKM and are not deduplicated, even across Google accounts. The no-duplicate rule applies only to a repeated claim by the same profile ID on the same board.
 - A business may appear on multiple boards only after separate claims and payments.
 - Previous payments are history, not ranking points.
 - No auction, bidding, outbid increments, dynamic pricing or cumulative payment score.
