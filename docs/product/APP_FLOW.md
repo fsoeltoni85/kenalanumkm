@@ -30,6 +30,8 @@ Visitors can browse every board without logging in:
 - No daily/weekly/monthly ranking modes or automatic reset.
 
 For a Kabupaten/Kota board, select a province and then one city/regency. A province board needs one province selection. The Indonesia board needs no lower-level location.
+The selected city/regency or province is an unrestricted leaderboard destination. It does not need to match the UMKM profile's descriptive location or verified operating area; do not require local-address proof.
+
 
 ## Login state and navigation
 
@@ -43,7 +45,7 @@ For a Kabupaten/Kota board, select a province and then one city/regency. A provi
 - Provide access to the user's saved UMKM profiles.
 - Logout must not delete profiles, payment history or board entries.
 
-Google Login through Supabase Auth is the only user sign-in method. Do not add anonymous sign-in, email OTP, SMS/WhatsApp OTP or a separate password form.
+Google Login through Supabase Auth is the only account sign-in method. Do not add anonymous sign-in, email OTP, SMS/WhatsApp OTP login or a separate password form. A separate business-contact OTP through phone/SMS or WhatsApp is required during claim verification; it is not a sign-in method.
 
 ## Claim #1 flow
 
@@ -56,13 +58,14 @@ Google Login through Supabase Auth is the only user sign-in method. Do not add a
    - Provinsi: select one province.
    - Indonesia: no lower-level location.
 6. User selects an existing saved UMKM profile connected to the Google account or creates a new profile.
-7. Show a review step with the selected profile, target board and fixed price Rp20.000.
-8. Backend creates one claim and payment intent for exactly Rp20.000.
-9. Show payment instructions from the configured provider.
-10. Show a pending state while waiting for trusted provider confirmation. The browser cannot declare payment successful.
-11. After server-side validation, apply the claim to exactly one board.
-12. If the profile is new to the board, insert it at #1 and shift current entries down one place. If the profile is already listed, move its existing row to #1; entries that were above it move down one place and entries below it keep their positions. Show the updated leaderboard.
-13. Show a receipt/reference for the successful claim.
+7. User supplies or confirms the UMKM business contact number and completes an OTP challenge through phone/SMS or WhatsApp. This confirms access to that contact channel only, not legal ownership or authority.
+8. Show a review step with the selected profile, target board and fixed all-in price Rp20.000.
+9. Backend creates one claim and payment intent for exactly Rp20.000; the intent expires 15 minutes after server creation.
+10. Show payment instructions from the configured provider.
+11. Show a pending state while waiting for an authenticated provider webhook. The browser cannot declare payment successful.
+12. Authenticate and match the webhook using its unique provider payment reference, record the server-side webhook receipt time and apply the claim to exactly one board.
+13. If the profile is new to the board, insert it at #1 and shift current entries down one place. If the profile is already listed, move its existing row to #1; entries that were above it move down one place and entries below it keep their positions. Show the updated leaderboard.
+14. Show a receipt/reference for the successful claim.
 
 If the same profile already appears on the selected board, move that existing entry to #1 instead of creating a second row. Only entries that were above it move down; entries below it keep their positions. A new profile is inserted at #1 and all existing entries move down one place. A claim for another board is separate and does not change earlier boards.
 
@@ -72,7 +75,7 @@ There is no manual admin approval between valid payment confirmation and ranking
 
 A first-time user creates an UMKM profile after Google Login. Store the profile against the authenticated Supabase user ID.
 
-On a later claim, the same Google account sees its saved profiles and can select one without typing the business details again. Profile edits must not change ranking order. The maximum number of profiles per account has not been decided.
+On a later claim, the same Google account sees its saved profiles and can select one without typing the business details again. Each account may save an unlimited number of profiles. Profiles may duplicate the same business, branch or physical UMKM, including across accounts; do not detect, block, auto-merge or deduplicate them. Profile edits must not change ranking order.
 
 Google Login identifies the account controlling the profile within KenalanUMKM; it does not prove legal ownership of the business. Avoid verified-owner wording unless a separate ownership check is approved and completed.
 
@@ -82,10 +85,13 @@ Google Login identifies the account controlling the profile within KenalanUMKM; 
 - The target board and profile are fixed by the server-side claim record.
 - Payment matching must use a unique provider transaction/reference or equivalent provider-supported mechanism; amount-only matching is insufficient.
 - Provider notification must be authenticated, matched to one pending payment intent and processed idempotently.
-- Validate provider identity, reference, destination, amount, currency, claim binding, trusted payment time and duplicate status.
+- Validate provider identity, unique payment reference, destination, exact amount, currency, claim binding, payment-intent expiry and duplicate status. Rank using the server-recorded receipt time of the authenticated valid webhook, not provider paid_at.
 - Pending, failed, client-reported or unverified payments never change a board.
+- Rp20.000 is the all-in customer price; the platform absorbs provider/bank transaction fees.
+- Each payment intent expires after 15 minutes. Late-payment handling remains undecided.
+- No refund solely because a profile is displaced. Exceptions are duplicate charges, system/provider errors or legal requirements; the exception workflow is not yet defined.
 - Claims for the same board must be applied deterministically so each profile has only one entry on that board.
-- Never use a browser-provided timestamp to determine order.
+- Never use a browser timestamp or provider paid_at timestamp to determine order. If valid webhook receipt times tie, tie-breaking remains undecided.
 
 Moota is only a candidate provider. Do not implement assumed webhook or signature behavior until its current official documentation, account requirements, commercial permission, pricing/limits and ability to match identical Rp20.000 payments are verified.
 
@@ -95,4 +101,4 @@ The current preview is still the earlier leaderboard/foundation prototype. Its g
 
 ## Not part of the flow
 
-No map, map pin, browser geolocation, Kecamatan/Kelurahan/Desa board, anonymous claim session, phone/SMS/WhatsApp OTP, email OTP, category competition, manual listing review, auction, bid increment, cumulative payment score or automatic ranking reset.
+No map, map pin, browser geolocation, Kecamatan/Kelurahan/Desa board, anonymous claim session, phone/SMS/WhatsApp OTP as account login, email OTP, category competition, manual listing review, auction, bid increment, cumulative payment score or automatic ranking reset. Business-contact OTP by phone/SMS or WhatsApp is in scope for claim verification.
