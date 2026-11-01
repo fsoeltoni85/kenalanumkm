@@ -21,6 +21,8 @@ The fixed price is Rp20.000 for one selected position. There is no bid or outbid
 
 One confirmed payment can activate only one selected position. If a business claims both #1 Wilayah and #1 Kategori, it completes two separate claims and payments.
 
+Relative ordering across different Kabupaten/Kota is not defined by this local claim rule. Do not calculate national or province-wide ranks from cumulative payment, clicks or payment recency until a separate cross-city display rule is approved. The UI should show local #1 champions without inventing a cross-city scoring model.
+
 ## Architecture
 
 Browser uses public/publishable credentials only. Server routes validate claim data and payment state. RLS is mandatory for exposed tables. Database is the source of truth for UMKM profiles, geography, claims, payment records, position ownership and champion history.
