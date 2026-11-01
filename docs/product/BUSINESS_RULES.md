@@ -91,7 +91,7 @@ Public visitors can browse all leaderboards without logging in. Google Login thr
 - Logging in again with the same Google account restores access to that account's saved profiles.
 - Each Google account may save an unlimited number of UMKM profiles. This does not create any duplicate-profile restrictions.
 
-In addition to Google Login, the claim flow requires an OTP sent to the business contact number supplied for the UMKM, using **phone/SMS or WhatsApp** as the delivery channel. The user must successfully enter the OTP to demonstrate access to that contact channel.
+In addition to Google Login, the UMKM business contact number must be OTP-verified through **phone/SMS or WhatsApp** before that profile is used for a claim. A successful OTP demonstrates access to the contact channel only. Whether verification is reused for later claims, how long it remains valid, and when re-verification is required remain open; do not assume either one-time-only or every-claim verification.
 
 This OTP confirms access to the supplied phone/WhatsApp channel only. It does **not** prove legal ownership of the business, legal authority to represent it, or that the business operates in the selected leaderboard area. Do not show an owner-verified or legally-verified badge based on Google Login and contact OTP.
 
@@ -103,7 +103,7 @@ Google OAuth remains the only account sign-in method. Phone/SMS/WhatsApp OTP is 
 2. If signed out, they log in with Google and return to the claim flow.
 3. User selects exactly one board: Kabupaten/Kota, Provinsi or Indonesia.
 4. User selects an existing saved UMKM profile or creates a new profile.
-5. User supplies or confirms the UMKM business contact number and completes the OTP challenge through phone/SMS or WhatsApp.
+5. Ensure the UMKM business contact number is OTP-verified through phone/SMS or WhatsApp before using the profile for a claim. If it is not yet verified, complete the OTP challenge. Re-verification timing and frequency remain open.
 6. The server creates one claim and one payment intent for exactly Rp20.000.
 7. The user pays using the configured provider method.
 8. The payment intent is valid for **15 minutes** from its server-created time.
@@ -111,7 +111,7 @@ Google OAuth remains the only account sign-in method. Phone/SMS/WhatsApp OTP is 
 10. The server records the webhook receipt time and applies the ranking movement to exactly the selected board.
 11. The user sees the updated board and a claim/payment reference.
 
-The exact OTP provider, OTP lifetime, resend limit, attempt limit and re-verification frequency have not been decided and must not be invented.
+The exact OTP provider, OTP lifetime, resend limit, attempt limit, verified-state validity period and re-verification frequency have not been decided and must not be invented.
 
 A claim does not change a leaderboard merely because the user submitted a form, opened a payment page, uploaded a screenshot or returned to the browser. Only a valid authenticated provider webhook matched to the unique claim/payment reference can trigger a ranking movement.
 
