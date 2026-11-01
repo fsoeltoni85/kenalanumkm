@@ -77,7 +77,7 @@ Profile content is collected inside Claim #1, not through separate registration.
 
 ## Demo data
 
-The preview uses synthetic businesses and champion assignments to demonstrate both position types and the geographic views. DATA SIMULASI remains visible. Demo businesses, payments and claim confirmations are not real. Claim #1 and real payment actions remain disabled until the end-to-end claim/payment milestone is implemented and explicitly enabled.
+The current preview is still the earlier leaderboard/foundation prototype. Its business names and sample values are synthetic; it does not yet implement or display the two approved position types end to end. Do not treat its old ranking order or period controls as approved product rules. DATA SIMULASI remains visible. Demo businesses, payments and claim confirmations are not real. Claim #1 and real payment actions remain disabled until the claim-first flow and payment verification are implemented and explicitly enabled.
 
 ## Future profile management
 
