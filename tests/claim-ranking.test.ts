@@ -337,6 +337,45 @@ describe("independent leaderboard claim ordering", () => {
 
 });
 
+  it("rejects an unauthenticated webhook before it can consume a transaction identity", () => {
+    const state = {
+      ...emptyLeaderboardRankingState(),
+      processedTransactionKeys: ["provider-test:txn-1"],
+    };
+    const result = applyClaimPaymentWebhook(
+      state,
+      makeClaim(),
+      makeWebhook({ eventId: "evt-forged", signatureVerified: false }),
+    );
+
+    expect(result.outcome).toEqual({
+      status: "rejected",
+      reason: "webhook_signature_not_verified",
+    });
+    expect(result.state).toEqual(state);
+    expect(result.state.processedWebhookEventKeys).toHaveLength(0);
+    expect(result.state.duplicatePaymentEventKeys).toHaveLength(0);
+  });
+
+  it("treats equal receipt time on a repeat claim as ambiguous", () => {
+    const state = {
+      ...emptyLeaderboardRankingState(),
+      entries: [makeEntry("profile-new", 1, "2026-11-01T10:01:00.000100Z")],
+    };
+    const result = applyClaimPaymentWebhook(
+      state,
+      makeClaim(),
+      makeWebhook({ receivedAt: "2026-11-01T10:01:00.000100Z" }),
+    );
+
+    expect(result.outcome).toEqual({
+      status: "ambiguous_order",
+      reason: "equal_webhook_receipt_timestamp",
+    });
+    expect(result.state.entries).toEqual(state.entries);
+    expect(result.state.unresolvedWebhookEventKeys).toContain("provider-test:evt-1");
+  });
+
 describe("payment validation and unresolved cases", () => {
   it("is idempotent for a repeated webhook event", () => {
     const first = applyClaimPaymentWebhook(
