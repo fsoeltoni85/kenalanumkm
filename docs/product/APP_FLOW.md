@@ -2,70 +2,81 @@
 
 ## Information architecture
 
-Public: Indonesia Top 20 city-champion leaderboard → Province → Kabupaten/Kota → Category → future UMKM detail.
+Public leaderboard: Indonesia → Province → Kabupaten/Kota → position type → leaderboard/profile.
 
-Future owner area: dashboard, listing management, ownership verification and stake/payment history.
-Future admin area: listing review, geography/category management, payment reconciliation and audit.
+Position types:
+- **#1 Wilayah:** the overall champion of one Kabupaten/Kota, across all categories.
+- **#1 Kategori:** the champion of one category inside one Kabupaten/Kota.
+
+The Indonesia regional Top 20 contains #1 Wilayah champions. Category leaderboards show the #1 Kategori champion for the selected category in each Kabupaten/Kota. Province is a grouping/navigation layer. Kabupaten/Kota is the only competition geography.
 
 ## Initial visit
 
-1. Open the leaderboard immediately on the Indonesia scope.
-2. Do not request browser location permission.
-3. Keep the DATA SIMULASI label visible while the preview uses synthetic names, stake and clicks.
-4. Show the rules plainly: one champion per city; confirmed stake determines rank; clicks are statistics only.
+1. Open the leaderboard immediately on Indonesia scope.
+2. Do not request browser location permission or show a map.
+3. Keep DATA SIMULASI visible while the preview uses synthetic names and sample champion data.
+4. Explain that the two position types are independent, each claim costs Rp20.000, and the latest confirmed payment takes the selected position.
 
 ## Explore and leaderboard scopes
 
-The public experience has three scopes:
-- **Indonesia** — national Top 20 city champions, one representative per Kabupaten/Kota.
-- **Provinsi** — the city champions in the selected province, ordered by their stake.
-- **Kab/Kota** — exactly one champion for the selected city/regency, with its national rank visible.
+The public experience has three geographic scopes:
+- **Indonesia** — national Top 20 of #1 Wilayah champions, one per represented Kabupaten/Kota.
+- **Provinsi** — the #1 Wilayah champions in that province, ordered by their latest confirmed claim time.
+- **Kab/Kota** — the current #1 Wilayah champion plus the #1 Kategori positions for the city's available categories.
 
-Province is navigation/grouping only. No map is used in the public experience. Kecamatan, Kelurahan and Desa are not exposed as filters or navigation levels.
+A category leaderboard is a separate view: it shows the latest #1 Kategori champion for that category in each Kabupaten/Kota. Selecting a province groups those category champions by province.
 
-Selecting a province opens its province board and resets the selected city. Selecting a city opens the single-champion city board. Returning to Indonesia restores the national board. Search only filters the currently displayed board; it never changes rank.
+Selecting a province opens its board and resets the selected city. Selecting a city opens its regional champion and category champion information. Returning to Indonesia restores the national regional board. Search only filters the visible results; it never changes rank.
 
-## Categories and periods
+There is no map, no map pin, no city-centroid visualization and no browser geolocation flow. Kecamatan, Kelurahan and Desa are not exposed as filters or navigation.
 
-- Category pills filter the champion set.
-- **All Time** ranks by cumulative confirmed stake.
-- **Hari Ini** ranks by current-day confirmed stake.
-- **Harian** ranks by confirmed stake for the selected calendar date.
-- Click counts are shown as secondary metadata and never influence rank.
-- The national rank for a city champion is computed from the full national set for the same category and period.
+## Current champion and history
 
-Daily timezone/day cutoff remains subject to approval. Weekly/monthly boards are not part of the current MVP.
+- A position has one current champion at a time.
+- The champion remains in place until a later valid payment is confirmed for that exact position.
+- No automatic daily, weekly or monthly reset applies.
+- Historical payment and champion-change activity may be shown separately from the current leaderboard; history does not determine the current champion.
+- Do not present All Time, Hari Ini or date-based periods as separate ranking modes in the active leaderboard.
 
-## Top ranks and list hierarchy
+## Claim #1 flow
 
-- Indonesia and province boards present ranks 1–3 in a dedicated podium.
-- Rank 1 uses a light gold treatment, rank 2 a light sky/silver treatment, and rank 3 a light peach/bronze treatment.
-- The remaining ranks stay in a neutral scannable list.
-- Business name and stake are the strongest row signals; city and national rank are supporting metadata; clicks are muted secondary statistics.
-- City scope features exactly one local champion and displays its national rank.
+There is no standalone registration or signup screen.
 
-## Registration CTA (preview only)
+1. Visitor clicks **Claim #1**.
+2. Visitor chooses the Kabupaten/Kota to compete in.
+3. Visitor chooses **#1 Wilayah** or **#1 Kategori**. If #1 Kategori is selected, the visitor must choose one category.
+4. Show the fixed price of **Rp20.000** for the selected position and explain that one payment only claims that position.
+5. Open the UMKM form as part of this claim. Collect business name, primary category, short description, Kabupaten/Kota, province, optional address, avatar, main website/social link, purchase link and order/contact link.
+6. The backend validates the data and creates a claim intent plus payment intent for exactly Rp20.000.
+7. Show payment instructions from the configured provider.
+8. Show a pending state while waiting for a trusted provider confirmation. Do not let the browser declare the payment successful.
+9. After server-side verification and one atomic commit, publish the profile and immediately assign the selected #1 position to that business.
+10. Show the new champion state and a receipt/reference for the successful claim.
 
-1. Clicking **Daftarkan UMKM** opens an informational dialog titled “Saatnya usaha lo ikut dikenal.”
-2. The dialog shows a conceptual sequence: introduce the business, choose category and Kabupaten/Kota, data review, and eventual appearance on the city board.
-3. The dialog explicitly says registration is not open, the preview is not an active form, no data is submitted, and no payment is taken.
-4. The dialog can be closed with its close button or Escape.
-5. Do not implement a real registration form, data collection, verification requirements or payment until their rules and fields are separately approved.
+A single payment applies to one slot only. To claim both #1 Wilayah and #1 Kategori, the user completes and pays for two separate claims of Rp20.000 each. Reclaiming a position after losing it also costs Rp20.000.
+
+The first claim does not require creating an account. There is no manual listing review or approval stage between payment confirmation and publication.
+
+## Payment pending and confirmation
+
+- A pending claim is not public and does not change a champion.
+- The backend creates and stores the amount and target position; the client cannot set either to an arbitrary value.
+- Provider notification must be authenticated and matched to the exact pending payment intent.
+- Validate reference, recipient/destination, currency, amount, freshness and duplicate status.
+- Process provider events idempotently.
+- Serialize competing confirmations for the same position so there is exactly one champion.
+- Client redirects, screenshots and client-side status values are never authoritative payment proof.
+
+Moota is a candidate provider only. Do not claim it is approved or implement an assumed webhook/signature format until the current official API, account requirements, commercial permission, pricing and limits are verified.
+
+## Profile content
+
+Profile content is collected inside Claim #1, not through separate registration. Keep public details limited to the business information and links needed for discovery. Personal contact data and claim/payment capability tokens must not be exposed in public profile responses.
 
 ## Demo data
 
-Preview rows are generated synthetic city champions so that the scopes, categories, periods and leaderboard density can be reviewed. The DATA SIMULASI label stays visible. Demo city/business pairings, stake and click counts are not real registered businesses, payments, traffic or live rankings.
+The preview uses synthetic businesses and champion assignments to demonstrate both position types and the geographic views. DATA SIMULASI remains visible. Demo businesses, payments and claim confirmations are not real. Claim #1 and real payment actions remain disabled until the end-to-end claim/payment milestone is implemented and explicitly enabled.
 
-The sample set currently represents 20 cities to demonstrate the interaction. Provinces without sample city champions show an explicit empty state. Do not invent additional real-looking locations to fill the board.
+## Future profile management
 
-## Participation and payment
-
-Registration preview is informational only. Real registration and participation remain inactive until ownership/claim, minimum stake, tie-break, payment, expiry, fee and refund rules are approved. Do not implement a pay-to-rank checkout or import Outbid.lol's payment mechanics.
-
-## Future business detail
-
-Show only verified business name, category, Kabupaten/Kota, province, physical address, supplied description/contact links, current rank, confirmed stake and click count. Do not invent hours, photos, verification or contact details.
-
-## Future stake/payment (not enabled)
-
-Create pending payment intent server-side → show transfer instructions → receive provider event → verify account/amount/reference/currency/freshness/duplicate → append ledger entry exactly once → update derived total/rank → show status. Client never writes rank or ledger. Do not implement until minimums, expiry, fees, refund, tie-break and provider permission are approved.
+A way to edit or recover a claimed profile may be designed later. It must not change the approved first-claim flow into a signup-first experience or add manual review to champion activation.
