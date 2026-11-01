@@ -1,41 +1,5 @@
 -- Serialize owner submissions before checking the pending profile cap.
--- Correct JSON array column aliases and separate public/owner link visibility policies.
--- The public status value is safe to expose because RLS only returns approved rows.
-
-grant select (id, status)
-  on table public.business_profiles to anon;
-
-drop policy if exists "Business profile links are public when approved or visible to owner"
-  on public.business_profile_links;
-
-create policy "Approved business profile links are public"
-  on public.business_profile_links
-  for select
-  to anon
-  using (
-    exists (
-      select 1
-      from public.business_profiles p
-      where p.id = business_profile_links.business_id
-        and p.status = 'approved'
-    )
-  );
-
-create policy "Owners can read their profile links"
-  on public.business_profile_links
-  for select
-  to authenticated
-  using (
-    exists (
-      select 1
-      from public.business_profiles p
-      where p.id = business_profile_links.business_id
-        and (
-          p.status = 'approved'
-          or p.owner_user_id = (select auth.uid())
-        )
-    )
-  );
+-- The profile RPC remains SECURITY INVOKER; only its per-owner concurrency guard changes.
 
 create or replace function public.submit_business_profile(
   p_profile jsonb,
