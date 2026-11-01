@@ -24,7 +24,7 @@ The legacy manual review lifecycle does not match the current product. Replace i
 - Three independently claimable boards exist: one Kabupaten/Kota, one Provinsi and one Indonesia.
 - Each successful claim costs exactly Rp20.000 and affects one board only.
 - All UMKM compete together; categories are descriptive metadata and not leaderboard dimensions.
-- A newly confirmed claim moves the selected profile to #1 on its board. Other entries shift down while preserving their relative order.
+- A new profile is inserted at #1 and all existing entries shift down. If the profile already has an entry on that board, update and move that row to #1; entries that were above it shift down while entries below it keep their positions.
 - A profile can have only one row per board. Reclaim updates that row rather than inserting a duplicate.
 - To appear on another board, the business must make another separate Rp20.000 claim.
 
