@@ -1,0 +1,151 @@
+name: CI and Cloudflare Preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Pull request number to deploy a preview for"
+        required: true
+        default: "1"
+        type: string
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review, closed]
+  push:
+    branches: [main, "bootstrap/**", "feature/**", "feat/**"]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Lint, typecheck, test and build
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm run test
+      - name: Production build
+        run: npm run build
+
+  preview:
+    name: Deploy Cloudflare PR preview
+    needs: checks
+    if: >-
+      (github.event_name == 'pull_request' &&
+       github.event.action != 'closed' &&
+       github.event.pull_request.head.repo.full_name == github.repository) ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/bootstrap/kenalanumkm-foundation')
+    runs-on: ubuntu-latest
+    environment:
+      name: preview
+    concurrency:
+      group: cloudflare-preview-pr-1
+      cancel-in-progress: true
+    steps:
+      - name: Check Cloudflare deployment secret
+        id: credentials
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Explain skipped preview
+        if: steps.credentials.outputs.enabled != 'true'
+        run: |
+          {
+            echo "### Cloudflare Preview not deployed"
+            echo "Add the Cloudflare API token as the `CLOUDFLARE_API_TOKEN` secret in the GitHub `preview` environment, then push a new commit or rerun this workflow."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/checkout@v4
+        if: steps.credentials.outputs.enabled == 'true'
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.ref }}
+      - uses: actions/setup-node@v4
+        if: steps.credentials.outputs.enabled == 'true'
+        with:
+          node-version: 22
+      - name: Install dependencies
+        if: steps.credentials.outputs.enabled == 'true'
+        run: npm install --no-audit --no-fund
+      - name: Deploy isolated preview Worker
+        if: steps.credentials.outputs.enabled == 'true'
+        run: npx @vinext/cloudflare deploy --env preview
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: 311649d38b2aa47efbff87cae6921e2a
+      - name: Verify preview health
+        id: health
+        if: steps.credentials.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          preview_url="https://kenalanumkm-preview.kenalanumkm-preview.workers.dev"
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent --show-error "$preview_url/api/health" >/dev/null; then
+              break
+            fi
+            sleep 3
+          done
+
+          public_response=$(curl --fail --silent --show-error "$preview_url/api/business-profiles?limit=1")
+          echo "$public_response" | jq -e '.data != null and (.count | type == "number")' >/dev/null
+
+          owner_status=$(curl --silent --output /dev/null --write-out "%{http_code}" "$preview_url/api/me/business-profiles")
+          if [ "$owner_status" != "401" ]; then
+            echo "Unauthenticated owner API should return 401, received $owner_status" >&2
+            exit 1
+          fi
+
+          echo "Preview, Supabase public read, and owner API auth checks passed: $preview_url"
+          {
+            echo "### Cloudflare Preview"
+            echo "$preview_url"
+            echo
+            echo "- Supabase public profile endpoint: passed"
+            echo "- Unauthenticated owner endpoint: correctly returned 401"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "url=$preview_url" >> "$GITHUB_OUTPUT"
+  cleanup-preview:
+    name: Delete closed PR preview Worker
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete preview Worker if credentials are configured
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: 311649d38b2aa47efbff87cae6921e2a
+          WORKER_NAME: kenalanumkm-preview
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "Cleanup skipped: CLOUDFLARE_API_TOKEN is not configured."
+            exit 0
+          fi
+          curl --fail-with-body --silent --show-error \
+            --request DELETE \
+            --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/$WORKER_NAME"
