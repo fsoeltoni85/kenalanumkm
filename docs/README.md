@@ -1,15 +1,17 @@
 # KenalanUMKM Documentation
 
-This directory contains the project reference documents. Read them before implementing or changing product behavior.
+These documents define the product and delivery rules. Read them before implementing or changing product behavior.
 
 ## Product
 - [Product definition and scope](product/PRODUCT.md)
+- [Approved business and pricing rules](product/BUSINESS_RULES.md)
 - [Application flows](product/APP_FLOW.md)
 - [Design brief](design/DESIGN_BRIEF.md)
 
 ## Architecture
 - [Technical requirements and stack](architecture/TECHNICAL_REQUIREMENTS.md)
-- [Logical backend schema and security model](architecture/BACKEND_SCHEMA.md)
+- [Logical backend schema, legacy status and claim-first target](architecture/BACKEND_SCHEMA.md)
+- [Legacy profile backend and claim-first direction](architecture/BUSINESS_PROFILE_BACKEND.md)
 
 ## Delivery
 - [Implementation plan and acceptance gates](delivery/IMPLEMENTATION_PLAN.md)
