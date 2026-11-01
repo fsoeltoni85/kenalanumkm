@@ -36,6 +36,7 @@ If documents conflict, BUSINESS_RULES.md is authoritative for price, board scope
 - Every claim requires a unique provider-issued payment reference/invoice/QRIS/VA plus authenticated webhook; amount-only matching is forbidden.
 - Users may claim any city/regency or province board without physical-location matching.
 - Google Login is account sign-in; phone/SMS or WhatsApp OTP is a separate business-contact verification step, not account login.
+- Do not assume the contact verification lasts forever or must be repeated on every claim. OTP validity and re-verification frequency are still open product decisions.
 - Moota is a candidate only, not approved for production until matching, webhook authenticity, account requirements, commercial permission, pricing and limits are verified.
 
 ## Working rules
