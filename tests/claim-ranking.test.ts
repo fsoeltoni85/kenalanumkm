@@ -299,6 +299,42 @@ describe("independent leaderboard claim ordering", () => {
     expect(result.state.entries.filter((entry) => entry.boardId === "board-kota-bekasi")).toHaveLength(2);
   });
 
+  it("treats equivalent UTC timestamp spellings as an identical microsecond", () => {
+    const state = {
+      ...emptyLeaderboardRankingState(),
+      entries: [makeEntry("profile-a", 1, "2026-11-01T10:00:00.1Z")],
+    };
+    const result = applyClaimPaymentWebhook(
+      state,
+      makeClaim(),
+      makeWebhook({ receivedAt: "2026-11-01T10:00:00.100000Z" }),
+    );
+
+    expect(result.outcome).toEqual({
+      status: "ambiguous_order",
+      reason: "equal_webhook_receipt_timestamp",
+    });
+  });
+
+  it("records a successful latest claim even when the profile was already #1", () => {
+    const state = {
+      ...emptyLeaderboardRankingState(),
+      entries: [makeEntry("profile-new", 1, "2026-11-01T10:00:00.000000Z")],
+    };
+    const result = applyClaimPaymentWebhook(
+      state,
+      makeClaim(),
+      makeWebhook({ receivedAt: "2026-11-01T10:02:00.000100Z" }),
+    );
+
+    expect(result.outcome).toEqual({ status: "applied", reason: "profile_moved" });
+    expect(result.state.entries[0]).toMatchObject({
+      profileId: "profile-new",
+      position: 1,
+      lastClaimId: "claim-1",
+    });
+  });
+
 });
 
 describe("payment validation and unresolved cases", () => {
