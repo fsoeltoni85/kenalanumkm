@@ -2,36 +2,55 @@
 
 Project: kenalanumkm.
 
-## Existing applied foundation — legacy
+## Existing applied foundation — legacy parts remain
 
-The first backend profile foundation has been applied to this Supabase project. It includes:
-- public.business_categories: curated categories (9 seeded categories);
-- public.business_profiles: one physical UMKM profile, legacy owner reference and moderation lifecycle;
-- public.business_profile_links: primary, social, purchase and order URLs plus server-managed profile metadata;
-- private business-avatars Storage bucket with policies built around authenticated owners and approved profiles.
+The first profile foundation has already been applied to this Supabase project. It includes:
+- public.business_categories: nine descriptive categories;
+- public.business_profiles: UMKM profiles with an owner user reference and legacy moderation lifecycle;
+- public.business_profile_links: primary, social, purchase and order URLs plus server-managed metadata;
+- private business-avatars Storage bucket with policies built around legacy owner and moderation assumptions.
 
-This foundation predates the approved Claim #1 rules. Its owner signup, auth-required profile submission and manual moderation lifecycle are legacy and must not be extended as the active product journey.
+Preserve all already-applied migration history. Do not edit or delete applied migration files.
+
+The legacy manual review lifecycle does not match the current product. Replace its activation gates and conflicting policies through reviewed additive migrations. Existing tables may be adapted where appropriate; do not treat their old workflow as approved.
 
 ## Approved target model
 
-The approved product uses a claim-first flow with no standalone signup and no manual review:
-- one #1 Wilayah position per Kabupaten/Kota;
-- one #1 Kategori position per Kabupaten/Kota/category;
-- fixed Rp20.000 per selected position;
-- one payment claims exactly one selected position;
-- latest trusted, successfully confirmed payment becomes the champion for that position;
-- profile becomes public/live immediately after successful payment confirmation.
+- Supabase Auth with Google OAuth is the only user sign-in method.
+- Public leaderboard browsing works without login.
+- Claim #1 and private profile management require a Google-authenticated Supabase user.
+- Profiles are linked to the authenticated auth.users ID so the same account can reuse them.
+- Google Login does not prove legal ownership of the named UMKM.
+- Three independently claimable boards exist: one Kabupaten/Kota, one Provinsi and one Indonesia.
+- Each successful claim costs exactly Rp20.000 and affects one board only.
+- All UMKM compete together; categories are descriptive metadata and not leaderboard dimensions.
+- A newly confirmed claim moves the selected profile to #1 on its board. Other entries shift down while preserving their relative order.
+- A profile can have only one row per board. Reclaim updates that row rather than inserting a duplicate.
+- To appear on another board, the business must make another separate Rp20.000 claim.
 
-The target database model includes private claim intents, server-created payment intents, authenticated/deduplicated provider events, unique leaderboard positions and immutable champion-transition/payment history.
+## Target database model
+
+Use authenticated profile ownership, explicit board scopes, unique profile-board entries, private claim/payment intents, authenticated/deduplicated provider events, immutable payment history and leaderboard-movement history.
+
+A leaderboard scope is one of:
+- Kabupaten/Kota with one canonical city/regency ID;
+- Provinsi with one canonical province ID;
+- Indonesia with no lower-level geography ID.
+
+Do not derive province or national entries by summing smaller boards.
+
+The server creates each payment intent for exactly IDR 20.000 and binds it to one profile and one board. A provider must uniquely match each same-amount payment to its own claim reference. Amount-only matching is insufficient.
 
 ## Migration discipline
 
-The initial five migration versions have already been applied. Preserve their history. Do not edit or delete already-applied migration files to make the new workflow appear as though it existed earlier. Implement the claim-first model through reviewed additive migrations, then disable or replace legacy owner/moderation routes and policies. Keep all DDL in supabase/migrations.
+The initial five migration versions have already been applied. Preserve their history. Implement the new board model, Google account ownership and replacement of moderation gates through reviewed additive migrations. Keep DDL in supabase/migrations.
 
-All exposed tables require RLS and explicit grants. Provider events cannot be written by browser clients. The browser must never choose price, paid status or champion. No Supabase secret/service-role key may be exposed to the browser or public Worker configuration.
+All exposed tables require RLS and explicit grants. Provider events cannot be written by browser clients. The browser must never choose price, paid status or board order. No Supabase secret/service-role key may be exposed to the browser or public Worker configuration.
 
 ## Validation
 
-After schema changes, run database migration tests, public/private access checks, duplicate payment-event tests and Supabase Security and Performance Advisors. Do not claim that the new claim/payment model is active until its migration is applied, API routes are connected and end-to-end validation passes.
+After schema changes, run migration tests, public/private access checks, one-entry-per-profile-per-board tests, payment idempotency checks, relative-order tests and Supabase Security and Performance Advisors.
+
+Do not claim Google OAuth is configured or the new claim/board model is active until provider settings, migration, API routes and end-to-end tests have passed.
 
 The current leaderboard preview remains synthetic. No real claims or payments are processed in preview.
