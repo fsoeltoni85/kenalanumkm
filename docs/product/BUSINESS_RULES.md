@@ -102,6 +102,7 @@ Do not invent these rules:
 - bank/provider fees and whether they are included in Rp20.000;
 - final payment provider and proof it can match many identical Rp20.000 payments to separate claims;
 - maximum number of rows shown and pagination;
+- whether a Kabupaten/Kota or Provinsi claim must match the UMKM's physical business address, or whether a user may choose another area;
 - any separate proof of legal business ownership or authorization;
 - maximum UMKM profiles per Google account.
 
