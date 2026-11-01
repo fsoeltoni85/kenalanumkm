@@ -50,7 +50,7 @@ There are three independent scopes: Kabupaten/Kota, Provinsi and Indonesia. They
 - Users can select a previously saved UMKM profile or create one. Avoid asking for the same business information on every claim.
 - Each account may save an unlimited number of profiles; do not show an arbitrary saved-profile quota.
 - Google Login identifies the KenalanUMKM account, not legal ownership of the business.
-- After choosing or creating a profile, the claim flow verifies access to the supplied business phone number through phone/SMS or WhatsApp OTP. This is contact-channel verification, not legal ownership verification.
+- The business contact must be OTP-verified through phone/SMS or WhatsApp before the profile is used for a claim. Complete the challenge if the contact is not yet verified. This is contact-channel verification, not legal ownership verification; verification validity and re-verification timing remain undecided.
 
 ## Fixed price and payment states
 
