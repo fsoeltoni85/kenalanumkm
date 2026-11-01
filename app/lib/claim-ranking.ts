@@ -95,8 +95,8 @@ export const emptyLeaderboardRankingState = (): LeaderboardRankingState => ({
   processedWebhookEventKeys: [],
   processedTransactionKeys: [],
   processedClaimIds: [],
-  unresolved: true,
-  duplicate: true,
+  unresolvedWebhookEventKeys: [],
+  duplicatePaymentEventKeys: [],
 });
 
 /**
