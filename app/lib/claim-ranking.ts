@@ -194,6 +194,10 @@ export function applyClaimPaymentWebhook(
   if (!provider || !eventId || !transactionId) {
     return result(state, { status: "rejected", reason: "invalid_event_identity" });
   }
+  // Never let an unauthenticated notification consume or probe an event/transaction key.
+  if (!webhook.signatureVerified) {
+    return result(state, { status: "rejected", reason: "webhook_signature_not_verified" });
+  }
   if (state.processedWebhookEventKeys.includes(webhookEventKey)) {
     return result(state, { status: "duplicate_event" });
   }
@@ -202,9 +206,6 @@ export function applyClaimPaymentWebhook(
       withRecordedEvent(state, webhookEventKey, transactionKey, { duplicate: true }),
       { status: "duplicate_transaction" },
     );
-  }
-  if (!webhook.signatureVerified) {
-    return result(state, { status: "rejected", reason: "webhook_signature_not_verified" });
   }
   if (
     !claim.id.trim()
@@ -296,7 +297,7 @@ export function applyClaimPaymentWebhook(
     ? toEpochMicroseconds(previousEntry.lastWebhookReceivedAt)
     : null;
 
-  if (previousEntry && previousTimestamp !== null && receivedAt <= previousTimestamp) {
+  if (previousEntry && previousTimestamp !== null && receivedAt < previousTimestamp) {
     const nextState = {
       ...withRecordedEvent(state, webhookEventKey, transactionKey),
       processedClaimIds: [...state.processedClaimIds, claim.id],
