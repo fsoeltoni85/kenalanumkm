@@ -1,132 +1,108 @@
 # Business Rules — KenalanUMKM
 
-**Status:** Approved product rules  
+**Status:** Approved core product rules  
 **Market:** Indonesia only  
-**Fixed claim price:** Rp20.000
+**Fixed claim price:** Rp20.000 per successful claim
 
-This document is the source of truth for claim, pricing, champion ownership and leaderboard behavior. Product, UI, API, database, payment and operational changes must follow it.
+This document is the source of truth for price, account access, board scopes and ranking behavior.
 
-## 1. Competition unit
+## 1. The simple rule
 
-The only geographic competition unit is Kabupaten/Kota. The same rules apply across Indonesia.
+An UMKM pays **Rp20.000** to move its business profile to the top of one selected leaderboard. All UMKM compete together, regardless of what they sell. There are no separate category competitions.
 
-Each Kabupaten/Kota has two kinds of claimable #1 position:
+## 2. Three independent leaderboard choices
 
-### #1 Wilayah
+A user chooses exactly one board for each claim:
 
-One overall champion for the Kabupaten/Kota, competing across all business categories.
+1. **Kabupaten/Kota** — one selected city or regency.
+2. **Provinsi** — one selected province.
+3. **Indonesia** — the national leaderboard.
 
-### #1 Kategori
+Each board can be claimed directly and is independent.
 
-One champion per category within the same Kabupaten/Kota. Each category is its own independent position.
+- A Kabupaten/Kota claim does not automatically enter its province board.
+- A province claim does not automatically enter the Indonesia board.
+- Province and Indonesia boards are not calculated by adding up lower-level results.
+- To appear on more than one board, the business makes a separate Rp20.000 claim for each board.
 
-The two position types do not imply each other. A business that wins #1 Kategori does not automatically become #1 Wilayah, and the reverse is also true. A business may hold both positions, but each position must be claimed separately.
+For a Kabupaten/Kota claim, select the province and then the city/regency. For a province claim, select one province. For an Indonesia claim, no smaller location is selected.
 
-Province and Indonesia are display, grouping and navigation scopes. They are not additional claimable positions.
+## 3. Fixed price
 
-## 2. Fixed price
+Every successful claim costs exactly **Rp20.000**, regardless of the selected board. One payment applies to one board only.
 
-Every successful claim costs exactly **Rp20.000**.
+There is no auction, bid, outbid increment, minimum increase, dynamic price, special price for the current #1 or cumulative-payment score.
 
-The price is the same in every Kabupaten/Kota, for #1 Wilayah and #1 Kategori, for a first-time challenger and for a previous champion reclaiming the position.
+## 4. How the ranking moves
 
-One payment applies to one selected position. A claim for #1 Wilayah and a claim for a category position are separate transactions. A single payment must never activate two positions.
+**The latest successfully confirmed claim is shown at #1.** All other entries move down by one place while keeping their previous order.
 
-There is no outbid increment or minimum increase, auction, bidding, offer calculation, dynamic pricing based on the previous payment, special price for the current champion, or cumulative stake score used to determine the champion.
+Example: if Business E is at #5 and pays Rp20.000, E moves to #1. The previous #1 moves to #2, #2 moves to #3, #3 moves to #4 and #4 moves to #5.
 
-## 3. Champion replacement rule
+If a business already appears on the same board and pays again, its existing entry moves to #1. It must not appear twice on that board. Other businesses keep their relative order.
 
-The current champion of a position is the business attached to the latest successfully confirmed payment for that exact position.
+A business can appear on several boards only by paying separately for each one. A claim on one board never changes its position on another board.
 
-Example for one position:
+No daily, weekly or monthly reset applies.
 
-| Confirmed event | Current champion |
-|---|---|
-| A pays Rp20.000 | A |
-| B pays Rp20.000 | B |
-| A pays Rp20.000 again | A |
-| C pays Rp20.000 | C |
-| B pays Rp20.000 again | B |
+## 5. Business category
 
-The same sequence applies independently to a #1 Wilayah position or a #1 Kategori position.
+Category may be stored as descriptive information on a business profile. It does not affect eligibility, leaderboard position, ordering, claim price or which businesses compete together. There are no #1 Kategori boards or category-based ranking filters.
 
-The current champion keeps the position until a later valid claim payment is confirmed. A previous champion has no priority and must pay Rp20.000 again to reclaim the position.
+## 6. Google Login
 
-## 4. What counts as a successful claim
+Public visitors can browse all leaderboards without logging in. Google Login is required before continuing with Claim #1.
 
-Only a payment confirmation validated by the server from the configured payment provider can change a champion.
+- Signed out: the header shows **Login dengan Google**.
+- Signed in: the header shows the signed-in account and a **Logout** button.
+- If a signed-out visitor clicks Claim #1, send them through Google Login and then return them to the claim they started.
+- UMKM profiles are linked to the Google account that manages them. Returning users can select a saved profile instead of typing the same details again.
+- Logging out does not delete profiles, payment history or leaderboard positions.
+- Logging in again with the same Google account restores access to that account's saved profiles.
 
-A claim form submission, payment instruction display, screenshot, browser callback, user assertion or pending transfer is not proof of payment.
+Google Login confirms access to a Google account. It does **not** prove that the person is the legal owner or authorized representative of the named UMKM. Do not show an owner-verified badge based only on Google Login.
 
-Before applying a payment, the backend must validate provider identity and trusted event authenticity, transaction/reference identity, receiving account or destination configured for the claim, exact amount Rp20.000, expected currency IDR, relation to the pending claim/payment intent, event freshness and duplicate status.
+## 7. Claim and payment flow
 
-The provider adapter and exact validation method must follow the provider's current official documentation and approved account configuration. Moota is a candidate integration, not an automatically approved production dependency.
+1. Visitor clicks **Claim #1**.
+2. If signed out, they log in with Google and return to the claim flow.
+3. User selects one board: Kabupaten/Kota, Provinsi or Indonesia.
+4. User selects an existing saved UMKM profile or creates a new profile.
+5. The server creates one claim and one payment intent for exactly Rp20.000.
+6. User pays using the enabled payment method.
+7. The server validates trusted provider confirmation.
+8. The selected profile moves to #1 on that board.
+9. Existing entries move down without changing their relative order.
 
-## 5. Atomicity and duplicate protection
+No manual admin approval is required after a valid payment confirmation. Unpaid or unverified claims never change a leaderboard.
 
-A verified payment must have one atomic effect:
-1. mark the related payment as paid;
-2. record the provider event and immutable payment history;
-3. attach the claiming business to the selected position as current champion;
-4. record the champion transition;
-5. make the profile publicly live, if this is its first successful claim.
+## 8. Payment verification
 
-The transaction must be idempotent. Replaying the same provider event cannot charge, record or apply the claim a second time.
+Only a payment confirmation validated by the server from the configured provider can change a leaderboard. A form submission, payment instruction, screenshot, browser redirect or pending transfer is not proof of payment.
 
-Claims for the same position arriving near-simultaneously must be serialized by the database. The champion is the latest payment confirmation successfully committed for that position. One position cannot have two current champions.
+Every claim needs a unique payment/claim reference so the system can match a Rp20.000 payment to exactly one board and profile. Matching by amount alone is not sufficient because many users can pay the same fixed amount.
 
-A pending or failed later payment does not displace the current champion.
+The provider must support a reliable way to identify each payment and determine its trusted payment time or confirmation order. Do not use a timestamp supplied by the browser.
 
-## 6. Claim flow — no standalone registration
+Moota is a candidate only. It is not approved until its official API, account requirements, commercial permission, fees/limits and payment-matching behavior are verified.
 
-There is no separate signup or registration step before Claim #1.
+## 9. Audit requirements
 
-1. User clicks Claim #1.
-2. User chooses Kabupaten/Kota.
-3. User chooses #1 Wilayah or #1 Kategori; category is required for a category claim.
-4. User fills in the UMKM profile.
-5. Backend creates a claim and payment intent for Rp20.000.
-6. User follows payment instructions.
-7. Trusted provider confirmation is verified server-side.
-8. The profile becomes live and the selected #1 position changes immediately.
+Keep immutable claim, payment, provider-event and leaderboard-movement history. A repeat claim moves the profile on the selected board but does not erase earlier payment history.
 
-There is no manual review, editorial approval, moderation queue or pending-review publication gate in this flow.
+Duplicate provider notifications must not create duplicate ranking movements. Genuine separate payments must have separate transaction identities and valid claim intents.
 
-The first claim flow does not require a standalone account. Any future profile editing/owner recovery mechanism must be designed separately and must not introduce signup or manual review into the initial claim path.
+For close-together payments, ordering must be deterministic. Use a trusted provider payment timestamp when available and reliable. Otherwise, document the exact server-side confirmation order before enabling the provider. Never use browser timestamps.
 
-## 7. Leaderboard display rules
+## 10. Decisions still open
 
-- Every Kabupaten/Kota has at most one current #1 Wilayah champion.
-- Every Kabupaten/Kota/category combination has at most one current #1 Kategori champion.
-- The Indonesia Top 20 is a display of current #1 Wilayah champions, one per represented Kabupaten/Kota.
-- A selected-category board displays the #1 Kategori champion for that category in each represented Kabupaten/Kota.
-- A province view groups the corresponding city/regency champions for the selected board.
-- A city/regency view can present its #1 Wilayah champion and its #1 Kategori positions.
-- Current champions persist until replaced by a later successful payment; no automatic period reset applies.
-- Historical claims and champion transitions may be shown separately, but they do not accumulate into a score.
-- Click counts are informational only and never affect ranking.
-- **Relative ordering across different Kabupaten/Kota has not been approved yet.** These rules determine the champion within each local position; they do not define a national or province-wide score. Do not sort or label cities by cumulative payment, click count or payment recency, and do not show a Top 3 podium or numbered national ranks, until a separate cross-city display-order rule is approved.
+Do not invent these rules:
+- refunds, chargebacks, reversals and mistaken payments;
+- pending payment expiry and late payments;
+- bank/provider fees and whether they are included in Rp20.000;
+- final payment provider and proof it can match many identical Rp20.000 payments to separate claims;
+- maximum number of rows shown and pagination;
+- any separate proof of legal business ownership or authorization;
+- maximum UMKM profiles per Google account.
 
-## 8. Geography and presentation boundaries
-
-- Indonesia only.
-- Kabupaten/Kota is the smallest and only geographic competition level.
-- Province is a grouping/navigation layer.
-- No Kecamatan, Kelurahan or Desa competitions, filters or navigation.
-- No public leaderboard map, map pins, map-based ranking, browser geolocation or city-centroid coordinates.
-
-## 9. Data and audit requirements
-
-Keep immutable payment records, provider-event records and champion-transition history. A correction or refund, if such a policy is approved later, must be represented with an auditable compensating event and must not silently rewrite historical payment or champion records.
-
-Refunds, failed-transfer recovery, payment expiry, fees, cancellation and disputes are not approved by this document and must not be invented in implementation. They require a separately approved rule before being exposed to users.
-
-## 10. Examples that must remain true
-
-- A at #1 pays Rp20.000; A remains #1 until another valid claim is confirmed.
-- B pays Rp20.000 for the same position; B becomes #1 immediately after confirmation.
-- A pays Rp20.000 again; A becomes #1 again.
-- Paying Rp20.000 for a category position does not change the #1 Wilayah champion.
-- Paying Rp20.000 for #1 Wilayah does not change any category champion.
-- One Rp20.000 payment cannot claim both a regional and a category position.
-- Clicks, profile views and social engagement never replace a champion.
+These do not change the approved core rule: one confirmed Rp20.000 claim moves one profile to #1 on one selected board.
