@@ -91,7 +91,7 @@ For a trusted provider event:
 
 1. authenticate the provider event and reject duplicates;
 2. locate the exact pending payment intent and claim;
-3. validate reference, receiving destination, amount (IDR 20.000), currency, trusted payment time and claim state;
+3. validate unique reference, receiving destination, amount (IDR 20.000), currency, webhook authentication, server-recorded webhook receipt time and claim state;
 4. mark the payment paid;
 5. append immutable payment history;
 6. lock or serialize the target board entry/order;
