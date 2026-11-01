@@ -4,7 +4,7 @@
 
 The initial profile backend exists, but its signup/moderation behavior predates the current product rules. Preserve already-applied migrations and transition through reviewed additive migrations.
 
-Google Login through Supabase Auth is the only account sign-in method. In addition, a claimant must verify access to the UMKM business contact number through an OTP delivered by phone/SMS or WhatsApp. This is contact-channel verification, not legal ownership or representative-authority verification. No standalone username/password or email OTP sign-in is part of the product.
+Google Login through Supabase Auth is the only account sign-in method. In addition, the UMKM profile's business contact number must pass OTP verification through phone/SMS or WhatsApp before it is used for a claim. This is contact-channel verification, not legal ownership or representative-authority verification. Whether verification is reused, how long it remains valid and when re-verification is required remain open. No standalone username/password or email OTP sign-in is part of the product.
 
 ## User journey
 
