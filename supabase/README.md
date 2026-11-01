@@ -44,7 +44,7 @@ Do not derive province or national entries by summing smaller boards.
 
 The server creates each payment intent for exactly IDR 20.000 and binds it to one profile and one board.
 
-No refund is due solely because a profile is displaced. Refund exceptions are duplicate charges, system/provider errors or legal requirements; the detailed workflow remains open. Late payments after expiry, chargebacks, reversals and mistaken payments remain open. Business-contact OTP proves access to a phone/WhatsApp channel only.
+No refund is due solely because a profile is displaced. Refund exceptions are duplicate charges, system/provider errors or legal requirements; the detailed workflow remains open. Late payments after expiry, chargebacks, reversals and mistaken payments remain open. Business-contact OTP proves access to a phone/WhatsApp channel only. Exact OTP provider, OTP lifetime, resend/attempt limits, verified-state validity and re-verification frequency remain undecided.
  The customer price is all-in; the platform absorbs provider/bank fees. Every intent expires 15 minutes after server creation. A provider must issue a unique invoice/QRIS/VA/payment reference and authenticate a webhook that maps each same-amount payment to its own claim. Amount-only matching is insufficient. Ranking order uses the server-recorded receipt time of the valid webhook, not provider paid_at.
 
 ## Migration discipline
