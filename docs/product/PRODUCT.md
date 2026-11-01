@@ -6,14 +6,14 @@
 
 KenalanUMKM is an Indonesia-only pay-to-rank leaderboard for UMKM. A business pays a fixed **Rp20.000** to move its profile to the top of one selected leaderboard.
 
-The user chooses Kabupaten/Kota, Provinsi or Indonesia. All business types compete together on the selected board. The latest successfully confirmed claim appears at #1; existing entries move down while keeping their relative order.
+The user chooses Kabupaten/Kota, Provinsi or Indonesia. All business types compete together on the selected board. The latest successfully confirmed claim appears at #1. A new profile entry is inserted at the top and existing entries move down; an existing profile is moved to the top without creating a duplicate, while everyone else's relative order is preserved.
 
 ## Core product rules
 
 1. Every successful claim costs exactly Rp20.000 at every geographic scope.
 2. There are three independently claimable boards: one Kabupaten/Kota, one Provinsi or the Indonesia board.
 3. Each claim affects exactly one selected board. There is no automatic entry, aggregation or point accumulation between levels.
-4. The latest successfully confirmed claim moves that business to #1 on the selected board. Other entries shift down and preserve their relative order.
+4. The latest successfully confirmed claim moves that business to #1 on the selected board. If it is a new entry, all existing entries shift down one place. If it is already listed, move that row to #1; entries previously above it shift down one place and entries below it keep their positions.
 5. If a profile already appears on the selected board, a new successful claim moves that entry to #1; it does not create a duplicate row.
 6. All business types compete together. Category is optional descriptive profile information only, not a separate competition or ranking filter.
 7. Public browsing does not require login. Claim #1 requires Google Login.
@@ -40,7 +40,7 @@ No Kecamatan, Kelurahan or Desa boards. No public map, map pins, browser geoloca
 - One successful claim costs exactly Rp20.000.
 - A claim targets exactly one selected board and one UMKM profile.
 - The newest valid, server-confirmed claim is placed at #1.
-- All other entries move down while preserving their relative order.
+- For a new profile on a board, insert at #1 and shift all current entries down one place. For an existing profile, move its row to #1; only entries previously above it change position. Other profiles always keep their relative order.
 - A profile already on that board is moved to #1 rather than duplicated.
 - A business may appear on multiple boards only after separate claims and payments.
 - Previous payments are history, not ranking points.
