@@ -32,6 +32,8 @@ Indonesia → Province → Kabupaten/Kota → Position type → Leaderboard.
 - The Indonesia regional board shows the Top 20 #1 Wilayah champions, one per represented Kabupaten/Kota.
 - Category boards show the #1 Kategori champion for the selected category in each Kabupaten/Kota.
 - A city/regency view can show its #1 Wilayah champion and its category champions.
+
+The local champion rules do not define how different cities should be ordered against one another. Until a separate cross-city display rule is approved, do not infer national rank from cumulative payments, clicks or payment recency; the Top 20 is a list of current regional champions, not a paid-stake score.
 - Kecamatan, Kelurahan and Desa are never competition, filter or navigation levels.
 - No map, map pins, public coordinates, browser geolocation or map-based leaderboard is part of the product.
 
