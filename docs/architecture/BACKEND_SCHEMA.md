@@ -36,7 +36,7 @@ Use Supabase Auth with Google OAuth. Public browsing does not require a session,
 
 Every UMKM profile is associated with the Supabase authenticated user ID that manages it. The authenticated user can reuse the profile on multiple boards and may save an unlimited number of profiles.
 
-Duplicate business profiles are allowed. Do not add unique constraints or deduplication logic across profile names, addresses, contact numbers, brands, branches or accounts. The authenticated owner relation still protects each profile's private management access. Require business-contact OTP through phone/SMS or WhatsApp during the claim flow; store verification status and verified contact-channel metadata privately. This proves access to that phone/WhatsApp channel only, not legal ownership or representative authority. The selected board need not match the profile's physical or descriptive location.
+Duplicate business profiles are allowed. Do not add unique constraints or deduplication logic across profile names, addresses, contact numbers, brands, branches or accounts. The authenticated owner relation still protects each profile's private management access. Require the profile's business-contact channel to pass OTP verification before it is used for a claim; store verification status and verified contact-channel metadata privately. This proves access to that phone/WhatsApp channel only, not legal ownership or representative authority. Whether the verified state is reused for later claims, its validity period and re-verification frequency remain undecided. The selected board need not match the profile's physical or descriptive location.
 
 ### Leaderboard boards
 
