@@ -6,6 +6,8 @@ The first backend foundation has already been applied to the linked Supabase pro
 
 Preserve every already-applied migration. Do not rewrite or delete applied migration files. Transition through reviewed additive migrations. No real paid claims or production payment processing are enabled by this documentation change.
 
+**Phase 1 status:** the proposed relational schema is documented in [PHASE_1_DATABASE_DRAFT.md](./PHASE_1_DATABASE_DRAFT.md), and a pure TypeScript ranking engine with unit tests is being added on the work branch. The schema document is a design draft, not a formal Supabase migration; no migration has been applied to Supabase.
+
 ## Existing tables
 
 ### Categories — business_categories
@@ -45,7 +47,7 @@ Model the three board scopes explicitly:
 - Province: one board per canonical province.
 - Indonesia: one national board.
 
-The scope identity must be unambiguous. Use canonical stable geography IDs for province and Kabupaten/Kota after verifying the source dataset and licence. The Indonesia board has no province or city ID.
+The scope identity must be unambiguous. Use stable province and Kabupaten/Kota keys derived from an approved geography dataset after verifying its source and licence. The dataset and identifier format are not yet selected; do not invent or seed canonical production IDs. The Indonesia board has no province or city key.
 
 No board is created for a business category. Category is descriptive profile metadata only.
 
@@ -99,7 +101,7 @@ For a trusted provider event:
 8. assign the newest trusted order value so the profile becomes #1;
 9. append a leaderboard-movement record.
 
-The transaction must roll back if any step fails. A pending, failed, expired or client-reported payment cannot change the board. A payment intent expires after 15 minutes; late-payment handling remains open and must not be invented.
+The transaction must roll back if any step fails. A pending, failed, expired or client-reported payment cannot change the board. A payment intent expires after 15 minutes; a webhook received at or after expiry is recorded as late/unresolved and does not rank. Any refund or reconciliation for that late payment remains open and must not be invented.
 
 The selected ordering source is the server-recorded receipt time of a valid, authenticated provider webhook. Do not use provider paid_at or browser timestamps. A delayed webhook may rank after a later-made payment if its webhook is received later. A tie-break rule for identical webhook receipt times remains open.
 
@@ -139,6 +141,8 @@ The existing auth-required profile submission route may be adapted, but remove t
 ## Migration and validation rules
 
 - Preserve the five already-applied legacy migration versions.
-- Add versioned migrations to introduce board scopes, unique profile-board entries, claim/payment linkage and the new access rules.
+- The Phase 1 schema proposal is documented separately; create the formal versioned migration only after review, using the Supabase CLI migration workflow.
+- The additive migration must introduce board scopes, unique profile-board entries, claim/payment linkage and the new access rules.
+- Replace the old maximum-three-pending-profile check with an ownership-only guard, retaining serialization if useful.
 - Disable or replace conflicting moderation gates through additive migrations.
 - Add tests for: Google-auth-required claim; business-contact OTP verification; public unauthenticated reads; one entry per exact profile ID per board; distinct duplicate profiles are allowed; no location-to-board matching; exact all-in Rp20.000 customer price; provider fees absorbed by platform; 15-minute intent expiry; one claim affects one board only; separate claims for each scope; moving an existing #5 entry to #1; keeping other entries in relative order; repeat claim with same profile ID without duplicate row; webhook-receipt-time ordering including delayed webhook behavior; equal-timestamp tie handling tracked as a release blocker; payment idempotency; unique-reference matching for identical-amount payments; concurrent claims; refund exception audit and public privacy.
