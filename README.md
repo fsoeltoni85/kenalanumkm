@@ -8,7 +8,7 @@ KenalanUMKM is an Indonesia-only pay-to-rank leaderboard for UMKM. A business pa
 - All UMKM compete together, regardless of business category.
 - Every successful claim costs exactly Rp20.000 at every scope.
 - A claim affects only the selected board. It does not automatically enter a province or national board.
-- The latest successfully confirmed claim moves the business to #1; other entries move down while keeping their relative order.
+- A new profile is inserted at #1 and existing entries move down one place. If a profile already on that board claims again, move its existing row to #1; entries above its old position shift down and entries below it keep their positions.
 - If the same profile claims the same board again, it moves to #1 instead of appearing twice.
 - A separate claim and Rp20.000 payment are required for each additional board.
 - Public browsing does not require login. Claim #1 requires Google Login.
