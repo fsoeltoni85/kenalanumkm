@@ -20,13 +20,15 @@ The Indonesia regional Top 20 contains #1 Wilayah champions. Category leaderboar
 ## Explore and leaderboard scopes
 
 The public experience has three geographic scopes:
-- **Indonesia** — national Top 20 of #1 Wilayah champions, one per represented Kabupaten/Kota.
-- **Provinsi** — the #1 Wilayah champions in that province, ordered by their latest confirmed claim time.
+- **Indonesia** — a display of current #1 Wilayah champions, one per represented Kabupaten/Kota.
+- **Provinsi** — the #1 Wilayah champions in that province.
 - **Kab/Kota** — the current #1 Wilayah champion plus the #1 Kategori positions for the city's available categories.
 
-A category leaderboard is a separate view: it shows the latest #1 Kategori champion for that category in each Kabupaten/Kota. Selecting a province groups those category champions by province.
+A category leaderboard is a separate view: it shows the current #1 Kategori champion for that category in each represented Kabupaten/Kota. Selecting a province groups those category champions by province.
 
-Selecting a province opens its board and resets the selected city. Selecting a city opens its regional champion and category champion information. Returning to Indonesia restores the national regional board. Search only filters the visible results; it never changes rank.
+Selecting a province opens its board and resets the selected city. Selecting a city opens its regional champion and category champion information. Returning to Indonesia restores the regional champion list. Search only filters the visible results; it never changes rank.
+
+The relative ordering between champions from different Kabupaten/Kota is not yet approved. Until a separate rule is approved, do not assign cross-city rank numbers, show a Top 3 podium, or sort by cumulative payment, click count or payment recency. Local #1 labels remain valid because they describe each city's or category's own position.
 
 There is no map, no map pin, no city-centroid visualization and no browser geolocation flow. Kecamatan, Kelurahan and Desa are not exposed as filters or navigation.
 
