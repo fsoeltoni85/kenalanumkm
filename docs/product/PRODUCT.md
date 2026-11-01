@@ -64,7 +64,7 @@ Ranking uses the server-recorded receipt time of a valid, authenticated provider
 
 ## Login and saved UMKM profiles
 
-Public visitors can explore every board without logging in. When a visitor selects Claim #1, they must complete Google Login if signed out, then return to the intended claim flow. The user selects a saved UMKM profile or creates one, then completes an OTP challenge sent to the UMKM business contact number through phone/SMS or WhatsApp. This verifies access to that contact channel only, not legal ownership or authority. The profile and claim are associated with the authenticated Supabase user.
+Public visitors can explore every board without logging in. When a visitor selects Claim #1, they must complete Google Login if signed out, then return to the intended claim flow. The user selects a saved UMKM profile or creates one, then ensures its business contact number is OTP-verified through phone/SMS or WhatsApp before the profile is used for a claim. This verifies access to that contact channel only, not legal ownership or authority. Whether verification is reused or repeated for later claims remains open. The profile and claim are associated with the authenticated Supabase user.
 
 The header shows Login dengan Google when signed out; when signed in, it shows the account identity and Logout. Logout does not remove profiles or paid entries.
 
@@ -77,7 +77,7 @@ Google authentication and business-contact OTP are not legal business-ownership 
 3. Choose a board: Kabupaten/Kota, Provinsi or Indonesia.
 4. Select the location required by that board. The selected city/regency or province does not need to match the business's descriptive or physical location.
 5. Choose a saved UMKM profile or create one.
-6. Complete the business-contact OTP challenge through phone/SMS or WhatsApp. It confirms access to that contact channel only, not legal ownership.
+6. Ensure business-contact OTP verification is complete after choosing or creating the profile. Complete the challenge if the contact is not yet verified. It confirms access to that phone/WhatsApp channel only, not legal ownership; validity and re-verification timing remain open.
 7. Review the selected board, profile and fixed all-in price Rp20.000.
 8. Pay using the unique payment reference created for this claim.
 9. After an authenticated valid provider webhook is received, the server uses its receipt time to apply the profile to #1 on the selected board and displays the updated leaderboard.
