@@ -1,10 +1,10 @@
-import { businessProfileInputSchema, normalizeProfileLink, slugifyBusinessName } from "@/app/lib/business-profile";
+import { businessProfileInputSchema, normalizeProfileLink, slugifyBusinessName } from "../../lib/business-profile";
 import {
   apiJson,
   createAuthenticatedSupabaseClient,
   createPublicSupabaseClient,
   isMissingSupabaseConfig,
-} from "@/app/lib/supabase/server";
+} from "../../lib/supabase/server";
 
 type PublicBusinessProfileRecord = {
   avatar_path: string | null;
