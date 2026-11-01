@@ -98,13 +98,14 @@ The first claim flow does not require a standalone account. Any future profile e
 
 - Every Kabupaten/Kota has at most one current #1 Wilayah champion.
 - Every Kabupaten/Kota/category combination has at most one current #1 Kategori champion.
-- The Indonesia regional Top 20 lists #1 Wilayah champions, one row per Kabupaten/Kota.
-- A selected-category board lists #1 Kategori champions for that category across Kabupaten/Kota.
-- A province view groups the corresponding city/regency champions for that view.
+- The Indonesia Top 20 is a display of current #1 Wilayah champions, one per represented Kabupaten/Kota.
+- A selected-category board displays the #1 Kategori champion for that category in each represented Kabupaten/Kota.
+- A province view groups the corresponding city/regency champions for the selected board.
 - A city/regency view can present its #1 Wilayah champion and its #1 Kategori positions.
-- No automatic period reset applies. Current champions persist until replaced by a later successful payment.
-- Historical claims and champion transitions may be shown as history, but they do not accumulate into a score.
+- Current champions persist until replaced by a later successful payment; no automatic period reset applies.
+- Historical claims and champion transitions may be shown separately, but they do not accumulate into a score.
 - Click counts are informational only and never affect ranking.
+- **Relative ordering across different Kabupaten/Kota has not been approved yet.** These rules determine the champion within each local position; they do not define a national or province-wide score. Do not sort or label cities by cumulative payment, click count or payment recency, and do not show a Top 3 podium or numbered national ranks, until a separate cross-city display-order rule is approved.
 
 ## 8. Geography and presentation boundaries
 
