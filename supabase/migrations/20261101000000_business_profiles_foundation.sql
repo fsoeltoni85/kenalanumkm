@@ -194,6 +194,15 @@ create policy "Approved business profiles are public"
   to anon, authenticated
   using (status = 'approved');
 
+create policy "Owners can submit their own pending business profiles"
+  on public.business_profiles
+  for insert
+  to authenticated
+  with check (
+    owner_user_id = (select auth.uid())
+    and status = 'pending_review'
+  );
+
 create policy "Owners can read their own business profiles"
   on public.business_profiles
   for select
